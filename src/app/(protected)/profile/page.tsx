@@ -58,7 +58,7 @@ const DISLIKED_INGREDIENT_OPTIONS: MultiSelectOption[] = [
 
 export function ProfileSkeleton() {
   return (
-    <div className="container mx-auto max-w-2xl py-8 px-4">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Skeleton className="h-9 w-48 mb-8" />
       <div className="space-y-8">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
@@ -250,8 +250,10 @@ export default function ProfilePage({
   };
 
   return (
-    <div className="container mx-auto max-w-2xl py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <h1 className="text-2xl font-semibold tracking-tight">
+        Profile Settings
+      </h1>
 
       {error && (
         <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">

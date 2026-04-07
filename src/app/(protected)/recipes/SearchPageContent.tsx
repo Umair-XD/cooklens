@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
   Sheet,
   SheetContent,
@@ -16,22 +16,22 @@ import {
   SheetTrigger,
   SheetClose,
   SheetFooter,
-} from '@/components/ui/sheet';
+} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { RecipeCard } from '@/components/RecipeCard';
-import { SearchResultsSkeleton } from '@/components/SearchResultsSkeleton';
+} from "@/components/ui/select";
+import { RecipeCard } from "@/components/RecipeCard";
+import { SearchResultsSkeleton } from "@/components/SearchResultsSkeleton";
 
 interface RecipeResult {
   _id: string;
   name: string;
   cuisineType: string;
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  difficulty: "EASY" | "MEDIUM" | "HARD";
   prepTimeMinutes: number;
   cookTimeMinutes: number;
 }
@@ -39,14 +39,14 @@ interface RecipeResult {
 export default function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [results, setResults] = useState<RecipeResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
   const [filters, setFilters] = useState({
-    cuisine: '',
+    cuisine: "",
     maxPrepTime: 120,
-    difficulty: '',
+    difficulty: "",
   });
 
   const performSearch = useCallback(
@@ -55,14 +55,14 @@ export default function SearchPageContent() {
       setNoResults(false);
 
       const params = new URLSearchParams();
-      if (searchQuery) params.set('q', searchQuery);
-      if (searchFilters.cuisine) params.set('cuisine', searchFilters.cuisine);
+      if (searchQuery) params.set("q", searchQuery);
+      if (searchFilters.cuisine) params.set("cuisine", searchFilters.cuisine);
       if (searchFilters.maxPrepTime < 120)
-        params.set('maxPrepTime', String(searchFilters.maxPrepTime));
+        params.set("maxPrepTime", String(searchFilters.maxPrepTime));
       if (searchFilters.difficulty)
-        params.set('difficulty', searchFilters.difficulty);
+        params.set("difficulty", searchFilters.difficulty);
 
-      router.push(`/search?${params.toString()}`);
+      router.push(`/recipes?${params.toString()}`);
 
       try {
         const res = await fetch(`/api/recipes/search?${params.toString()}`);
@@ -76,17 +76,17 @@ export default function SearchPageContent() {
           setNoResults(false);
         }
       } catch (error) {
-        console.error('Search error:', error);
+        console.error("Search error:", error);
         setNoResults(true);
       } finally {
         setIsLoading(false);
       }
     },
-    [router]
+    [router],
   );
 
   useEffect(() => {
-    const q = searchParams.get('q');
+    const q = searchParams.get("q");
     if (q) {
       setQuery(q);
       performSearch(q, filters);
@@ -99,8 +99,8 @@ export default function SearchPageContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mb-6 flex items-center gap-3">
         <form onSubmit={handleSubmit} className="flex flex-1 gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

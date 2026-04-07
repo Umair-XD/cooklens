@@ -23,8 +23,10 @@ export default async function AdminRecipesPage() {
   }));
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Recipe Management</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">
+        Recipe Management
+      </h2>
       <RecipeManager
         recipes={recipeData}
         ingredientOptions={ingredientOptions}

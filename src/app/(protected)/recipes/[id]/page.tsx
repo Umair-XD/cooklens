@@ -152,10 +152,10 @@ export default async function RecipeDetailPage({
   const availableIngredientIds: string[] = [];
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Suspense fallback={<RecipeDetailSkeleton />}>
         {/* Hero image area */}
-        <div className="w-full aspect-video bg-muted rounded-lg mb-6 flex items-center justify-center">
+        <div className="mt-6 w-full aspect-video bg-muted rounded-lg mb-8 flex items-center justify-center">
           <ChefHat className="h-16 w-16 text-muted-foreground" />
         </div>
 

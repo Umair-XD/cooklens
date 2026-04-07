@@ -50,8 +50,8 @@ async function FavoritesList({ userId }: { userId: string }) {
 
 export default function FavoritesPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">My Favorites</h1>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <h1 className="text-2xl font-semibold tracking-tight">My Favorites</h1>
       <Suspense fallback={<FavoritesSkeleton />}>
         <FavoritesListWrapper />
       </Suspense>

@@ -13,12 +13,11 @@ export default async function AdminIngredientsPage() {
   }));
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Ingredient Management</h2>
-      <IngredientManager
-        ingredients={ingredientData}
-        onRefresh={() => {}}
-      />
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">
+        Ingredient Management
+      </h2>
+      <IngredientManager ingredients={ingredientData} onRefresh={() => {}} />
     </div>
   );
 }

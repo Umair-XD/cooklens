@@ -23,10 +23,9 @@ export const config = {
   matcher: [
     "/profile/:path*",
     "/profile",
-    "/search/:path*",
-    "/search",
     "/admin/:path*",
     "/recipes/:path*",
+    "/recipes",
     "/planner/:path*",
     "/planner",
     "/favorites/:path*",
