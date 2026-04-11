@@ -20,6 +20,28 @@ import {
 } from "@/lib/schemas/planner.schema";
 
 // ---------------------------------------------------------------------------
+// Serialize Mongoose documents to plain JSON-safe objects
+// ---------------------------------------------------------------------------
+
+function serializePlan(plan: any): any {
+  return JSON.parse(
+    JSON.stringify(plan, (_key, value) => {
+      // Mongoose ObjectId: has _bsontype or buffer array
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        if (value._bsontype === "ObjectId" || value._bsontype === "ObjectID") {
+          return value.toString();
+        }
+        if (value.buffer && Array.isArray(value.buffer)) {
+          return value.id || Buffer.from(value.buffer).toString("hex");
+        }
+      }
+      if (value instanceof Date) return value.toISOString();
+      return value;
+    }),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Helper: distribute daily calories across 3 meals
 // ---------------------------------------------------------------------------
 
@@ -132,11 +154,14 @@ export async function generatePlan(
       slots,
     });
 
-    const populated = await MealPlan.findById(plan._id).populate(
-      "slots.recipeId",
-    );
+    const populated = await MealPlan.findById(plan._id)
+      .populate("slots.recipeId")
+      .lean();
 
-    return { success: true, plan: populated as IMealPlan };
+    return {
+      success: true,
+      plan: serializePlan(populated) as unknown as IMealPlan,
+    };
   } catch (err) {
     console.error("Error generating plan:", err);
     return { success: false, error: "Failed to generate meal plan." };
@@ -204,11 +229,14 @@ export async function swapMeal(
     plan.slots[slotIndex].recipeId = new Types.ObjectId(alternativeRecipeId);
     await plan.save();
 
-    const populated = await MealPlan.findById(plan._id).populate(
-      "slots.recipeId",
-    );
+    const populated = await MealPlan.findById(plan._id)
+      .populate("slots.recipeId")
+      .lean();
 
-    return { success: true, plan: populated as IMealPlan };
+    return {
+      success: true,
+      plan: serializePlan(populated) as unknown as IMealPlan,
+    };
   } catch (err) {
     console.error("Error swapping meal:", err);
     return { success: false, error: "Failed to swap meal." };
@@ -228,13 +256,25 @@ export async function getPlan(
       userId: new Types.ObjectId(userId),
     })
       .sort({ weekStart: -1 })
-      .populate("slots.recipeId");
+      .populate("slots.recipeId")
+      .lean();
 
     if (!plan) {
       return { success: false, error: "No plan found." };
     }
 
-    return { success: true, plan: plan as IMealPlan };
+    // Serialize all ObjectId fields to strings
+    const serialized = JSON.parse(
+      JSON.stringify(plan, (_key, value) =>
+        value?._bsontype === "ObjectId"
+          ? value.toString()
+          : value instanceof Date
+            ? value.toISOString()
+            : value,
+      ),
+    );
+
+    return { success: true, plan: serialized as unknown as IMealPlan };
   } catch (err) {
     console.error("Error fetching plan:", err);
     return { success: false, error: "Failed to fetch plan." };

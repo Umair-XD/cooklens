@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,40 +26,39 @@ interface MealSlotCardProps {
   onLoadAlternatives: (slotId: string) => void;
 }
 
-function MacroPill({
+function MacroBadge({
   label,
   value,
-  color,
+  bg,
+  fg,
 }: {
   label: string;
   value: number;
-  color: string;
+  bg: string;
+  fg: string;
 }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-        color,
-      )}
+      className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${bg} ${fg}`}
     >
-      {label}: {value}g
+      {label}:{value}
     </span>
   );
 }
 
 export function MealSlotCardSkeleton() {
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader className="pb-2">
-        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-3 w-12" />
       </CardHeader>
-      <CardContent className="space-y-3">
-        <Skeleton className="h-5 w-full" />
-        <Skeleton className="h-6 w-20" />
+      <CardContent className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-5 w-16" />
         <div className="flex gap-1">
-          <Skeleton className="h-5 w-14" />
-          <Skeleton className="h-5 w-14" />
-          <Skeleton className="h-5 w-14" />
+          <Skeleton className="h-4 w-10" />
+          <Skeleton className="h-4 w-10" />
+          <Skeleton className="h-4 w-10" />
         </div>
       </CardContent>
     </Card>
@@ -81,42 +73,43 @@ export default function MealSlotCard({
   isLoadingAlternatives,
   onLoadAlternatives,
 }: MealSlotCardProps) {
-  const mealTypeLabel = slot.mealType.charAt(0) + slot.mealType.slice(1).toLowerCase();
-  const calories = recipe?.nutrition?.caloriesPerServing ?? 0;
+  const mealLabel =
+    slot.mealType.charAt(0) + slot.mealType.slice(1).toLowerCase();
+  const cal = recipe?.nutrition?.caloriesPerServing ?? 0;
 
-  const getCalorieColor = (cal: number): string => {
-    if (cal < 400) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    if (cal < 700) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-  };
+  const calColor =
+    cal < 400
+      ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+      : cal < 650
+        ? "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
+        : "bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400";
 
   return (
-    <Card className="h-full transition-shadow hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground">
-          {mealTypeLabel}
-        </CardTitle>
+    <Card className="transition-shadow hover:shadow-sm">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 pt-3 px-3">
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {mealLabel}
+        </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Swap meal</span>
+            <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1.5">
+              <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Swap {mealTypeLabel}</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>Swap {mealLabel}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {isLoadingAlternatives ? (
-              <div className="px-2 py-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="mt-2 h-4 w-3/4" />
+              <div className="px-2 py-3">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="mt-1.5 h-3 w-3/4" />
               </div>
             ) : alternatives.length === 0 ? (
               <DropdownMenuItem
                 onSelect={() => onLoadAlternatives(slot._id?.toString() ?? "")}
-                className="text-muted-foreground"
+                className="text-muted-foreground cursor-pointer"
               >
-                <UtensilsCrossed className="mr-2 h-4 w-4" />
+                <UtensilsCrossed className="mr-2 h-3.5 w-3.5" />
                 Load alternatives
               </DropdownMenuItem>
             ) : (
@@ -124,15 +117,13 @@ export default function MealSlotCard({
                 <DropdownMenuItem
                   key={alt._id.toString()}
                   onSelect={() =>
-                    onSwap(
-                      slot._id?.toString() ?? "",
-                      alt._id.toString(),
-                    )
+                    onSwap(slot._id?.toString() ?? "", alt._id.toString())
                   }
+                  className="cursor-pointer"
                 >
-                  <span className="truncate">{alt.name}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {alt.nutrition?.caloriesPerServing ?? 0} kcal
+                  <span className="truncate text-xs">{alt.name}</span>
+                  <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+                    {alt.nutrition?.caloriesPerServing ?? 0}
                   </span>
                 </DropdownMenuItem>
               ))
@@ -140,36 +131,43 @@ export default function MealSlotCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="px-3 pb-3 space-y-1.5">
         {recipe ? (
           <>
-            <p className="text-sm font-semibold leading-tight">{recipe.name}</p>
-            <Badge
-              variant="secondary"
-              className={cn("text-xs font-medium", getCalorieColor(calories))}
+            <p className="text-[13px] font-semibold leading-tight line-clamp-2">
+              {recipe.name}
+            </p>
+            <span
+              className={cn(
+                "inline-flex rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
+                calColor,
+              )}
             >
-              {calories} kcal
-            </Badge>
-            <div className="flex flex-wrap gap-1">
-              <MacroPill
+              {cal} kcal
+            </span>
+            <div className="flex gap-1">
+              <MacroBadge
                 label="P"
                 value={recipe.nutrition?.proteinGrams ?? 0}
-                color="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
+                bg="bg-purple-500/10"
+                fg="text-purple-600 dark:text-purple-400"
               />
-              <MacroPill
+              <MacroBadge
                 label="C"
                 value={recipe.nutrition?.carbsGrams ?? 0}
-                color="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                bg="bg-amber-500/10"
+                fg="text-amber-600 dark:text-amber-400"
               />
-              <MacroPill
+              <MacroBadge
                 label="F"
                 value={recipe.nutrition?.fatGrams ?? 0}
-                color="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                bg="bg-red-500/10"
+                fg="text-red-600 dark:text-red-400"
               />
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">No recipe assigned</p>
+          <p className="text-[12px] text-muted-foreground">No recipe</p>
         )}
       </CardContent>
     </Card>

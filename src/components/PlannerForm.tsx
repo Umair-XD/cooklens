@@ -21,26 +21,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Target } from "lucide-react";
 
 const formSchema = z.object({
-  age: z.coerce.number().min(1, "Age must be positive").max(120, "Age must be 120 or less"),
-  weightKg: z.coerce.number().min(1, "Weight must be positive").max(500, "Weight must be 500 or less"),
-  heightCm: z.coerce.number().min(50, "Height must be positive").max(300, "Height must be 300 or less"),
-  sex: z.enum(["male", "female"], { required_error: "Please select your sex" }),
-  activityLevel: z.enum(
-    ["sedentary", "lightly_active", "moderately_active", "very_active", "extra_active"],
-    { required_error: "Please select your activity level" },
-  ),
-  goal: z.enum(["lose_weight", "maintain", "gain_weight"], {
-    required_error: "Please select your goal",
-  }),
+  age: z.coerce.number().min(1).max(120),
+  weightKg: z.coerce.number().min(1).max(500),
+  heightCm: z.coerce.number().min(50).max(300),
+  sex: z.enum(["male", "female"]),
+  activityLevel: z.enum([
+    "sedentary",
+    "lightly_active",
+    "moderately_active",
+    "very_active",
+    "extra_active",
+  ]),
+  goal: z.enum(["lose_weight", "maintain", "gain_weight"]),
 });
 
 export type PlannerFormValues = z.infer<typeof formSchema>;
@@ -51,41 +47,43 @@ interface PlannerFormProps {
   tdeeResult: number | null;
 }
 
-export default function PlannerForm({ onSubmit, isLoading, tdeeResult }: PlannerFormProps) {
+export default function PlannerForm({
+  onSubmit,
+  isLoading,
+  tdeeResult,
+}: PlannerFormProps) {
   const form = useForm<PlannerFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      age: undefined,
-      weightKg: undefined,
-      heightCm: undefined,
-      sex: undefined,
-      activityLevel: undefined,
+      age: 25,
+      weightKg: 70,
+      heightCm: 175,
+      sex: "male",
+      activityLevel: "sedentary",
       goal: "maintain",
     },
   });
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Meal Planner</CardTitle>
-        <CardDescription>
-          Enter your stats to generate a personalized 7-day meal plan
-        </CardDescription>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg">Your Stats</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Age / Weight / Height row */}
+            <div className="grid grid-cols-3 gap-3">
               <FormField
                 control={form.control}
                 name="age"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Age</FormLabel>
+                    <FormLabel className="text-[12px]">Age</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="25" {...field} />
+                      <Input type="number" className="h-9 text-sm" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px]" />
                   </FormItem>
                 )}
               />
@@ -94,11 +92,11 @@ export default function PlannerForm({ onSubmit, isLoading, tdeeResult }: Planner
                 name="weightKg"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Weight (kg)</FormLabel>
+                    <FormLabel className="text-[12px]">Weight</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="70" {...field} />
+                      <Input type="number" className="h-9 text-sm" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px]" />
                   </FormItem>
                 )}
               />
@@ -107,109 +105,117 @@ export default function PlannerForm({ onSubmit, isLoading, tdeeResult }: Planner
                 name="heightCm"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Height (cm)</FormLabel>
+                    <FormLabel className="text-[12px]">Height</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="175" {...field} />
+                      <Input type="number" className="h-9 text-sm" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px]" />
                   </FormItem>
                 )}
               />
             </div>
 
+            {/* Sex */}
             <FormField
               control={form.control}
               name="sex"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sex</FormLabel>
+                  <FormLabel className="text-[12px]">Sex</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="flex gap-4"
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="male" id="male" />
-                        <FormLabel htmlFor="male" className="font-normal">Male</FormLabel>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="female" id="female" />
-                        <FormLabel htmlFor="female" className="font-normal">Female</FormLabel>
-                      </div>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <RadioGroupItem value="male" id="sex-male" />
+                        Male
+                      </label>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <RadioGroupItem value="female" id="sex-female" />
+                        Female
+                      </label>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Activity Level */}
             <FormField
               control={form.control}
               name="activityLevel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Activity Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel className="text-[12px]">Activity Level</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select activity level" />
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="sedentary">Sedentary (little or no exercise)</SelectItem>
+                      <SelectItem value="sedentary">Sedentary</SelectItem>
                       <SelectItem value="lightly_active">
-                        Lightly Active (exercise 1-3 days/week)
+                        Light (1-3 days/wk)
                       </SelectItem>
                       <SelectItem value="moderately_active">
-                        Moderately Active (exercise 3-5 days/week)
+                        Moderate (3-5 days/wk)
                       </SelectItem>
                       <SelectItem value="very_active">
-                        Very Active (exercise 6-7 days/week)
+                        Active (6-7 days/wk)
                       </SelectItem>
-                      <SelectItem value="extra_active">
-                        Extra Active (very hard exercise / physical job)
-                      </SelectItem>
+                      <SelectItem value="extra_active">Very Active</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Goal */}
             <FormField
               control={form.control}
               name="goal"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Goal</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel className="text-[12px]">Goal</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your goal" />
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="lose_weight">Lose Weight (-500 kcal)</SelectItem>
-                      <SelectItem value="maintain">Maintain Weight</SelectItem>
-                      <SelectItem value="gain_weight">Gain Weight (+500 kcal)</SelectItem>
+                      <SelectItem value="lose_weight">Lose Weight</SelectItem>
+                      <SelectItem value="maintain">Maintain</SelectItem>
+                      <SelectItem value="gain_weight">Gain Weight</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* TDEE display */}
             {tdeeResult !== null && (
-              <div className="rounded-md bg-primary/10 p-4 text-center">
-                <p className="text-sm font-medium text-primary">
-                  Your estimated TDEE: {tdeeResult} kcal/day
-                </p>
+              <div className="flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2.5">
+                <Target className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm">
+                  TDEE:{" "}
+                  <span className="font-semibold text-primary">
+                    {tdeeResult}
+                  </span>{" "}
+                  kcal/day
+                </span>
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Generating Plan..." : "Generate 7-Day Plan"}
+            <Button
+              type="submit"
+              className="w-full h-9 text-sm"
+              disabled={isLoading}
+            >
+              {isLoading ? "Generating..." : "Generate Plan"}
             </Button>
           </form>
         </Form>

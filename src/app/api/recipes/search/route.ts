@@ -2,108 +2,62 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db/connect";
 import { Recipe } from "@/lib/db/models/Recipe";
 import { Ingredient } from "@/lib/db/models/Ingredient";
-import type { PipelineStage } from "mongoose";
+import { Types } from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const q = searchParams.get("q");
-    const cuisine = searchParams.get("cuisine");
-    const maxPrepTime = searchParams.get("maxPrepTime");
-    const difficulty = searchParams.get("difficulty");
+    const q = request.nextUrl.searchParams.get("q");
+    const cuisine = request.nextUrl.searchParams.get("cuisine");
+    const maxCookTime = request.nextUrl.searchParams.get("maxCookTime");
+    const difficulty = request.nextUrl.searchParams.get("difficulty");
 
     await dbConnect();
 
-    const pipeline: PipelineStage[] = [];
+    // Build mongo query
+    const match: Record<string, unknown> = {};
 
-    // Build $text search if query is provided
     if (q) {
-      // First, find ingredient IDs that match the search term
-      const matchingIngredients = await Ingredient.find(
-        { $text: { $search: q } },
-        { score: { $meta: "textScore" } },
-      )
-        .sort({ score: { $meta: "textScore" } })
-        .limit(50)
-        .lean();
+      // Search by name (case-insensitive) and ingredient names
+      const matchIngredients = await Ingredient.find(
+        { canonicalName: { $regex: q, $options: "i" } },
+        { _id: 1 },
+      ).lean();
+      const ingredientIds = matchIngredients.map((i) => i._id);
 
-      const ingredientIds = matchingIngredients.map((ing) => ing._id);
-
-      // Build $text search for recipes and match by ingredient IDs
-      pipeline.push({
-        $match: {
-          $or: [
-            { $text: { $search: q } },
-            { "ingredients.ingredientId": { $in: ingredientIds } },
-          ],
-          ...(cuisine && { cuisineType: { $regex: cuisine, $options: "i" } }),
-          ...(maxPrepTime && {
-            prepTimeMinutes: { $lte: parseInt(maxPrepTime, 10) },
-          }),
-          ...(difficulty && { difficulty }),
-        },
-      } as PipelineStage);
-
-      // Add text score for sorting
-      pipeline.push({
-        $addFields: {
-          textScore: { $meta: "textScore" },
-        },
-      } as PipelineStage);
-      pipeline.push({
-        $sort: { textScore: { $meta: "textScore" } },
-      } as PipelineStage);
-    } else {
-      // No text search, use regular match for filters only
-      const matchFilter: Record<string, unknown> = {};
-      if (cuisine) matchFilter.cuisineType = { $regex: cuisine, $options: "i" };
-      if (maxPrepTime)
-        matchFilter.prepTimeMinutes = { $lte: parseInt(maxPrepTime, 10) };
-      if (difficulty) matchFilter.difficulty = difficulty;
-
-      if (Object.keys(matchFilter).length > 0) {
-        pipeline.push({ $match: matchFilter } as PipelineStage);
-      }
+      match.$or = [
+        { name: { $regex: q, $options: "i" } },
+        { cuisineType: { $regex: q, $options: "i" } },
+        { "ingredients.ingredientId": { $in: ingredientIds } },
+      ];
     }
 
-    const buildLookupPipeline = (): PipelineStage[] => {
-      const stages: PipelineStage[] =
-        pipeline.length > 0 ? [...pipeline] : [{ $match: {} } as PipelineStage];
-      stages.push({
-        $lookup: {
-          from: "ingredients",
-          localField: "ingredients.ingredientId",
-          foreignField: "_id",
-          as: "ingredientDetails",
-        },
-      } as PipelineStage);
-      return stages;
-    };
+    if (cuisine) {
+      match.cuisineType = { $regex: cuisine, $options: "i" };
+    }
+    if (maxCookTime) {
+      const mins = parseInt(maxCookTime, 10);
+      match.cookTimeMinutes = { $lte: mins };
+    }
+    if (difficulty) {
+      match.difficulty = difficulty;
+    }
 
-    const recipes = await Recipe.aggregate(
-      pipeline.length > 0 ? pipeline : undefined,
-    ).limit(50);
+    let query = Recipe.find(match).sort({ name: 1 }).limit(50).lean();
 
-    // Populate ingredient details for display
-    const populatedRecipes = await Recipe.aggregate(buildLookupPipeline());
+    const recipes = await query;
 
-    // Serialize ObjectId fields for JSON response
-    const serializedRecipes = populatedRecipes.map((recipe) => ({
-      _id: recipe._id.toString(),
-      name: recipe.name,
-      cuisineType: recipe.cuisineType,
-      difficulty: recipe.difficulty,
-      prepTimeMinutes: recipe.prepTimeMinutes,
-      cookTimeMinutes: recipe.cookTimeMinutes,
-      servings: recipe.servings,
-      ingredientNames: (recipe.ingredientDetails ?? []).map(
-        (ing: { canonicalName: string }) => ing.canonicalName,
-      ),
+    const serialized = recipes.map((r) => ({
+      _id: (r._id as Types.ObjectId).toString(),
+      name: r.name,
+      cuisineType: r.cuisineType,
+      difficulty: r.difficulty,
+      prepTimeMinutes: r.prepTimeMinutes,
+      cookTimeMinutes: r.cookTimeMinutes,
     }));
 
     return NextResponse.json({
-      recipes: serializedRecipes,
-      noResults: serializedRecipes.length === 0,
+      recipes: serialized,
+      noResults: serialized.length === 0,
     });
   } catch (error) {
     console.error("Recipe search error:", error);

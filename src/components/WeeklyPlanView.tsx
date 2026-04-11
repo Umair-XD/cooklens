@@ -8,34 +8,10 @@ import { IMealPlan, IMealSlot, MealType } from "@/lib/db/models/MealPlan";
 import { IRecipe } from "@/lib/db/models/Recipe";
 import { swapMeal, getAlternatives } from "@/lib/actions/planner.actions";
 import { Download, RefreshCw } from "lucide-react";
-import type { Types } from "mongoose";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MEALS: MealType[] = ["BREAKFAST", "LUNCH", "DINNER"];
-
-function getSlotsForDay(
-  slots: IMealSlot[],
-  dayIndex: number,
-  mealType: MealType,
-): (IMealSlot & { _id?: import("mongoose").Types.ObjectId }) | undefined {
-  return slots.find(
-    (s) => s.dayIndex === dayIndex && s.mealType === mealType,
-  ) as (IMealSlot & { _id?: import("mongoose").Types.ObjectId }) | undefined;
-}
-
-function getRecipeForSlot(
-  slots: IMealSlot[],
-  dayIndex: number,
-  mealType: MealType,
-  plan: IMealPlan,
-): IRecipe | null {
-  const slot = getSlotsForDay(slots, dayIndex, mealType);
-  if (!slot) return null;
-  const populatedSlot = (
-    plan.slots as unknown as (IMealSlot & { recipeId: IRecipe })[]
-  ).find((s) => s.dayIndex === dayIndex && s.mealType === mealType);
-  return populatedSlot?.recipeId ?? null;
-}
+const COL_W = "w-[160px]";
 
 interface WeeklyPlanViewProps {
   plan: IMealPlan;
@@ -44,20 +20,15 @@ interface WeeklyPlanViewProps {
 
 export function WeeklyPlanSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-7 gap-3">
+    <div className="overflow-x-auto rounded-xl border bg-muted/30 p-4">
+      <div className="flex gap-3 min-w-[1150px]">
         {DAYS.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-semibold text-muted-foreground"
-          >
-            {day}
+          <div key={day} className={`${COL_W} flex-shrink-0 space-y-3`}>
+            <div className="h-5 bg-muted rounded" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-24 rounded-lg" />
           </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-3">
-        {Array.from({ length: 21 }).map((_, i) => (
-          <MealSlotCardSkeleton key={i} />
         ))}
       </div>
     </div>
@@ -125,12 +96,13 @@ export default function WeeklyPlanView({
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Weekly Meal Plan</h2>
+        <h2 className="text-lg font-semibold">Weekly Meal Plan</h2>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExportPdf}>
             <Download className="mr-2 h-4 w-4" />
-            Export PDF
+            PDF
           </Button>
           <Button
             variant="outline"
@@ -148,50 +120,43 @@ export default function WeeklyPlanView({
         </div>
       </div>
 
-      {/* 7-column CSS grid */}
-      <div className="grid grid-cols-7 gap-3">
-        {DAYS.map((day) => (
-          <div
-            key={day}
-            className="text-center text-sm font-semibold text-muted-foreground"
-          >
-            {day}
-          </div>
-        ))}
-      </div>
+      {/* Scrollable weekly grid */}
+      <div className="overflow-x-auto rounded-xl border bg-muted/30 p-4">
+        <div className="flex gap-3 min-w-[1150px]">
+          {DAYS.map((_, dayIndex) => (
+            <div
+              key={dayIndex}
+              className={`${COL_W} flex-shrink-0 flex flex-col gap-3`}
+            >
+              {/* Day header */}
+              <div className="text-center text-[13px] font-semibold text-muted-foreground pb-2 border-b border-border/50">
+                {DAYS[dayIndex]}
+              </div>
+              {/* Meal slots */}
+              {MEALS.map((meal) => {
+                const slot = planSlots.find(
+                  (s) => s.dayIndex === dayIndex && s.mealType === meal,
+                ) as (typeof planSlots)[number] | undefined;
+                const recipe = (slot as any)?.recipeId ?? null;
+                const slotId = (slot as any)?._id?.toString() ?? "";
+                const alternatives = alternativesMap[slotId] ?? [];
+                const isLoading = loadingAltId === slotId;
 
-      <div className="grid grid-cols-7 gap-3">
-        {DAYS.map((_, dayIndex) => (
-          <div key={dayIndex} className="flex flex-col gap-3">
-            {MEALS.map((meal) => {
-              const slot = planSlots.find(
-                (s) => s.dayIndex === dayIndex && s.mealType === meal,
-              ) as
-                | ((typeof planSlots)[number] & { _id?: Types.ObjectId })
-                | undefined;
-              const recipe = slot?.recipeId ?? null;
-              const slotId = slot?._id?.toString() ?? "";
-              const alternatives = alternativesMap[slotId] ?? [];
-              const isLoading = loadingAltId === slotId;
-
-              return (
-                <MealSlotCard
-                  key={`${dayIndex}-${meal}`}
-                  slot={
-                    slot as IMealSlot & {
-                      _id?: import("mongoose").Types.ObjectId;
-                    }
-                  }
-                  recipe={recipe}
-                  onSwap={handleSwap}
-                  alternatives={alternatives}
-                  isLoadingAlternatives={isLoading}
-                  onLoadAlternatives={handleLoadAlternatives}
-                />
-              );
-            })}
-          </div>
-        ))}
+                return (
+                  <MealSlotCard
+                    key={`${dayIndex}-${meal}`}
+                    slot={slot as any}
+                    recipe={recipe}
+                    onSwap={handleSwap}
+                    alternatives={alternatives}
+                    isLoadingAlternatives={isLoading}
+                    onLoadAlternatives={handleLoadAlternatives}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
