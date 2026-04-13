@@ -1,19 +1,42 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatInput from "@/components/ChatInput";
 import ChatMessageSkeleton from "@/components/ChatMessageSkeleton";
-import { ChefHat, AlertCircle, Sparkles, User, Info } from "lucide-react";
+import { ChefHat, AlertCircle, Sparkles, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function ChatPage() {
-  const { messages, input, setInput, handleSubmit, isLoading, error, stop, reload } = useChat({
-    api: "/api/ai/chat",
+  const [localInput, setLocalInput] = useState("");
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/ai/chat",
+    }),
+    messages: [
+      {
+        id: "welcome",
+        role: "assistant",
+        parts: [{ type: "text", text: "Hi there! I'm Chef Lens, your personal kitchen assistant. How can I help you today?" }]
+      }
+    ] as UIMessage[]
   });
+
+  const isStreaming = status === "streaming" || status === "submitted";
+
+  const handleSend = async (text: string, files?: FileList) => {
+    if (!text.trim() && (!files || files.length === 0)) return;
+    
+    await sendMessage({
+      text,
+      files
+    });
+    setLocalInput("");
+  };
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -25,7 +48,7 @@ export default function ChatPage() {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
-  }, [messages, isLoading]);
+  }, [messages, isStreaming]);
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col bg-background/50">
@@ -53,7 +76,9 @@ export default function ChatPage() {
                 ].map((tip) => (
                   <button 
                     key={tip}
-                    onClick={() => setInput(tip)}
+                    onClick={() => {
+                       setLocalInput(tip);
+                    }}
                     className="p-3 text-xs font-semibold rounded-xl border border-border/50 bg-card/40 hover:bg-primary/5 hover:border-primary/30 transition-all text-left group"
                   >
                     <span className="flex items-center gap-2">
@@ -71,15 +96,15 @@ export default function ChatPage() {
               key={message.id}
               className={cn(
                 "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
-                message.role === "user" ? "flex-row-reverse" : ""
+                (message.role as string) === "user" ? "flex-row-reverse" : ""
               )}
             >
               <Avatar className={cn(
                 "h-9 w-9 border shadow-sm",
-                message.role === "user" ? "bg-primary/10" : "bg-card glass"
+                (message.role as string) === "user" ? "bg-primary/10" : "bg-card glass"
               )}>
                 <AvatarFallback className="text-xs font-bold">
-                  {message.role === "user" ? (
+                  {(message.role as string) === "user" ? (
                     <User className="h-4 w-4 text-primary" />
                   ) : (
                     <ChefHat className="h-4 w-4 text-primary" />
@@ -90,19 +115,37 @@ export default function ChatPage() {
               <div
                 className={cn(
                   "relative rounded-2xl px-5 py-3.5 max-w-[85%] shadow-premium text-sm leading-relaxed",
-                  message.role === "user"
+                  (message.role as string) === "user"
                     ? "bg-primary text-primary-foreground font-medium rounded-tr-none"
                     : "bg-card border border-border/50 glass rounded-tl-none"
                 )}
               >
-                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                  {message.content}
+                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap space-y-4">
+                  {message.parts.map((part: any, partIdx: number) => {
+                    if (part.type === "text") {
+                      return <p key={partIdx}>{part.text}</p>;
+                    }
+                    if (part.type === "reasoning") {
+                      return <p key={partIdx} className="italic text-muted-foreground/70">{part.text}</p>;
+                    }
+                    if (part.type === "file") {
+                      return (
+                        <img
+                          key={partIdx}
+                          src={part.url}
+                          alt="Attachment"
+                          className="max-h-60 rounded-lg border border-border/50 object-cover shadow-sm"
+                        />
+                      );
+                    }
+                    return null;
+                  })}
                 </div>
               </div>
             </div>
           ))}
 
-          {isLoading && messages[messages.length - 1]?.role === "user" && (
+          {isStreaming && (
             <div className="flex items-start gap-4">
               <Avatar className="h-9 w-9 bg-card glass border shadow-sm">
                 <AvatarFallback>
@@ -121,7 +164,7 @@ export default function ChatPage() {
               <AlertDescription className="text-xs font-semibold">
                 {error.message || "Connection lost. Please try again."}
                 <button 
-                  onClick={() => reload()} 
+                  onClick={() => regenerate()} 
                   className="ml-2 underline hover:no-underline"
                 >
                   Retry
@@ -141,13 +184,12 @@ export default function ChatPage() {
             </span>
           </div>
           <ChatInput
-            input={input}
-            onInputChange={setInput}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit(e);
+            input={localInput}
+            onInputChange={setLocalInput}
+            onSubmit={(e, files) => {
+              handleSend(localInput, files);
             }}
-            isStreaming={isLoading}
+            isStreaming={isStreaming}
             onStop={async () => stop()}
             className="glass shadow-premium border-border/50 rounded-2xl overflow-hidden p-1 gap-1"
           />

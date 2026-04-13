@@ -1,4 +1,4 @@
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { aiGateway } from "@/lib/ai-gateway";
 
 export async function POST(req: Request) {
@@ -16,10 +16,30 @@ export async function POST(req: Request) {
 
     try {
       const model = aiGateway().getChatModel();
+      
+      // Ensure messages is always an array
+      const safeMessages = Array.isArray(messages) ? messages : [];
+      const modelMessages = convertToModelMessages(safeMessages) || [];
 
       const result = streamText({
         model,
-        messages,
+        messages: [
+          {
+            role: "system",
+            content: `You are Chef Lens, an elite culinary AI assistant for the CookLens platform. 
+            Your goal is to help users cook better, eat healthier, and master their kitchen.
+            
+            Guidelines:
+            1. Personality: Warm, professional, encouraging, and highly knowledgeable. Think of a Michelin-star chef who is also a patient teacher.
+            2. Scope: Answer questions about recipes, ingredients, substitutions, nutrition, meal planning, and cooking techniques.
+            3. Precision: When asked for recipes or measurements, be precise. Provide clear, step-by-step instructions.
+            4. Encouragement: If a user is a beginner, give them confidence. If they are experienced, offer professional tips.
+            5. Safety: Always include safety warnings when handling raw meat, high heat, or potential allergens.
+            
+            Keep your responses concise but detailed enough to be useful. Use Markdown formatting for lists and bold text.`
+          },
+          ...await modelMessages
+        ],
         timeout: {
           totalMs: 30_000,
         },

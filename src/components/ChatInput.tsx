@@ -9,7 +9,7 @@ import { useRef, useEffect } from "react";
 interface ChatInputProps {
   input: string;
   onInputChange: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, attachments?: FileList) => void;
   isStreaming: boolean;
   onStop?: () => Promise<void>;
   className?: string;
@@ -26,14 +26,20 @@ export default function ChatInput({
   placeholder = "Message Chef Assistant...",
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (input.trim() && !isStreaming) {
-        onSubmit(e as unknown as React.FormEvent);
+      if ((input.trim() || (fileInputRef.current?.files?.length ?? 0) > 0) && !isStreaming) {
+        onSubmit(e as unknown as React.FormEvent, fileInputRef.current?.files || undefined);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     }
+  };
+
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
   };
 
   // Auto-resize textarea
@@ -46,10 +52,18 @@ export default function ChatInput({
 
   return (
     <div className={cn("relative flex items-end gap-2 p-2", className)}>
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        multiple
+      />
       <Button
         type="button"
         variant="ghost"
         size="icon"
+        onClick={handleFileClick}
         className="h-10 w-10 shrink-0 rounded-xl hover:bg-muted font-bold"
         aria-label="Add attachment"
       >
@@ -83,10 +97,17 @@ export default function ChatInput({
           <Button
             type="submit"
             size="icon"
-            disabled={!input?.trim()}
+            disabled={!input?.trim() && (fileInputRef.current?.files?.length ?? 0) === 0}
+            onClick={(e) => {
+              e.preventDefault();
+              if (!isStreaming) {
+                onSubmit(e, fileInputRef.current?.files || undefined);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }
+            }}
             className={cn(
                "h-10 w-10 shrink-0 rounded-xl transition-all duration-300",
-               !input?.trim() ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
+               (!input?.trim() && (fileInputRef.current?.files?.length ?? 0) === 0) ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
             )}
             aria-label="Send message"
           >
