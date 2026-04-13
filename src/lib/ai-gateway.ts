@@ -27,21 +27,21 @@ export class AIGateway {
    * Returns a language model optimized for conversational chat.
    */
   public getChatModel(): LanguageModel {
-    return this.gateway.languageModel("chat");
+    return this.gateway.languageModel("openai/gpt-4o");
   }
 
   /**
    * Returns a model optimized for reasoning and structured tasks (like planning).
    */
   public getReasoningModel(): LanguageModel {
-    return this.gateway.languageModel("reasoning");
+    return this.gateway.languageModel("openai/o1-mini");
   }
 
   /**
    * Returns a lightweight model for quick tasks.
    */
   public getFastModel(): LanguageModel {
-    return this.gateway.languageModel("fast");
+    return this.gateway.languageModel("openai/gpt-4o-mini");
   }
 }
 

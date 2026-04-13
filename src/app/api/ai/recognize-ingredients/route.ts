@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const gateway = createGateway({ apiKey });
-      const model = gateway.languageModel("recognize-ingredients");
+      const model = gateway.languageModel("openai/gpt-4o");
 
       const { text } = await generateText({
         model,
