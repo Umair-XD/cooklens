@@ -1,4 +1,5 @@
-import { streamText, createGateway } from "ai";
+import { streamText } from "ai";
+import { aiGateway } from "@/lib/ai-gateway";
 
 export async function POST(req: Request) {
   try {
@@ -13,31 +14,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiKey = process.env.AI_GATEWAY_API_KEY;
-    if (!apiKey) {
-      return new Response(
+    try {
+      const model = aiGateway().getChatModel();
+
+      const result = streamText({
+        model,
+        messages,
+        timeout: {
+          totalMs: 30_000,
+        },
+        onError: (error) => {
+          console.error("Stream text error:", error);
+        },
+      });
+
+      return result.toUIMessageStreamResponse();
+    } catch (err: any) {
+       console.error("AI Gateway Error:", err);
+       return new Response(
         JSON.stringify({
           error: "AI service is currently unavailable. Please try again later.",
         }),
         { status: 503, headers: { "Content-Type": "application/json" } },
       );
     }
-
-    const gateway = createGateway({ apiKey });
-    const model = gateway.languageModel("chat");
-
-    const result = streamText({
-      model,
-      messages,
-      timeout: {
-        totalMs: 15_000,
-      },
-      onError: (error) => {
-        console.error("Stream text error:", error);
-      },
-    });
-
-    return result.toUIMessageStreamResponse();
   } catch {
     return new Response(
       JSON.stringify({

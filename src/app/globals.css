@@ -1,60 +1,81 @@
 @import "tailwindcss";
 
 @theme {
-    --color-background: oklch(100% 0 0);
-    --color-foreground: oklch(9% 0 0);
+    /* Base Colors - Using OKLCH for better color space control */
+    --color-background: oklch(98% 0.005 240);
+    --color-foreground: oklch(20% 0.02 240);
+    
     --color-card: oklch(100% 0 0);
-    --color-card-foreground: oklch(9% 0 0);
+    --color-card-foreground: oklch(20% 0.02 240);
+    
     --color-popover: oklch(100% 0 0);
-    --color-popover-foreground: oklch(9% 0 0);
-    --color-primary: oklch(12% 0 0);
-    --color-primary-foreground: oklch(98% 0 0);
-    --color-secondary: oklch(96% 0 0);
-    --color-secondary-foreground: oklch(20% 0 0);
-    --color-muted: oklch(96% 0 0);
-    --color-muted-foreground: oklch(55% 0 0);
-    --color-accent: oklch(96% 0 0);
-    --color-accent-foreground: oklch(20% 0 0);
-    --color-destructive: oklch(62% 0.22 25);
+    --color-popover-foreground: oklch(20% 0.02 240);
+    
+    --color-primary: oklch(60% 0.16 250); /* A refined blue/indigo */
+    --color-primary-foreground: oklch(98% 0.01 240);
+    
+    --color-secondary: oklch(94% 0.01 240);
+    --color-secondary-foreground: oklch(25% 0.02 240);
+    
+    --color-muted: oklch(94% 0.01 240);
+    --color-muted-foreground: oklch(50% 0.02 240);
+    
+    --color-accent: oklch(94% 0.02 250);
+    --color-accent-foreground: oklch(25% 0.02 240);
+    
+    --color-destructive: oklch(65% 0.2 25);
     --color-destructive-foreground: oklch(98% 0 0);
-    --color-border: oklch(92% 0 0);
-    --color-input: oklch(92% 0 0);
-    --color-ring: oklch(20% 0 0);
+    
+    --color-border: oklch(90% 0.01 240);
+    --color-input: oklch(90% 0.01 240);
+    --color-ring: oklch(60% 0.16 250 / 0.5);
 
-    --radius-lg: 0.625rem;
-    --radius-md: calc(var(--radius-lg) - 2px);
-    --radius-sm: calc(var(--radius-lg) - 4px);
+    --radius-lg: 1rem;
+    --radius-md: calc(var(--radius-lg) - 0.25rem);
+    --radius-sm: calc(var(--radius-lg) - 0.5rem);
 
-    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
+
+    /* Custom Utilities */
+    --animate-in: animate-in 0.2s ease-out;
+    --animate-out: animate-out 0.2s ease-in;
 }
 
 @layer base {
     .dark {
-        --color-background: oklch(8% 0 0);
-        --color-foreground: oklch(97% 0 0);
-        --color-card: oklch(11% 0 0);
-        --color-card-foreground: oklch(97% 0 0);
-        --color-popover: oklch(11% 0 0);
-        --color-popover-foreground: oklch(97% 0 0);
-        --color-primary: oklch(97% 0 0);
-        --color-primary-foreground: oklch(12% 0 0);
-        --color-secondary: oklch(16% 0 0);
-        --color-secondary-foreground: oklch(97% 0 0);
-        --color-muted: oklch(16% 0 0);
-        --color-muted-foreground: oklch(62% 0 0);
-        --color-accent: oklch(16% 0 0);
-        --color-accent-foreground: oklch(97% 0 0);
-        --color-destructive: oklch(45% 0.15 25);
+        --color-background: oklch(15% 0.02 240);
+        --color-foreground: oklch(95% 0.01 240);
+        
+        --color-card: oklch(18% 0.02 240);
+        --color-card-foreground: oklch(95% 0.01 240);
+        
+        --color-popover: oklch(18% 0.02 240);
+        --color-popover-foreground: oklch(95% 0.01 240);
+        
+        --color-primary: oklch(70% 0.14 250);
+        --color-primary-foreground: oklch(15% 0.02 240);
+        
+        --color-secondary: oklch(22% 0.02 240);
+        --color-secondary-foreground: oklch(95% 0.01 240);
+        
+        --color-muted: oklch(22% 0.02 240);
+        --color-muted-foreground: oklch(65% 0.02 240);
+        
+        --color-accent: oklch(25% 0.03 250);
+        --color-accent-foreground: oklch(95% 0.01 240);
+        
+        --color-destructive: oklch(50% 0.15 25);
         --color-destructive-foreground: oklch(98% 0 0);
-        --color-border: oklch(18% 0 0);
-        --color-input: oklch(18% 0 0);
-        --color-ring: oklch(80% 0 0);
+        
+        --color-border: oklch(25% 0.02 240);
+        --color-input: oklch(25% 0.02 240);
+        --color-ring: oklch(70% 0.14 250 / 0.4);
     }
 }
 
 @layer base {
     * {
-        border-color: var(--color-border);
+        @apply border-border;
     }
 
     html {
@@ -62,25 +83,21 @@
     }
 
     body {
-        background-color: var(--color-background);
-        color: var(--color-foreground);
+        @apply bg-background text-foreground;
         font-family: var(--font-sans);
-        font-feature-settings:
-            "rlig" 1,
-            "calt" 1;
+        font-feature-settings: "rlig" 1, "calt" 1;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Thin, minimal scrollbar */
+    /* Modern Minimal Scrollbar */
     * {
         scrollbar-width: thin;
-        scrollbar-color: hsl(var(--muted)) transparent;
+        scrollbar-color: var(--color-muted) transparent;
     }
 
     *::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
     }
 
     *::-webkit-scrollbar-track {
@@ -88,27 +105,36 @@
     }
 
     *::-webkit-scrollbar-thumb {
-        background-color: hsl(var(--muted));
-        border-radius: 20px;
+        background-color: var(--color-muted);
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        border-radius: 10px;
     }
 
     *::-webkit-scrollbar-thumb:hover {
-        background-color: hsl(var(--muted-foreground));
+        background-color: var(--color-muted-foreground);
+    }
+}
+
+@layer utilities {
+    .glass {
+        @apply bg-background/60 backdrop-blur-md border border-white/20 dark:border-white/10;
+    }
+    
+    .glass-dark {
+        @apply bg-black/40 backdrop-blur-md border border-white/10;
     }
 
-    /* Only interactive elements get transitions — prevents theme flash */
-    button,
-    a,
-    input,
-    textarea,
-    select,
-    [role="button"],
-    [data-slot="dropdown-menu-trigger"],
-    [data-slot="dropdown-menu-item"] {
-        transition-property:
-            color, background-color, border-color, text-decoration-color, fill,
-            stroke, opacity, box-shadow, transform;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 150ms;
+    .shadow-premium {
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
     }
 }

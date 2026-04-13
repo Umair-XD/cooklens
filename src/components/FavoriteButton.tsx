@@ -1,55 +1,57 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toggleFavorite } from '@/lib/actions/recipe.actions';
+import { useState, useTransition } from "react";
+import { Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toggleFavorite } from "@/lib/actions/favorites.actions";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter, usePathname } from "next/navigation";
 
-export interface FavoriteButtonProps {
-  userId: string;
+interface FavoriteButtonProps {
   recipeId: string;
-  initialFavorite?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  initialIsFavorite: boolean;
+  className?: string;
 }
 
-const sizeClasses: Record<string, string> = {
-  sm: 'h-8 w-8 p-0',
-  md: 'h-10 w-10 p-0',
-  lg: 'h-12 w-12 p-0',
-};
-
-const iconSizes: Record<string, number> = {
-  sm: 16,
-  md: 20,
-  lg: 24,
-};
-
 export function FavoriteButton({
-  userId,
   recipeId,
-  initialFavorite = false,
-  size = 'md',
+  initialIsFavorite,
+  className,
 }: FavoriteButtonProps) {
-  const [isFavorite, setIsFavorite] = useState(initialFavorite);
+  const { data: session } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isFav, setIsFav] = useState(initialIsFavorite);
   const [isPending, startTransition] = useTransition();
-  const [animate, setAnimate] = useState(false);
 
-  const handleToggle = () => {
-    if (isPending) return;
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    const prev = isFavorite;
-    setIsFavorite(!prev);
-    setAnimate(true);
+    if (!session?.user?.id) {
+      toast.error("Please sign in to save recipes");
+      return;
+    }
 
-    setTimeout(() => setAnimate(false), 300);
+    // Optimistic update
+    const previousState = isFav;
+    setIsFav(!previousState);
 
     startTransition(async () => {
-      const result = await toggleFavorite(userId, recipeId);
-      if (result.success && result.isFavorite !== undefined) {
-        setIsFavorite(result.isFavorite);
-      } else {
-        setIsFavorite(prev);
+      try {
+        const result = await toggleFavorite(session.user.id, recipeId);
+        setIsFav(result.isFavorite);
+        toast.success(result.isFavorite ? "Saved to favorites" : "Removed from favorites");
+        
+        // If we're on the favorites page and we un-favorite, refresh to remove the card
+        if (!result.isFavorite && pathname === "/favorites") {
+          router.refresh();
+        }
+      } catch (error) {
+        setIsFav(previousState);
+        toast.error("Failed to update collection");
       }
     });
   };
@@ -58,20 +60,19 @@ export function FavoriteButton({
     <Button
       variant="ghost"
       size="icon"
-      className={cn(sizeClasses[size], 'transition-colors')}
+      className={cn(
+        "h-9 w-9 rounded-full bg-white/90 backdrop-blur-md shadow-md transition-all hover:scale-110 active:scale-95 group/fav border border-border/10",
+        isFav ? "text-rose-500" : "text-muted-foreground",
+        className
+      )}
       onClick={handleToggle}
       disabled={isPending}
-      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
     >
       <Heart
         className={cn(
-          'transition-all duration-300',
-          animate && 'scale-125',
-          isFavorite
-            ? 'fill-red-500 text-red-500'
-            : 'text-muted-foreground hover:text-red-500'
+          "h-5 w-5 transition-all",
+          isFav ? "fill-current scale-110" : "group-hover/fav:fill-rose-500/20"
         )}
-        size={iconSizes[size]}
       />
     </Button>
   );

@@ -21,6 +21,7 @@ export interface INutrition {
 }
 
 export interface IRecipe extends Document {
+  imageUrl: string | undefined;
   name: string;
   cuisineType: string;
   difficulty: Difficulty;

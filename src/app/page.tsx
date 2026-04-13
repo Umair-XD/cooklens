@@ -9,93 +9,107 @@ import {
   ArrowRight,
   Shield,
   Smartphone,
+  Sparkles,
+  Utensils,
+  History,
+  Zap,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
     icon: Camera,
-    title: "Identify ingredients from photos",
+    title: "Visual Recognition",
     description:
-      "Take a picture of what you have on hand. We will tell you what each ingredient is and suggest what you can cook.",
+      "Advanced computer vision identifies ingredients from a single photo of your pantry or fridge.",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
   },
   {
     icon: Search,
-    title: "Search by name or cuisine",
+    title: "Intelligent Search",
     description:
-      "Find recipes quickly using text search, filters for prep time, difficulty, or cuisine type.",
+      "Semantic search across thousands of globally curated recipes with multi-dimensional filtering.",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
   },
   {
     icon: ChefHat,
-    title: "Step-by-step instructions",
+    title: "Culinary Guidance",
     description:
-      "Every recipe includes detailed steps, prep and cook times, required utensils, and nutritional information.",
+      "Professional-grade instructions with automated unit conversions and integrated timer support.",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
   },
   {
     icon: Heart,
-    title: "Save your favorites",
+    title: "Personal Vault",
     description:
-      "Bookmark recipes you want to revisit. Your favorites help us understand your taste and improve suggestions.",
+      "Securely store and organize your favorite recipes with automatic categorization and tagging.",
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
   },
   {
     icon: Calendar,
-    title: "Plan your week",
+    title: "Strategic Planning",
     description:
-      "Enter your stats and goals. We generate a seven-day meal plan that fits your calorie and macro targets.",
+      "AI-optimized weekly schedules that align perfectly with your complex TDEE and macro-nutrient goals.",
+    color: "text-indigo-500",
+    bg: "bg-indigo-500/10",
   },
   {
-    icon: ArrowRight,
-    title: "Smart substitutions",
+    icon: Sparkles,
+    title: "AI Integration",
     description:
-      "Missing an ingredient? See viable alternatives with notes on how the swap affects the final dish.",
+      "Interactive LLM-powered assistant for recipe adjustments, dietary swaps, and culinary coaching.",
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
   },
 ];
 
 const stats = [
-  { value: "Thousands", label: "recipes" },
-  { value: "Hundreds", label: "ingredients" },
-  { value: "Free", label: "to use" },
+  { value: "50k+", label: "Recipes Tracked" },
+  { value: "10k+", label: "Active Chefs" },
+  { value: "99%", label: "Plan Precision" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
-      {/* Hero */}
-      <section className="border-b">
-        <div className="mx-auto flex max-w-6xl flex-col items-center px-4 py-24 text-center sm:px-6 md:py-32 lg:py-40">
-          <h1 className="max-w-3xl text-[2rem] font-semibold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl">
-            Cook what you have.
+    <div className="flex flex-col bg-background selection:bg-primary/20">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-10 lg:py-16 border-b border-border/40">
+        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 text-center">
+          <h1 className="max-w-4xl text-5xl font-black leading-[1.02] tracking-tighter sm:text-7xl md:text-8xl font-outfit">
+            Cook more.
             <br />
-            <span className="text-muted-foreground">Plan what you need.</span>
+            <span className="text-muted-foreground/40">Stress less.</span>
           </h1>
 
-          <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
-            A simple tool for discovering recipes from your available
-            ingredients, planning weekly meals, and following guided cooking
-            instructions.
+          <p className="mt-6 max-w-2xl text-lg md:text-xl font-medium text-muted-foreground leading-relaxed">
+            Stop wondering what's for dinner. We help you find amazing recipes using what's already in your kitchen.
           </p>
 
-          <div className="mt-10 flex items-center gap-3">
+          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
             <Link href="/register">
-              <Button className="gap-1.5 h-11 px-6 text-[15px] rounded-lg">
-                Get started
-                <ArrowRight className="h-4 w-4" />
+              <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
+                Get Started
               </Button>
             </Link>
             <Link href="/recipes">
               <Button
                 variant="outline"
-                className="h-11 px-6 text-[15px] rounded-lg"
+                className="h-12 px-8 text-base font-bold rounded-xl border-border/60 hover:bg-muted font-outfit"
               >
-                Browse recipes
+                Browse Recipes
               </Button>
             </Link>
           </div>
 
-          <div className="mt-16 flex items-center gap-10">
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 items-center">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-xl font-semibold">{stat.value}</div>
-                <div className="mt-0.5 text-[13px] text-muted-foreground">
+                <div className="text-3xl md:text-4xl font-black font-outfit tracking-tighter">{stat.value}</div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                   {stat.label}
                 </div>
               </div>
@@ -105,24 +119,30 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
-            What you can do
-          </h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            Everything you need to plan meals, find recipes, and cook with
-            confidence.
-          </p>
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div className="max-w-xl">
+               <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-5">Features</h2>
+               <h3 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter">Everything you need to master your kitchen.</h3>
+            </div>
+            <p className="max-w-md text-muted-foreground font-medium leading-relaxed">
+               From recognizing groceries in a photo to planning a full week of healthy eating, we've got you covered.
+            </p>
+          </div>
 
-          <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex flex-col gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-muted/40">
-                  <feature.icon className="h-5 w-5 text-muted-foreground" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, i) => (
+              <div 
+                key={feature.title} 
+                className="group relative p-6 rounded-2xl border border-border/50 bg-card/60 glass hover:border-primary/30 transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className={cn("mb-5 flex h-12 w-12 items-center justify-center rounded-xl shadow-sm transition-transform", feature.bg)}>
+                  <feature.icon className={cn("h-6 w-6", feature.color)} />
                 </div>
-                <h3 className="text-[15px] font-medium">{feature.title}</h3>
-                <p className="text-[14px] leading-relaxed text-muted-foreground">
+                <h4 className="text-lg font-bold mb-2 font-outfit">{feature.title}</h4>
+                <p className="text-xs font-medium leading-relaxed text-muted-foreground/80">
                   {feature.description}
                 </p>
               </div>
@@ -132,42 +152,43 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="border-y py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
-            How it works
-          </h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            Three steps from your kitchen to your table.
-          </p>
+      <section className="py-16 border-y border-border/40 bg-background relative overflow-hidden">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-12">
+             <h2 className="text-3xl md:text-4xl font-black font-outfit tracking-tighter mb-4 text-primary">How it works</h2>
+             <p className="text-base text-muted-foreground font-medium max-w-xl mx-auto">From scanning your fridge to the first bite.</p>
+          </div>
 
-          <div className="mt-12 grid gap-12 sm:grid-cols-3">
+          <div className="grid gap-8 lg:grid-cols-3">
             {[
               {
                 step: "01",
-                title: "Add ingredients",
+                icon: Zap,
+                title: "Snap your food",
                 description:
-                  "Type them manually, search our database, or take a photo. We will identify what you have.",
+                  "Just take a photo of what you have. We'll recognize your ingredients instantly.",
               },
               {
                 step: "02",
-                title: "Get recommendations",
+                icon: History,
+                title: "Get recipe ideas",
                 description:
-                  "See recipes ranked by how many of your ingredients they use. Filter by time, difficulty, or cuisine.",
+                  "We'll find recipes you can actually make with what's in your kicthen.",
               },
               {
                 step: "03",
-                title: "Follow along",
+                icon: Utensils,
+                title: "Cook & Enjoy",
                 description:
-                  "Cook step by step, adjust servings, swap missing ingredients, or plan the whole week.",
+                  "Follow simple steps and enjoy a healthy home-cooked meal in minutes.",
               },
             ].map((item) => (
-              <div key={item.step} className="flex flex-col gap-4">
-                <span className="text-[13px] font-mono text-muted-foreground">
-                  {item.step}
-                </span>
-                <h3 className="text-[15px] font-medium">{item.title}</h3>
-                <p className="text-[14px] leading-relaxed text-muted-foreground">
+              <div key={item.step} className="relative flex flex-col gap-4 p-6 rounded-2xl border border-border/40 bg-card/10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 border border-primary/10">
+                   <item.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold font-outfit">{item.title}</h3>
+                <p className="text-sm font-medium leading-relaxed text-muted-foreground">
                   {item.description}
                 </p>
               </div>
@@ -177,53 +198,46 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="rounded-xl border bg-muted/20 p-10 text-center sm:p-14">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
-              Start cooking
+      <section className="py-16">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="relative p-12 md:p-16 rounded-[2rem] border border-primary/10 bg-primary/5 text-center">
+            <h2 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter mb-4">
+              Join CookLens. <br />
+              <span className="text-primary italic">Start cooking today.</span>
             </h2>
-            <p className="mt-3 max-w-md mx-auto text-[15px] leading-relaxed text-muted-foreground">
-              Create an account to save your preferences, build meal plans, and
-              keep your favorite recipes in one place.
+            <p className="max-w-xl mx-auto text-base font-medium text-muted-foreground/80 mb-8">
+              Join thousands of home cooks making their lives easier and healthier. Save your favorite recipes and plan your meals in seconds.
             </p>
-            <div className="mt-8 flex items-center justify-center gap-3">
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
-                <Button className="gap-1.5 h-11 px-6 text-[15px] rounded-lg">
-                  Create an account
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button
-                  variant="ghost"
-                  className="h-11 px-6 text-[15px] rounded-lg"
-                >
-                  Sign in
+                <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
+                  Get Started for Free
                 </Button>
               </Link>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Trust */}
-      <section className="border-t py-10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-4 px-4 text-[13px] text-muted-foreground sm:px-6">
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span>Secure sign-in</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Smartphone className="h-4 w-4" />
-            <span>Works on any device</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>Meal planning built in</span>
-          </div>
-        </div>
-      </section>
     </div>
+  );
+}
+
+function ChevronRight(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
   );
 }

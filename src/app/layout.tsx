@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -17,23 +17,26 @@ import {
 import { Providers } from "@/components/Providers";
 import Link from "next/link";
 import { signOut } from "@/lib/actions/auth.actions";
+import { ChefHat, Search, Calendar, Heart, MessageSquare, User, LogOut, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
   title: {
-    default: "CookLens",
+    default: "CookLens | AI Driven Culinary Excellence",
     template: "%s — CookLens",
   },
   description:
-    "Recipe discovery and meal planning. Find what to cook from what you have.",
+    "Premium recipe discovery and intelligent meal planning powered by cutting-edge AI.",
 };
 
 const navLinks = [
-  { href: "/recipes", label: "Recipes" },
-  { href: "/planner", label: "Planner" },
-  { href: "/favorites", label: "Favorites" },
-  { href: "/chat", label: "Chat" },
+  { href: "/recipes", label: "Recipes", icon: Search },
+  { href: "/planner", label: "Planner", icon: Calendar },
+  { href: "/favorites", label: "Favorites", icon: Heart },
+  { href: "/chat", label: "Assistant", icon: MessageSquare },
 ];
 
 async function UserNav() {
@@ -41,31 +44,18 @@ async function UserNav() {
 
   if (!session?.user) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="inline-flex items-center justify-center rounded-lg text-sm font-medium h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          Login
         </Link>
         <Link
           href="/register"
-          className="inline-flex items-center justify-center rounded-lg text-sm font-medium h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 transition-all font-outfit"
         >
-          Sign up
+          Join
         </Link>
       </div>
     );
@@ -81,50 +71,60 @@ async function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full outline-none hover:bg-accent p-1 pr-3 transition-colors">
-          <Avatar className="h-7 w-7">
+        <button className="flex items-center gap-2 rounded-full outline-none hover:bg-accent/50 p-1 group transition-all">
+          <Avatar className="h-8 w-8 border-2 border-transparent group-hover:border-primary/20 transition-all">
             <AvatarImage src={session.user.image || undefined} />
-            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <AvatarFallback className="text-xs font-black bg-primary/10 text-primary">{initials}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium">
-            {session.user.name?.split(" ")[0] || session.user.email}
-          </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl glass shadow-premium border-border/50">
+        <DropdownMenuLabel className="font-normal p-3">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{session.user.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm font-black tracking-tight">{session.user.name}</p>
+            <p className="text-xs font-medium text-muted-foreground truncate">
               {session.user.email}
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/profile">Profile</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/favorites">Favorites</Link>
-        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-border/50" />
+        <div className="py-1">
+          <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
+            <Link href="/profile" className="flex items-center gap-2.5 font-bold text-sm">
+               <User className="h-4 w-4 text-primary" />
+               Account Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
+            <Link href="/favorites" className="flex items-center gap-2.5 font-bold text-sm">
+               <Heart className="h-4 w-4 text-primary" />
+               Saved Recipes
+            </Link>
+          </DropdownMenuItem>
+        </div>
         {session.user.role === "ADMIN" && (
           <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/admin/recipes">Admin</Link>
+            <DropdownMenuSeparator className="bg-border/50" />
+            <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
+              <Link href="/admin/recipes" className="flex items-center gap-2.5 font-bold text-sm">
+                 <Settings className="h-4 w-4 text-primary" />
+                 Kitchen Admin
+              </Link>
             </DropdownMenuItem>
           </>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuSeparator className="bg-border/50" />
+        <DropdownMenuItem asChild className="rounded-xl focus:bg-destructive/5 text-destructive cursor-pointer p-2.5">
           <form
             action={async () => {
               "use server";
               await signOut();
             }}
+            className="w-full"
           >
-            <button type="submit" className="w-full text-left">
-              Sign out
+            <button type="submit" className="w-full flex items-center gap-2.5 font-bold text-sm">
+              <LogOut className="h-4 w-4" />
+              Terminate Session
             </button>
           </form>
         </DropdownMenuItem>
@@ -137,36 +137,37 @@ async function FullHeader() {
   const session = await getServerSessionSafe();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-6">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-10">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"
+            className="flex items-center gap-2.5"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold">
-              CL
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+              <ChefHat className="h-5 w-5 fill-current" />
             </div>
-            CookLens
+            <span className="text-xl font-black tracking-tighter font-outfit">CookLens</span>
           </Link>
-
-          {session?.user && (
-            <nav className="hidden md:flex items-center gap-0.5">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="inline-flex items-center rounded-md px-3 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          )}
         </div>
 
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
+        <nav className="hidden lg:flex items-center gap-1 bg-muted/30 p-1 rounded-2xl border border-border/50 glass">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all border border-transparent hover:border-border/40"
+            >
+              <link.icon className="h-3.5 w-3.5" />
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <div className="pr-2 border-r border-border/50 hidden sm:block">
+             <ThemeToggle />
+          </div>
           <UserNav />
         </div>
       </div>
@@ -176,21 +177,19 @@ async function FullHeader() {
 
 async function AuthHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-50 w-full bg-transparent">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
-          className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight"
+          className="flex items-center gap-2.5"
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold">
-            CL
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <ChefHat className="h-5 w-5 fill-current" />
           </div>
-          CookLens
+          <span className="text-xl font-black tracking-tighter font-outfit">CookLens</span>
         </Link>
-
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
-        </div>
+        
+        <ThemeToggle />
       </div>
     </header>
   );
@@ -198,21 +197,28 @@ async function AuthHeader() {
 
 function MinimalFooter() {
   return (
-    <footer className="border-t border-border/50">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6 text-[13px] text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} CookLens</p>
-        <div className="flex items-center gap-4">
+    <footer className="border-t border-border/40 bg-muted/10 py-12">
+      <div className="mx-auto flex flex-col md:flex-row items-center justify-between max-w-7xl px-6 gap-6">
+        <div className="flex flex-col gap-2 items-center md:items-start">
+           <div className="flex items-center gap-2 opacity-40">
+              <ChefHat className="h-4 w-4" />
+              <span className="text-sm font-black tracking-tighter uppercase">CookLens</span>
+           </div>
+           <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">&copy; {new Date().getFullYear()} CookLens</p>
+        </div>
+        
+        <div className="flex items-center gap-8">
           <Link
-            href="/login"
-            className="hover:text-foreground transition-colors"
+            href="/privacy"
+            className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors"
           >
-            Sign in
+            Privacy
           </Link>
           <Link
-            href="/register"
-            className="hover:text-foreground transition-colors"
+            href="/terms"
+            className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-colors"
           >
-            Sign up
+            Terms
           </Link>
         </div>
       </div>
@@ -231,9 +237,9 @@ export default async function RootLayout({
   const session = await getServerSessionSafe();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={outfit.variable}>
       <body
-        className={`${inter.className} antialiased`}
+        className={`${inter.className} antialiased selection:bg-primary/20 selection:text-primary`}
         suppressHydrationWarning
       >
         <ThemeProvider

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Filter, LayoutGrid, ChevronRight, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { RecipeCard } from "@/components/RecipeCard";
 import { SearchResultsSkeleton } from "@/components/SearchResultsSkeleton";
+import { cn } from "@/lib/utils";
 
 const CUISINES = [
   "All",
@@ -33,6 +34,7 @@ interface RecipeResult {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   prepTimeMinutes: number;
   cookTimeMinutes: number;
+  imageUrl?: string;
 }
 
 interface Filters {
@@ -51,11 +53,22 @@ export default function SearchPageContent() {
   const [results, setResults] = useState<RecipeResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Filters>(() => ({
     cuisine: searchParams.get("cuisine") || "All",
     maxCookTime: Number(searchParams.get("maxCookTime")) || 120,
     difficulty: searchParams.get("difficulty") || "All",
   }));
+
+  const fetchFavoriteIds = async () => {
+    try {
+      const res = await fetch("/api/favorites/ids");
+      const data = await res.json();
+      setFavoriteIds(new Set(data.favoriteIds));
+    } catch (err) {
+      console.error("Failed to fetch favorites", err);
+    }
+  };
 
   const doSearch = useCallback(
     async (q: string, f: Filters) => {
@@ -71,7 +84,10 @@ export default function SearchPageContent() {
       router.push(`/recipes?${p.toString()}`, { scroll: false });
 
       try {
-        const res = await fetch(`/api/recipes/search?${p.toString()}`);
+        const [res, _] = await Promise.all([
+          fetch(`/api/recipes/search?${p.toString()}`),
+          fetchFavoriteIds()
+        ]);
         const data = await res.json();
         const recipes = Array.isArray(data.recipes) ? data.recipes : [];
         if (recipes.length === 0) {
@@ -119,49 +135,53 @@ export default function SearchPageContent() {
 
   // Shared filter UI
   const FilterFields = () => (
-    <div className="space-y-5">
-      <div className="space-y-2">
-        <Label className="text-[13px]">Cuisine</Label>
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+           <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Style</Label>
+        </div>
         <Select
           value={filters.cuisine}
           onValueChange={(v) => updateFilter("cuisine", v)}
         >
-          <SelectTrigger className="h-10">
-            <SelectValue placeholder="All cuisines" />
+          <SelectTrigger className="h-11 bg-background/50 rounded-xl">
+            <SelectValue placeholder="All styles" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-xl glass">
             {CUISINES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c === "All" ? "All" : c.replace(" Recipes", "")}
+                {c === "All" ? "Any" : c.replace(" Recipes", "")}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-[13px]">
-          Max cook time: {filters.maxCookTime} min
-        </Label>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Time limit</Label>
+            <span className="text-primary text-xs font-bold">{filters.maxCookTime} min</span>
+        </div>
         <Slider
           value={[filters.maxCookTime]}
           onValueChange={([v]) => updateFilter("maxCookTime", v)}
           min={5}
           max={120}
           step={5}
+          className="py-2"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-[13px]">Difficulty</Label>
+      <div className="space-y-3">
+        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Skill level</Label>
         <Select
           value={filters.difficulty}
           onValueChange={(v) => updateFilter("difficulty", v)}
         >
-          <SelectTrigger className="h-10">
-            <SelectValue placeholder="Any difficulty" />
+          <SelectTrigger className="h-11 bg-background/50 rounded-xl">
+            <SelectValue placeholder="Any skill" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-xl glass">
             {DIFFICULTIES.map((d) => (
               <SelectItem key={d} value={d}>
                 {d === "All" ? "Any" : d.charAt(0) + d.slice(1).toLowerCase()}
@@ -172,14 +192,14 @@ export default function SearchPageContent() {
       </div>
 
       <Button
-        className="w-full"
+        className="w-full h-11 rounded-xl shadow-lg shadow-primary/20 font-bold"
         onClick={() => {
           hasSearched.current = false;
           doSearch(query, filters);
           setMobileOpen(false);
         }}
       >
-        Apply filters
+        Show Results
       </Button>
     </div>
   );
@@ -190,173 +210,188 @@ export default function SearchPageContent() {
     filters.maxCookTime < 120;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight mb-4">Recipes</h1>
-
-        {/* Search bar */}
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by name, ingredient, or cuisine..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-10 h-11"
-            />
-          </div>
-
-          {/* Desktop: filter toggle button */}
-          <Button
-            type="button"
-            variant="outline"
-            className={`hidden sm:inline-flex h-11 gap-1.5 ${hasActiveFilters ? "border-primary text-primary" : ""}`}
-            onClick={() => {
-              const el = document.getElementById("filters-panel");
-              el?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters
-            {hasActiveFilters && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                ✓
-              </span>
-            )}
-          </Button>
-
-          {/* Mobile: sheet trigger */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className={`sm:hidden h-11 w-11 ${hasActiveFilters ? "border-primary text-primary" : ""}`}
-            onClick={() => setMobileOpen(true)}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-          </Button>
-
-          <Button type="submit" className="h-11 px-6">
-            Search
-          </Button>
-        </form>
-      </div>
-
-      <div className="flex gap-8">
-        {/* Desktop sidebar */}
-        <aside id="filters-panel" className="hidden sm:block w-64 shrink-0">
-          <div className="sticky top-24 rounded-xl border bg-card p-5">
-            <h2 className="text-sm font-semibold mb-4">Filters</h2>
-            <FilterFields />
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 w-full text-muted-foreground"
-                onClick={() => {
-                  setFilters({
-                    cuisine: "All",
-                    maxCookTime: 120,
-                    difficulty: "All",
-                  });
-                  hasSearched.current = false;
-                  doSearch(query, {
-                    cuisine: "All",
-                    maxCookTime: 120,
-                    difficulty: "All",
-                  });
-                }}
-              >
-                Clear all
-              </Button>
-            )}
-          </div>
-        </aside>
-
-        {/* Main content */}
-        <div className="min-w-0 flex-1">
-          {isLoading && <SearchResultsSkeleton />}
-
-          {!isLoading && noResults && (
-            <div className="py-20 text-center">
-              <p className="text-lg font-medium text-muted-foreground">
-                No recipes found
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Try broadening your search or removing filters
-              </p>
+    <div className="bg-background/50 min-h-screen">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
+              <RotateCcw className="h-4 w-4" />
+              Recipe Discovery
             </div>
-          )}
-
-          {!isLoading && results.length > 0 && (
-            <>
-              <p className="text-sm text-muted-foreground mb-4">
-                {results.length} recipe{results.length !== 1 ? "s" : ""}
-              </p>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {results.map((recipe) => (
-                  <RecipeCard
-                    key={recipe._id}
-                    _id={recipe._id}
-                    name={recipe.name}
-                    cuisineType={recipe.cuisineType}
-                    difficulty={recipe.difficulty}
-                    prepTimeMinutes={recipe.prepTimeMinutes}
-                    cookTimeMinutes={recipe.cookTimeMinutes}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+            <h1 className="text-4xl font-black font-outfit tracking-tighter lg:text-5xl">
+              Find your next <span className="text-primary italic">Meal</span>
+            </h1>
+          </div>
         </div>
-      </div>
 
-      {/* Mobile filter sheet (pure CSS) */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 sm:hidden">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-background shadow-xl p-6 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Filters</h2>
+        {/* Search bar Area */}
+        <div className="mb-12 glass p-1.5 rounded-2xl border border-border/50 shadow-premium animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                type="text"
+                placeholder="What do you feel like cooking?"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-12 h-14 bg-transparent border-none focus-visible:ring-0 text-lg font-medium placeholder:text-muted-foreground/40"
+              />
+            </div>
+
+            <div className="flex gap-2 p-1">
+               {/* Mobile: filter trigger */}
               <Button
-                variant="ghost"
+                type="button"
+                variant="outline"
                 size="icon"
-                className="h-8 w-8"
-                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "sm:hidden h-12 w-12 rounded-xl border-border/50 glass",
+                  hasActiveFilters && "border-primary/50 bg-primary/5 text-primary"
+                )}
+                onClick={() => setMobileOpen(true)}
               >
-                <X className="h-4 w-4" />
+                <SlidersHorizontal className="h-5 w-5" />
+              </Button>
+
+              <Button type="submit" className="h-12 px-8 rounded-xl font-bold shadow-xl shadow-primary/20">
+                Search Recipes
               </Button>
             </div>
-            <FilterFields />
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 w-full text-muted-foreground"
-                onClick={() => {
-                  setFilters({
-                    cuisine: "All",
-                    maxCookTime: 120,
-                    difficulty: "All",
-                  });
-                  hasSearched.current = false;
-                  doSearch(query, {
-                    cuisine: "All",
-                    maxCookTime: 120,
-                    difficulty: "All",
-                  });
-                }}
-              >
-                Clear all
-              </Button>
+          </form>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Desktop sidebar */}
+          <aside id="filters-panel" className="hidden lg:block w-72 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700">
+            <div className="sticky top-24 rounded-3xl border border-border/50 bg-card/60 p-6 glass shadow-premium">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 font-bold text-sm">
+                   <Filter className="h-4 w-4 text-primary" />
+                   Filter by
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => {
+                      setFilters({
+                        cuisine: "All",
+                        maxCookTime: 120,
+                        difficulty: "All",
+                      });
+                      hasSearched.current = false;
+                      doSearch(query, {
+                        cuisine: "All",
+                        maxCookTime: 120,
+                        difficulty: "All",
+                      });
+                    }}
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <FilterFields />
+            </div>
+          </aside>
+
+          {/* Main content */}
+          <div className="min-w-0 flex-1 animate-in fade-in slide-in-from-right-4 duration-700">
+            {isLoading && <SearchResultsSkeleton />}
+
+            {!isLoading && noResults && (
+              <div className="py-32 text-center rounded-3xl border border-dashed border-border/60 bg-muted/5">
+                <div className="mb-4 inline-flex p-4 rounded-full bg-background border shadow-sm">
+                   <Search className="h-8 w-8 text-muted-foreground/20" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Nothing found</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto text-sm">
+                   Try adjusting your filters or search for something else.
+                </p>
+              </div>
+            )}
+
+            {!isLoading && results.length > 0 && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between px-2">
+                   <div className="flex items-center gap-2">
+                      <LayoutGrid className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-bold text-muted-foreground/80">
+                        Found {results.length} recipes
+                      </span>
+                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                  {results.map((recipe, i) => (
+                    <div 
+                      key={recipe._id} 
+                      className="animate-in fade-in slide-in-from-bottom-4" 
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                      <RecipeCard
+                        _id={recipe._id}
+                        name={recipe.name}
+                        cuisineType={recipe.cuisineType}
+                        difficulty={recipe.difficulty}
+                        prepTimeMinutes={recipe.prepTimeMinutes}
+                        cookTimeMinutes={recipe.cookTimeMinutes}
+                        imageUrl={recipe.imageUrl}
+                        initialIsFavorite={favoriteIds.has(recipe._id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
-      )}
+
+        {/* Mobile filter panel overlay */}
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden animate-in fade-in duration-300">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <div className="absolute bottom-0 left-0 right-0 max-h-[90vh] bg-background rounded-t-[2.5rem] p-8 shadow-2xl overflow-y-auto animate-in slide-in-from-bottom duration-500">
+              <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-8" />
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black">Filters</h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full bg-muted h-10 w-10"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+              <FilterFields />
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  className="mt-4 w-full text-muted-foreground text-xs font-bold uppercase tracking-widest"
+                  onClick={() => {
+                    setFilters({
+                      cuisine: "All",
+                      maxCookTime: 120,
+                      difficulty: "All",
+                    });
+                    hasSearched.current = false;
+                    doSearch(query, {
+                      cuisine: "All",
+                      maxCookTime: 120,
+                      difficulty: "All",
+                    });
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

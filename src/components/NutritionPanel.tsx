@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Minus, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Minus, Plus, Activity, Zap, Flame } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export interface NutritionInfo {
   caloriesPerServing: number;
@@ -38,83 +39,103 @@ function NumberInput({
     if (value > min) onChange(value - 1);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = parseInt(e.target.value, 10);
-    if (!isNaN(parsed)) {
-      onChange(Math.min(max, Math.max(min, parsed)));
-    }
-  };
-
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/30 border border-border/50">
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 rounded-lg hover:bg-background shadow-sm transition-all"
         onClick={decrement}
         disabled={value <= min}
-        aria-label="Decrease servings"
       >
-        <Minus className="h-3 w-3" />
+        <Minus className="h-3.5 w-3.5" />
       </Button>
-      <Input
-        type="number"
-        value={value}
-        onChange={handleChange}
-        className="h-8 w-16 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        min={min}
-        max={max}
-        aria-label="Number of servings"
-      />
+      <div className="w-10 text-center text-sm font-black font-outfit">
+        {value}
+      </div>
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 rounded-lg hover:bg-background shadow-sm transition-all"
         onClick={increment}
         disabled={value >= max}
-        aria-label="Increase servings"
       >
-        <Plus className="h-3 w-3" />
+        <Plus className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
 }
 
-export function NutritionPanel({ nutrition, baseServings }: NutritionPanelProps) {
+export function NutritionPanel({
+  nutrition,
+  baseServings,
+}: NutritionPanelProps) {
   const [servings, setServings] = useState(baseServings);
 
   const scaleFactor = servings / baseServings;
 
-  const adjustedCalories = Math.round(nutrition.caloriesPerServing * scaleFactor);
-  const adjustedProtein = Math.round(nutrition.proteinGrams * scaleFactor * 10) / 10;
-  const adjustedCarbs = Math.round(nutrition.carbsGrams * scaleFactor * 10) / 10;
+  const adjustedCalories = Math.round(
+    nutrition.caloriesPerServing * scaleFactor,
+  );
+  const adjustedProtein =
+    Math.round(nutrition.proteinGrams * scaleFactor * 10) / 10;
+  const adjustedCarbs =
+    Math.round(nutrition.carbsGrams * scaleFactor * 10) / 10;
   const adjustedFat = Math.round(nutrition.fatGrams * scaleFactor * 10) / 10;
 
-  // Macro percentages for progress bars (out of 100g reference)
-  const maxMacro = 100;
-  const proteinPercent = Math.min((adjustedProtein / maxMacro) * 100, 100);
-  const carbsPercent = Math.min((adjustedCarbs / maxMacro) * 100, 100);
-  const fatPercent = Math.min((adjustedFat / maxMacro) * 100, 100);
+  const totalGrams = adjustedProtein + adjustedCarbs + adjustedFat;
+  const proteinRatio = (adjustedProtein / totalGrams) * 100 || 0;
+  const carbsRatio = (adjustedCarbs / totalGrams) * 100 || 0;
+  const fatRatio = (adjustedFat / totalGrams) * 100 || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Nutrition</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Servings:</span>
-          <NumberInput value={servings} onChange={setServings} min={1} max={99} />
+        <div className="space-y-0.5">
+           <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Macro Analysis</h3>
+           <p className="text-xs font-bold text-primary">Dynamic Serving Calibration</p>
+        </div>
+        <NumberInput value={servings} onChange={setServings} min={1} max={99} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <GlassCard className="p-6 md:col-span-1 flex flex-col items-center justify-center text-center gap-2" variant="tinted">
+           <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <Flame className="h-5 w-5 fill-current" />
+           </div>
+           <div className="text-3xl font-black font-outfit tracking-tighter">{adjustedCalories}</div>
+           <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Calories</div>
+        </GlassCard>
+
+        <div className="md:col-span-3 space-y-6 flex flex-col justify-center bg-muted/20 p-6 rounded-3xl border border-border/50">
+          <MacroBar
+            label="Protein"
+            value={adjustedProtein}
+            percent={proteinRatio}
+            color="bg-emerald-500"
+            icon={<Zap className="h-3 w-3" />}
+          />
+          <MacroBar
+            label="Carbohydrates"
+            value={adjustedCarbs}
+            percent={carbsRatio}
+            color="bg-amber-500"
+            icon={<Activity className="h-3 w-3" />}
+          />
+          <MacroBar
+            label="Lipids / Fats"
+            value={adjustedFat}
+            percent={fatRatio}
+            color="bg-rose-500"
+            icon={<Activity className="h-3 w-3" />}
+          />
         </div>
       </div>
-
-      <div className="text-center py-4 bg-muted/50 rounded-lg">
-        <p className="text-3xl font-bold">{adjustedCalories}</p>
-        <p className="text-sm text-muted-foreground">calories (per {servings} serving{servings !== 1 ? 's' : ''})</p>
-      </div>
-
-      <div className="space-y-4">
-        <MacroBar label="Protein" value={adjustedProtein} percent={proteinPercent} color="bg-blue-500" />
-        <MacroBar label="Carbs" value={adjustedCarbs} percent={carbsPercent} color="bg-amber-500" />
-        <MacroBar label="Fat" value={adjustedFat} percent={fatPercent} color="bg-rose-500" />
+      
+      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20">
+         <p className="text-[10px] font-bold text-center text-primary uppercase tracking-[0.2em]">
+            Values adjusted for {servings} serving{servings !== 1 ? "s" : ""}
+         </p>
       </div>
     </div>
   );
@@ -125,22 +146,28 @@ function MacroBar({
   value,
   percent,
   color,
+  icon,
 }: {
   label: string;
   value: number;
   percent: number;
   color: string;
+  icon: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">{value}g</span>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+           <div className={cn("p-1 rounded-md", color.replace('bg-', 'text-').replace('500', '500/10'), color.replace('bg-', 'bg-'))}>
+              <div className="text-white">
+                {icon}
+              </div>
+           </div>
+           <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/80">{label}</span>
+        </div>
+        <span className="text-sm font-black font-outfit tracking-tight">{value}g <span className="text-[10px] text-muted-foreground/40 font-bold ml-1">({Math.round(percent)}%)</span></span>
       </div>
-      <Progress
-        value={percent}
-        className={cn('h-2', color)}
-      />
+      <Progress value={percent} className={cn("h-1.5", color)} />
     </div>
   );
 }
