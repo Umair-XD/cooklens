@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { Streamdown } from "streamdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -58,7 +59,7 @@ export default function ChatPage() {
   }, [messages, isStreaming]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col bg-background/50">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-background/50 overflow-hidden">
       <ScrollArea ref={scrollRef} className="flex-1 px-4">
         <div className="mx-auto max-w-3xl py-10 space-y-8">
           {messages.length === 0 && (
@@ -137,7 +138,13 @@ export default function ChatPage() {
                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap space-y-4">
                   {message.parts.map((part: any, partIdx: number) => {
                     if (part.type === "text") {
-                      return <p key={partIdx}>{part.text}</p>;
+                      return (
+                        <div key={partIdx} className="w-full">
+                          <Streamdown>
+                            {part.text}
+                          </Streamdown>
+                        </div>
+                      );
                     }
                     if (part.type === "reasoning") {
                       return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { FullHeader, MinimalFooter } from "@/components/AppShell";
 import {
   Camera,
   Search,
@@ -75,7 +76,10 @@ const stats = [
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col bg-background selection:bg-primary/20">
+    <>
+      <FullHeader />
+      <main>
+      <div className="flex flex-col bg-background selection:bg-primary/20">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-10 lg:py-16 border-b border-border/40">
         <div className="mx-auto flex max-w-7xl flex-col items-center px-6 text-center">
@@ -243,7 +247,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+      </main>
+      <MinimalFooter />
+    </>
   );
 }
 

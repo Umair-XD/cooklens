@@ -1,19 +1,15 @@
-import { createGateway as createSdkGateway, type LanguageModel } from "ai";
-
 /**
- * AI Gateway centralizes all AI-related model access.
- * It provides a unified entry point for different AI tasks.
+ * AI Gateway centralizes all AI-related model access using the latest
+ * native string-based routing from the v3.4+ 'ai' package.
  */
 export class AIGateway {
   private static instance: AIGateway;
-  private gateway: ReturnType<typeof createSdkGateway>;
 
   private constructor() {
     const apiKey = process.env.AI_GATEWAY_API_KEY;
     if (!apiKey) {
       throw new Error("AI_GATEWAY_API_KEY is not defined");
     }
-    this.gateway = createSdkGateway({ apiKey });
   }
 
   public static getInstance(): AIGateway {
@@ -26,22 +22,22 @@ export class AIGateway {
   /**
    * Returns a language model optimized for conversational chat.
    */
-  public getChatModel(): LanguageModel {
-    return this.gateway.languageModel("openai/gpt-4o");
+  public getChatModel(): any {
+    return "openai/gpt-4o";
   }
 
   /**
    * Returns a model optimized for reasoning and structured tasks (like planning).
    */
-  public getReasoningModel(): LanguageModel {
-    return this.gateway.languageModel("openai/o1-mini");
+  public getReasoningModel(): any {
+    return "openai/o1-mini";
   }
 
   /**
    * Returns a lightweight model for quick tasks.
    */
-  public getFastModel(): LanguageModel {
-    return this.gateway.languageModel("openai/gpt-4o-mini");
+  public getFastModel(): any {
+    return "openai/gpt-4o-mini";
   }
 }
 

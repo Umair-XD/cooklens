@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateText, createGateway } from "ai";
+import { generateText } from "ai";
+import { aiGateway } from "@/lib/ai-gateway";
 
 const TIMEOUT_MS = 10_000;
 
@@ -32,8 +33,7 @@ export async function POST(req: NextRequest) {
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      const gateway = createGateway({ apiKey });
-      const model = gateway.languageModel("openai/gpt-4o");
+      const model = aiGateway().getChatModel();
 
       const { text } = await generateText({
         model,
