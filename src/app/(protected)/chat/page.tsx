@@ -1,237 +1,325 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Streamdown } from "streamdown";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatInput from "@/components/ChatInput";
 import ChatMessageSkeleton from "@/components/ChatMessageSkeleton";
-import { ChefHat, AlertCircle, Sparkles, User } from "lucide-react";
+import { ChefHat, AlertCircle, Sparkles, User, Copy, Check, RotateCcw, ArrowDown, Zap, UtensilsCrossed, Soup } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function ChatPage() {
   const [localInput, setLocalInput] = useState("");
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/ai/chat",
     }),
-    messages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: "Hi there! I'm Chef Lens, your personal kitchen assistant. How can I help you today?",
-          },
-        ],
-      },
-    ] as UIMessage[],
+    messages: [] as UIMessage[],
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = async (text: string, files?: FileList) => {
+  const handleSend = (text: string, files?: FileList) => {
     if (!text.trim() && (!files || files.length === 0)) return;
-
-    await sendMessage({
-      text,
-      files,
-    });
+    isAtBottom.current = true;
+    sendMessage({ text, files });
     setLocalInput("");
   };
 
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    isAtBottom.current = true;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  // Auto-scroll to bottom when messages change
+  const isAtBottom = useRef(true);
+
+  // Universal scroll effect for both user and AI updates
   useEffect(() => {
-    if (scrollRef.current) {
-      const scrollContainer = scrollRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]",
-      );
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+    if (messages.length === 0) return;
+
+    // Force stick to bottom when AI starts or user sends a message
+    if (status === "streaming" || status === "submitted") {
+      isAtBottom.current = true;
     }
-  }, [messages, isStreaming]);
+
+    if (isAtBottom.current) {
+      // Use requestAnimationFrame for smoother synchronization with the browser's render cycle
+      const scroll = () => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: isStreaming ? "auto" : "smooth",
+          block: "end" 
+        });
+      };
+      
+      const timeoutId = setTimeout(scroll, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages, isStreaming, status]);
+
+  // Track scroll position to update "isAtBottom" and toggle floating button
+  useEffect(() => {
+    if (messages.length === 0) return;
+    
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      // If we are within 100px of bottom, consider it "at bottom"
+      const nearBottom = scrollHeight - scrollTop <= clientHeight + 100;
+      isAtBottom.current = nearBottom;
+      setShowScrollButton(!nearBottom);
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [messages.length]);
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-background/50 overflow-hidden">
-      <ScrollArea ref={scrollRef} className="flex-1 px-4">
-        <div className="mx-auto max-w-3xl py-10 space-y-8">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                <div className="relative p-5 rounded-3xl bg-primary/10 text-primary border border-primary/20">
-                  <ChefHat className="h-12 w-12" />
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold tracking-tight mb-2">
-                AI Culinary Assistant
-              </h2>
-              <p className="text-muted-foreground max-w-sm">
-                Your personal sous-chef. Ask me for recipe tweaks, meal ideas,
-                or nutritional advice.
-              </p>
+    <div className="relative flex h-[calc(100dvh-4rem)] flex-col bg-background/30 overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border/50 to-transparent" />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-10 w-full max-w-md text-left">
-                {[
-                  "How do I make a keto breakfast?",
-                  "Give me a 15-min dinner idea",
-                  "What's a good substitute for eggs?",
-                  "Explain macros like I'm five",
-                ].map((tip) => (
-                  <button
-                    key={tip}
-                    onClick={() => {
-                      setLocalInput(tip);
-                    }}
-                    className="p-3 text-xs font-semibold rounded-xl border border-border/50 bg-card/40 hover:bg-primary/5 hover:border-primary/30 transition-all text-left group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Sparkles className="h-3 w-3 text-primary opacity-50 group-hover:opacity-100" />
-                      {tip}
-                    </span>
-                  </button>
-                ))}
+      {/* Main Content Area - Split into two views */}
+      <div className="flex-1 overflow-hidden relative">
+        {messages.length === 0 ? (
+          /* Landing View - No Scroll, Centered */
+          <div className="h-full flex flex-col items-center justify-center text-center px-4 pt-10 animate-in fade-in duration-700">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 opacity-30" />
+              <div className="relative h-16 w-16 rounded-[1.25rem] bg-card border border-border/40 flex items-center justify-center shadow-sm">
+                <ChefHat className="h-8 w-8 text-primary" />
               </div>
             </div>
-          )}
-
-          {messages.map((message, i) => (
-            <div
-              key={message.id}
-              className={cn(
-                "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
-                (message.role as string) === "user" ? "flex-row-reverse" : "",
-              )}
-            >
-              <Avatar
-                className={cn(
-                  "h-9 w-9 border shadow-sm",
-                  (message.role as string) === "user"
-                    ? "bg-primary/10"
-                    : "bg-card glass",
-                )}
-              >
-                <AvatarFallback className="text-xs font-bold">
-                  {(message.role as string) === "user" ? (
-                    <User className="h-4 w-4 text-primary" />
-                  ) : (
-                    <ChefHat className="h-4 w-4 text-primary" />
-                  )}
-                </AvatarFallback>
-              </Avatar>
-
-              <div
-                className={cn(
-                  "relative rounded-2xl px-5 py-3.5 max-w-4/5 shadow-premium text-sm leading-relaxed",
-                  (message.role as string) === "user"
-                    ? "bg-primary text-primary-foreground font-medium rounded-tr-none"
-                    : "bg-card border border-border/50 glass rounded-tl-none",
-                )}
-              >
-                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap space-y-4">
-                  {message.parts.map((part: any, partIdx: number) => {
-                    if (part.type === "text") {
-                      return (
-                        <div key={partIdx} className="w-full">
-                          <Streamdown>
-                            {part.text}
-                          </Streamdown>
-                        </div>
-                      );
-                    }
-                    if (part.type === "reasoning") {
-                      return (
-                        <p
-                          key={partIdx}
-                          className="italic text-muted-foreground/70"
-                        >
-                          {part.text}
-                        </p>
-                      );
-                    }
-                    if (part.type === "file") {
-                      return (
-                        <img
-                          key={partIdx}
-                          src={part.url}
-                          alt="Attachment"
-                          className="max-h-60 rounded-lg border border-border/50 object-cover shadow-sm"
-                        />
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {isStreaming && (
-            <div className="flex items-start gap-4">
-              <Avatar className="h-9 w-9 bg-card glass border shadow-sm">
-                <AvatarFallback>
-                  <ChefHat className="h-4 w-4 text-primary" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="bg-card border border-border/50 glass rounded-2xl rounded-tl-none px-5 py-4 w-full max-w-[200px] shadow-premium">
-                <ChatMessageSkeleton lines={2} />
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <Alert
-              variant="destructive"
-              className="rounded-2xl bg-destructive/5 border-destructive/20 text-destructive"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-xs font-semibold">
-                {error.message || "Connection lost. Please try again."}
-                <button
-                  onClick={() => regenerate()}
-                  className="ml-2 underline hover:no-underline"
-                >
-                  Retry
-                </button>
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      </ScrollArea>
-
-      <div className="p-4 sm:p-6 bg-linear-to-t from-background to-transparent">
-        <div className="mx-auto max-w-3xl">
-          <div className="mb-2 flex items-center gap-1.5 px-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-              AI Powered Culinary Engine
-            </span>
-          </div>
-          <ChatInput
-            input={localInput}
-            onInputChange={setLocalInput}
-            onSubmit={(e, files) => {
-              handleSend(localInput, files);
-            }}
-            isStreaming={isStreaming}
-            onStop={async () => stop()}
-            className="glass shadow-premium border-border/50 rounded-2xl overflow-hidden p-1 gap-1"
-          />
-          <div className="mt-2 text-center">
-            <p className="text-[10px] text-muted-foreground/40">
-              AI can make mistakes. Always verify recipe safety and
-              measurements.
+            
+            <h1 className="text-2xl md:text-5xl font-black tracking-tighter mb-2 text-foreground leading-tight">
+              What's on the menu?
+            </h1>
+            <p className="text-muted-foreground/40 text-base md:text-lg max-w-lg mb-10 font-medium leading-relaxed">
+              Your AI-powered culinary companion for recipes<br className="hidden md:block" /> and kitchen tips.
             </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl text-left">
+              {[
+                { icon: Sparkles, text: "Healthy keto breakfast ideas", sub: "QUICK" },
+                { icon: Soup, text: "Dinner with zero waste", sub: "SMART" },
+                { icon: UtensilsCrossed, text: "Homemade pizza dough", sub: "GUIDE" },
+                { icon: Zap, text: "Substitute for eggs", sub: "SCIENCE" },
+              ].map((tip) => (
+                <button
+                  key={tip.text}
+                  onClick={() => handleSend(tip.text)}
+                  className="flex items-center gap-3.5 p-3.5 rounded-xl border border-border/40 bg-card/40 hover:bg-card/60 hover:border-primary/20 transition-all group focus:outline-hidden"
+                >
+                  <div className="h-9 w-9 shrink-0 rounded-lg bg-muted/20 flex items-center justify-center transition-all duration-300">
+                    <tip.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold text-foreground/70 group-hover:text-primary transition-colors leading-[1.2]">{tip.text}</span>
+                    <span className="text-[9px] text-muted-foreground/30 uppercase tracking-widest font-black mt-1">{tip.sub}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {/* Added bottom padding to landing view to avoid the input island */}
+            <div className="h-32" />
           </div>
-        </div>
+        ) : (
+          /* Chat View - Fully Scrollable with Native Feel */
+          <div 
+            ref={scrollRef} 
+            className="h-full px-4 overflow-y-auto scroll-smooth no-scrollbar"
+          >
+            <div className="mx-auto max-w-4xl py-10 space-y-6 pb-40">
+              {messages.map((message, i) => {
+                const isUser = (message.role as string) === "user";
+                
+                return (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex items-start gap-3 md:gap-5 group/msg animate-in fade-in slide-in-from-bottom-4 duration-500",
+                      isUser ? "flex-row-reverse" : "flex-row",
+                    )}
+                  >
+                    <div className="shrink-0 mt-1">
+                      <Avatar className={cn(
+                        "h-10 w-10 border shadow-md transition-all duration-300 group-hover/msg:scale-105",
+                        isUser ? "bg-primary border-primary/20" : "bg-card border-border/50 glass"
+                      )}>
+                        <AvatarFallback className={cn("text-xs font-bold", isUser ? "text-primary-foreground" : "text-primary")}>
+                          {isUser ? <User className="h-5 w-5" /> : <ChefHat className="h-5 w-5" />}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+
+                    <div className={cn(
+                      "relative flex flex-col gap-2 max-w-[85%] md:max-w-[75%]",
+                      isUser ? "items-end" : "items-start"
+                    )}>
+                      <div className={cn(
+                        "relative rounded-3xl px-5 py-4 shadow-sm text-base leading-relaxed wrap-break-word",
+                        isUser 
+                          ? "bg-primary text-primary-foreground font-medium rounded-tr-none shadow-primary/20" 
+                          : "bg-card/50 border border-border/40 backdrop-blur-md rounded-tl-none"
+                      )}>
+                        <div className="prose prose-sm dark:prose-invert max-w-none font-medium prose-p:my-1 prose-headings:mt-4 prose-headings:mb-2 prose-ul:my-1 prose-li:my-0 prose-pre:my-2">
+                          {message.parts.map((part: any, partIdx: number) => {
+                            if (part.type === "text") {
+                              return (
+                                <div key={partIdx} className="w-full">
+                                  <Streamdown mode={isStreaming ? "streaming" : "static"}>
+                                    {part.text}
+                                  </Streamdown>
+                                </div>
+                              );
+                            }
+                            if (part.type === "reasoning") {
+                              return (
+                                <div key={partIdx} className="my-2 p-3 bg-muted/30 rounded-xl border-l-2 border-primary/30 text-muted-foreground text-sm italic">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Sparkles className="h-3 w-3" />
+                                    <span className="text-[10px] font-bold uppercase tracking-tighter">Thinking</span>
+                                  </div>
+                                  {part.text}
+                                </div>
+                              );
+                            }
+                            if (part.type === "file") {
+                              return (
+                                <div key={partIdx} className="relative group/img overflow-hidden rounded-2xl border border-border/50 shadow-lg mt-2 mb-4">
+                                  <img
+                                    src={part.url}
+                                    alt="Shared image"
+                                    className="max-h-[70dvh] w-auto object-contain transition-transform duration-500 group-hover/img:scale-[1.02]"
+                                  />
+                                </div>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Message Actions */}
+                      {!isUser && (
+                        <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-300 translate-x-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-lg hover:bg-muted/50 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            onClick={() => handleCopy(
+                              message.parts.filter(p => p.type === 'text').map(p => p.text).join(' '), 
+                              message.id
+                            )}
+                          >
+                            {copiedId === message.id ? (
+                              <Check className="h-3.5 w-3.5 text-green-500" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                            )}
+                          </Button>
+                          {i === messages.length - 1 && !isStreaming && (
+                             <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-lg hover:bg-muted/50 focus-visible:ring-0 focus-visible:ring-offset-0"
+                              onClick={() => regenerate()}
+                            >
+                              <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {isStreaming && (
+                <div className="flex items-start gap-3 md:gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <Avatar className="h-10 w-10 bg-card glass border border-border/50 shadow-md">
+                    <AvatarFallback>
+                      <ChefHat className="h-5 w-5 text-primary animate-pulse" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="bg-card/40 border border-border/40 backdrop-blur-md rounded-3xl rounded-tl-none px-6 py-5 w-full max-w-[200px] shadow-sm">
+                    <ChatMessageSkeleton lines={2} />
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <Alert
+                  variant="destructive"
+                  className="rounded-3xl bg-destructive/5 border-destructive/20 text-destructive mx-auto max-w-2xl py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 shrink-0" />
+                    <AlertDescription className="text-sm font-bold flex-1">
+                      {error.message || "Something went wrong with the connection."}
+                    </AlertDescription>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => regenerate()}
+                      className="bg-background/50 border-destructive/20 hover:bg-destructive/10 text-destructive rounded-xl h-8 px-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                </Alert>
+              )}
+
+              <div ref={messagesEndRef} className="h-2 invisible" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Scroll Button */}
+      {showScrollButton && (
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute bottom-32 right-8 h-10 w-10 rounded-full shadow-2xl bg-card/80 backdrop-blur-md border border-border/50 hover:bg-card hover:scale-110 active:scale-90 transition-all z-10 animate-in fade-in zoom-in duration-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+          onClick={scrollToBottom}
+        >
+          <ArrowDown className="h-5 w-5 text-primary" />
+        </Button>
+      )}
+
+      {/* Input Overlay */}
+      <div className="relative z-10">
+        <ChatInput
+          input={localInput}
+          onInputChange={setLocalInput}
+          onSubmit={(e, files) => handleSend(localInput, files)}
+          isStreaming={isStreaming}
+          onStop={async () => stop()}
+          className="relative px-4 pb-6"
+        />
       </div>
     </div>
   );
 }
+

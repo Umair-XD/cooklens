@@ -3,8 +3,9 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Send, Square, Plus, X } from "lucide-react";
+import { Send, Square, Plus, X, Image as ImageIcon, Paperclip } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 interface ChatInputProps {
   input: string;
@@ -23,7 +24,7 @@ export default function ChatInput({
   isStreaming,
   onStop,
   className,
-  placeholder = "Message Chef Assistant...",
+  placeholder = "Ask anything about cooking...",
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,12 +47,13 @@ export default function ChatInput({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
+    
+    // Add new files to existing ones
     setSelectedFiles((prev) => [...prev, ...files]);
 
     const urls = files.map(file => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...urls]);
     
-    // Clear the input so identical files can be picked again if removed
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -66,17 +68,19 @@ export default function ChatInput({
 
   const submitMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isStreaming) {
-      // Create a fake FileList-like construct or pass files if needed, but modern useChat allows passing an array or custom DataTransfer
+    if (!isStreaming && (input.trim() || selectedFiles.length > 0)) {
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       
       onSubmit(e, dt.files);
       
-      // Cleanup
       setSelectedFiles([]);
       previewUrls.forEach(URL.revokeObjectURL);
       setPreviewUrls([]);
+      
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
     }
   };
 
@@ -84,91 +88,116 @@ export default function ChatInput({
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
   }, [input]);
 
   return (
-    <div className={cn("relative flex items-end gap-2 p-2", className)}>
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        onChange={handleFileChange}
-        multiple
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={handleFileClick}
-        className="h-10 w-10 shrink-0 rounded-xl hover:bg-muted font-bold"
-        aria-label="Add attachment"
-      >
-        <Plus className="h-5 w-5 text-muted-foreground" />
-      </Button>
+    <TooltipProvider>
+      <div className={cn("relative w-full max-w-4xl mx-auto px-4 pb-4 bg-transparent", className)}>
+        <div className="relative flex flex-col w-full bg-card/60 backdrop-blur-xl border border-border/50 shadow-2xl rounded-[1.5rem] transition-all duration-300 ring-offset-background focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary/20 overflow-hidden">
+          
+          {/* File Previews */}
+          {previewUrls.length > 0 && (
+            <div className="flex gap-3 px-4 pt-4 overflow-x-auto no-scrollbar scroll-smooth">
+              {previewUrls.map((url, i) => (
+                <div key={i} className="relative group shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="relative h-20 w-20 rounded-xl overflow-hidden border border-border/50 shadow-sm ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
+                    <img 
+                      src={url} 
+                      alt="Preview" 
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                  </div>
+                  <button
+                    onClick={() => removeFile(i)}
+                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-90 z-20 focus:outline-hidden"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
-      <div className="flex-1 flex flex-col min-h-[44px]">
-        {previewUrls.length > 0 && (
-          <div className="flex gap-2 p-2 overflow-x-auto pb-1 mt-1">
-            {previewUrls.map((url, i) => (
-              <div key={i} className="relative shrink-0 group/preview transition-transform animate-in fade-in zoom-in-95">
-                <img 
-                  src={url} 
-                  alt="Attachment preview" 
-                  className="h-16 w-16 object-cover rounded-xl border border-border/50 shadow-sm" 
-                />
-                <button
-                  onClick={() => removeFile(i)}
-                  className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5 shadow-sm opacity-0 group-hover/preview:opacity-100 transition-opacity focus:opacity-100"
+          <div className="flex items-end gap-2 p-2 focus-within:outline-hidden">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileChange}
+              multiple
+            />
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleFileClick}
+                  className="h-10 w-10 shrink-0 rounded-xl hover:bg-muted/50 transition-colors focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+                  <Paperclip className="h-5 w-5 text-muted-foreground/70" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Attach images</TooltipContent>
+            </Tooltip>
+
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => onInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className="min-h-[44px] max-h-[200px] w-full resize-none bg-transparent border-none focus-visible:ring-0 px-2 py-3 text-base leading-relaxed placeholder:text-muted-foreground/40 transition-all"
+              rows={1}
+              disabled={isStreaming}
+            />
+            
+            <div className="flex items-center pb-1 pr-1">
+              {isStreaming ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={onStop}
+                      className="h-10 w-10 shrink-0 rounded-xl shadow-lg shadow-destructive/20 animate-in zoom-in-75 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    >
+                      <Square className="h-4 w-4 fill-current text-white" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">Stop generating</TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!input.trim() && selectedFiles.length === 0}
+                  onClick={submitMessage}
+                  className={cn(
+                    "h-10 w-10 shrink-0 rounded-xl transition-all duration-500 focus-visible:ring-0 focus-visible:ring-offset-0",
+                    (!input.trim() && selectedFiles.length === 0)
+                      ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                      : "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95"
+                  )}
+                >
+                  <Send className={cn("h-4 w-4 transition-transform", input.trim() && "translate-x-0.5 -translate-y-0.5")} />
+                </Button>
+              )}
+            </div>
           </div>
-        )}
-        <Textarea
-          ref={textareaRef}
-          value={input}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="min-h-[44px] max-h-40 w-full resize-none bg-transparent border-none focus-visible:ring-0 px-2 py-3 text-sm font-medium placeholder:text-muted-foreground/50 transition-all custom-scrollbar"
-          rows={1}
-          disabled={isStreaming}
-        />
+        </div>
+        <div className="mt-2 text-center pb-2">
+          <p className="text-[11px] text-muted-foreground/50 font-medium tracking-tight">
+            Chef Lens AI can make mistakes. Check important info.
+          </p>
+        </div>
       </div>
-      
-      <div className="flex gap-1.5 h-10 items-center px-1">
-        {isStreaming && onStop ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onStop}
-            className="h-10 w-10 shrink-0 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all"
-            aria-label="Stop generating"
-          >
-            <Square className="h-4 w-4 fill-current" />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            size="icon"
-            disabled={!input?.trim() && selectedFiles.length === 0}
-            onClick={submitMessage}
-            className={cn(
-               "h-10 w-10 shrink-0 rounded-xl transition-all duration-300",
-               (!input?.trim() && selectedFiles.length === 0) ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
-            )}
-            aria-label="Send message"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </div>
+    </TooltipProvider>
   );
 }
