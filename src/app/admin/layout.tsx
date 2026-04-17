@@ -30,7 +30,7 @@ export default async function AdminLayout({
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
-        <p className="mt-1 text-[14px] text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage recipes and ingredients
         </p>
       </div>

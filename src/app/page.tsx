@@ -86,7 +86,8 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg md:text-xl font-medium text-muted-foreground leading-relaxed">
-            Stop wondering what's for dinner. We help you find amazing recipes using what's already in your kitchen.
+            Stop wondering what's for dinner. We help you find amazing recipes
+            using what's already in your kitchen.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
@@ -108,7 +109,9 @@ export default function HomePage() {
           <div className="mt-20 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 items-center">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl md:text-4xl font-black font-outfit tracking-tighter">{stat.value}</div>
+                <div className="text-3xl md:text-4xl font-black font-outfit tracking-tighter">
+                  {stat.value}
+                </div>
                 <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                   {stat.label}
                 </div>
@@ -123,25 +126,37 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div className="max-w-xl">
-               <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-5">Features</h2>
-               <h3 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter">Everything you need to master your kitchen.</h3>
+              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-5">
+                Features
+              </h2>
+              <h3 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter">
+                Everything you need to master your kitchen.
+              </h3>
             </div>
             <p className="max-w-md text-muted-foreground font-medium leading-relaxed">
-               From recognizing groceries in a photo to planning a full week of healthy eating, we've got you covered.
+              From recognizing groceries in a photo to planning a full week of
+              healthy eating, we've got you covered.
             </p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, i) => (
-              <div 
-                key={feature.title} 
+              <div
+                key={feature.title}
                 className="group relative p-6 rounded-2xl border border-border/50 bg-card/60 glass hover:border-primary/30 transition-all duration-300 overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className={cn("mb-5 flex h-12 w-12 items-center justify-center rounded-xl shadow-sm transition-transform", feature.bg)}>
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div
+                  className={cn(
+                    "mb-5 flex h-12 w-12 items-center justify-center rounded-xl shadow-sm transition-transform",
+                    feature.bg,
+                  )}
+                >
                   <feature.icon className={cn("h-6 w-6", feature.color)} />
                 </div>
-                <h4 className="text-lg font-bold mb-2 font-outfit">{feature.title}</h4>
+                <h4 className="text-lg font-bold mb-2 font-outfit">
+                  {feature.title}
+                </h4>
                 <p className="text-xs font-medium leading-relaxed text-muted-foreground/80">
                   {feature.description}
                 </p>
@@ -155,8 +170,12 @@ export default function HomePage() {
       <section className="py-16 border-y border-border/40 bg-background relative overflow-hidden">
         <div className="mx-auto max-w-7xl px-6">
           <div className="text-center mb-12">
-             <h2 className="text-3xl md:text-4xl font-black font-outfit tracking-tighter mb-4 text-primary">How it works</h2>
-             <p className="text-base text-muted-foreground font-medium max-w-xl mx-auto">From scanning your fridge to the first bite.</p>
+            <h2 className="text-3xl md:text-4xl font-black font-outfit tracking-tighter mb-4 text-primary">
+              How it works
+            </h2>
+            <p className="text-base text-muted-foreground font-medium max-w-xl mx-auto">
+              From scanning your fridge to the first bite.
+            </p>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
@@ -183,9 +202,12 @@ export default function HomePage() {
                   "Follow simple steps and enjoy a healthy home-cooked meal in minutes.",
               },
             ].map((item) => (
-              <div key={item.step} className="relative flex flex-col gap-4 p-6 rounded-2xl border border-border/40 bg-card/10">
+              <div
+                key={item.step}
+                className="relative flex flex-col gap-4 p-6 rounded-2xl border border-border/40 bg-card/10"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 border border-primary/10">
-                   <item.icon className="h-6 w-6 text-primary" />
+                  <item.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-bold font-outfit">{item.title}</h3>
                 <p className="text-sm font-medium leading-relaxed text-muted-foreground">
@@ -200,15 +222,17 @@ export default function HomePage() {
       {/* CTA */}
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-6">
-          <div className="relative p-12 md:p-16 rounded-[2rem] border border-primary/10 bg-primary/5 text-center">
+          <div className="relative p-12 md:p-16 rounded-4xl border border-primary/10 bg-primary/5 text-center">
             <h2 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter mb-4">
               Join CookLens. <br />
               <span className="text-primary italic">Start cooking today.</span>
             </h2>
             <p className="max-w-xl mx-auto text-base font-medium text-muted-foreground/80 mb-8">
-              Join thousands of home cooks making their lives easier and healthier. Save your favorite recipes and plan your meals in seconds.
+              Join thousands of home cooks making their lives easier and
+              healthier. Save your favorite recipes and plan your meals in
+              seconds.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
                 <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">

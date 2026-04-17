@@ -80,13 +80,13 @@ export default function PlannerPageClient({
               Precision nutrition meets AI-crafted culinary planning.
             </p>
           </div>
-          
+
           {plan && (
-             <div className="flex items-center gap-3 p-1 rounded-2xl bg-muted/20 border border-border/50 glass">
-               <div className="px-4 py-2 rounded-xl bg-background/60 text-sm font-bold shadow-sm">
-                 Current Plan Active
-               </div>
-             </div>
+            <div className="flex items-center gap-3 p-1 rounded-2xl bg-muted/20 border border-border/50 glass">
+              <div className="px-4 py-2 rounded-xl bg-background/60 text-sm font-bold shadow-sm">
+                Current Plan Active
+              </div>
+            </div>
           )}
         </div>
 
@@ -106,14 +106,14 @@ export default function PlannerPageClient({
               isLoading={isLoading}
               tdeeResult={tdeeResult}
             />
-            
+
             {!plan && (
-               <div className="p-6 rounded-3xl border border-dashed border-border/60 bg-muted/5 flex flex-col items-center text-center gap-3">
-                 <LayoutGrid className="h-8 w-8 text-muted-foreground/20" />
-                 <p className="text-xs font-bold uppercase tracking-tighter text-muted-foreground/40">
-                   Plan Preview Region
-                 </p>
-               </div>
+              <div className="p-6 rounded-3xl border border-dashed border-border/60 bg-muted/5 flex flex-col items-center text-center gap-3">
+                <LayoutGrid className="h-8 w-8 text-muted-foreground/20" />
+                <p className="text-xs font-bold uppercase tracking-tighter text-muted-foreground/40">
+                  Plan Preview Region
+                </p>
+              </div>
             )}
           </div>
 
@@ -123,24 +123,29 @@ export default function PlannerPageClient({
 
             {!isLoading && !plan && (
               <div className="relative group overflow-hidden rounded-3xl border border-dashed border-border/60 bg-muted/5 py-32 text-center transition-all hover:bg-muted/10">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex flex-col items-center">
                   <div className="mb-6 p-4 rounded-full bg-background border shadow-premium animate-float">
                     <Sparkles className="h-10 w-10 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Let's plan your week</h3>
+                  <h3 className="text-xl font-bold mb-2">
+                    Let's plan your week
+                  </h3>
                   <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                    Tell us a bit about your goals in the sidebar, and we'll generate a personalized meal plan just for you.
+                    Tell us a bit about your goals in the sidebar, and we'll
+                    generate a personalized meal plan just for you.
                   </p>
                 </div>
               </div>
             )}
 
             {plan && (
-              <div className={cn(
-                "transition-opacity duration-300",
-                isLoading ? "opacity-30 pointer-events-none" : "opacity-100"
-              )}>
+              <div
+                className={cn(
+                  "transition-opacity duration-300",
+                  isLoading ? "opacity-30 pointer-events-none" : "opacity-100",
+                )}
+              >
                 <WeeklyPlanView plan={plan} onRegenerate={handleRefreshPlan} />
               </div>
             )}

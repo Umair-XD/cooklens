@@ -49,7 +49,10 @@ export function RecipeCard({
           className,
         )}
       >
-        <Link href={`/recipes/${id}`} className="block relative aspect-[4/3] bg-muted overflow-hidden">
+        <Link
+          href={`/recipes/${id}`}
+          className="block relative aspect-[4/3] bg-muted overflow-hidden"
+        >
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -57,18 +60,26 @@ export function RecipeCard({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 bg-gradient-to-br from-muted to-muted/50">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 bg-linear-to-br from-muted to-muted/50">
               <ChefHat className="h-16 w-16" />
             </div>
           )}
-          
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-          
+
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60" />
+
           <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between z-30">
-             <Badge className={cn("px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border backdrop-blur-md h-fit rounded-lg", difficultyStyles[diff])}>
-               {diff}
-             </Badge>
-             <FavoriteButton recipeId={id} initialIsFavorite={initialIsFavorite} />
+            <Badge
+              className={cn(
+                "px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest border backdrop-blur-md h-fit rounded-lg",
+                difficultyStyles[diff],
+              )}
+            >
+              {diff}
+            </Badge>
+            <FavoriteButton
+              recipeId={id}
+              initialIsFavorite={initialIsFavorite}
+            />
           </div>
 
           {matchPercentage !== undefined && (
@@ -81,30 +92,40 @@ export function RecipeCard({
           )}
 
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
-             <span className="text-[10px] font-bold uppercase tracking-widest opacity-90">{cuisineType}</span>
-             <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg text-[11px] font-bold border border-white/10">
-                <Clock className="h-3.5 w-3.5" />
-                {totalTime}m
-             </div>
+            <span className="text-[10px] font-bold uppercase tracking-widest opacity-90">
+              {cuisineType}
+            </span>
+            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg text-[11px] font-bold border border-white/10">
+              <Clock className="h-3.5 w-3.5" />
+              {totalTime}m
+            </div>
           </div>
         </Link>
-        
+
         <Link href={`/recipes/${id}`} className="flex flex-col flex-1">
           <CardHeader className="p-4 pb-2">
             <h3 className="font-bold text-lg leading-tight line-clamp-2 hover:text-primary transition-colors">
               {name}
             </h3>
           </CardHeader>
-          
+
           <CardContent className="p-4 pt-0">
             <div className="flex items-center justify-between gap-4 py-3 border-t border-border/30">
               <div className="flex flex-col gap-0.5">
-                 <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">Prep Time</span>
-                 <span className="text-xs font-bold">{prepTimeMinutes ?? "—"} min</span>
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">
+                  Prep Time
+                </span>
+                <span className="text-xs font-bold">
+                  {prepTimeMinutes ?? "—"} min
+                </span>
               </div>
               <div className="flex flex-col gap-0.5 items-end">
-                 <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">Cook Time</span>
-                 <span className="text-xs font-bold">{cookTimeMinutes ?? "—"} min</span>
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">
+                  Cook Time
+                </span>
+                <span className="text-xs font-bold">
+                  {cookTimeMinutes ?? "—"} min
+                </span>
               </div>
             </div>
           </CardContent>

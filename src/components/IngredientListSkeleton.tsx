@@ -10,7 +10,7 @@ export function IngredientListSkeleton({ count = 4 }: IngredientListSkeletonProp
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton
           key={i}
-          className="inline-flex h-6 w-20 items-center rounded-full px-2.5 py-0.5"
+          className="inline-flex h-8 w-24 items-center rounded-2xl bg-muted/40 border border-border/50"
         />
       ))}
     </div>

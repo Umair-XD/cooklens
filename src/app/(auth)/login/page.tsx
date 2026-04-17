@@ -8,7 +8,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-          <p className="text-[14px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Enter your credentials to access your account
           </p>
         </div>

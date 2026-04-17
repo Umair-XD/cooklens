@@ -21,29 +21,36 @@ export default function ChatPage() {
       {
         id: "welcome",
         role: "assistant",
-        parts: [{ type: "text", text: "Hi there! I'm Chef Lens, your personal kitchen assistant. How can I help you today?" }]
-      }
-    ] as UIMessage[]
+        parts: [
+          {
+            type: "text",
+            text: "Hi there! I'm Chef Lens, your personal kitchen assistant. How can I help you today?",
+          },
+        ],
+      },
+    ] as UIMessage[],
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
 
   const handleSend = async (text: string, files?: FileList) => {
     if (!text.trim() && (!files || files.length === 0)) return;
-    
+
     await sendMessage({
       text,
-      files
+      files,
     });
     setLocalInput("");
   };
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
-      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -57,33 +64,36 @@ export default function ChatPage() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="relative mb-6">
-                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                 <div className="relative p-5 rounded-3xl bg-primary/10 text-primary border border-primary/20">
-                   <ChefHat className="h-12 w-12" />
-                 </div>
+                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
+                <div className="relative p-5 rounded-3xl bg-primary/10 text-primary border border-primary/20">
+                  <ChefHat className="h-12 w-12" />
+                </div>
               </div>
-              <h2 className="text-3xl font-bold tracking-tight mb-2">AI Culinary Assistant</h2>
+              <h2 className="text-3xl font-bold tracking-tight mb-2">
+                AI Culinary Assistant
+              </h2>
               <p className="text-muted-foreground max-w-sm">
-                Your personal sous-chef. Ask me for recipe tweaks, meal ideas, or nutritional advice.
+                Your personal sous-chef. Ask me for recipe tweaks, meal ideas,
+                or nutritional advice.
               </p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-10 w-full max-w-md text-left">
                 {[
                   "How do I make a keto breakfast?",
                   "Give me a 15-min dinner idea",
                   "What's a good substitute for eggs?",
-                  "Explain macros like I'm five"
+                  "Explain macros like I'm five",
                 ].map((tip) => (
-                  <button 
+                  <button
                     key={tip}
                     onClick={() => {
-                       setLocalInput(tip);
+                      setLocalInput(tip);
                     }}
                     className="p-3 text-xs font-semibold rounded-xl border border-border/50 bg-card/40 hover:bg-primary/5 hover:border-primary/30 transition-all text-left group"
                   >
                     <span className="flex items-center gap-2">
-                       <Sparkles className="h-3 w-3 text-primary opacity-50 group-hover:opacity-100" />
-                       {tip}
+                      <Sparkles className="h-3 w-3 text-primary opacity-50 group-hover:opacity-100" />
+                      {tip}
                     </span>
                   </button>
                 ))}
@@ -96,13 +106,17 @@ export default function ChatPage() {
               key={message.id}
               className={cn(
                 "flex items-start gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
-                (message.role as string) === "user" ? "flex-row-reverse" : ""
+                (message.role as string) === "user" ? "flex-row-reverse" : "",
               )}
             >
-              <Avatar className={cn(
-                "h-9 w-9 border shadow-sm",
-                (message.role as string) === "user" ? "bg-primary/10" : "bg-card glass"
-              )}>
+              <Avatar
+                className={cn(
+                  "h-9 w-9 border shadow-sm",
+                  (message.role as string) === "user"
+                    ? "bg-primary/10"
+                    : "bg-card glass",
+                )}
+              >
                 <AvatarFallback className="text-xs font-bold">
                   {(message.role as string) === "user" ? (
                     <User className="h-4 w-4 text-primary" />
@@ -111,13 +125,13 @@ export default function ChatPage() {
                   )}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div
                 className={cn(
-                  "relative rounded-2xl px-5 py-3.5 max-w-[85%] shadow-premium text-sm leading-relaxed",
+                  "relative rounded-2xl px-5 py-3.5 max-w-4/5 shadow-premium text-sm leading-relaxed",
                   (message.role as string) === "user"
                     ? "bg-primary text-primary-foreground font-medium rounded-tr-none"
-                    : "bg-card border border-border/50 glass rounded-tl-none"
+                    : "bg-card border border-border/50 glass rounded-tl-none",
                 )}
               >
                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap space-y-4">
@@ -126,7 +140,14 @@ export default function ChatPage() {
                       return <p key={partIdx}>{part.text}</p>;
                     }
                     if (part.type === "reasoning") {
-                      return <p key={partIdx} className="italic text-muted-foreground/70">{part.text}</p>;
+                      return (
+                        <p
+                          key={partIdx}
+                          className="italic text-muted-foreground/70"
+                        >
+                          {part.text}
+                        </p>
+                      );
                     }
                     if (part.type === "file") {
                       return (
@@ -159,12 +180,15 @@ export default function ChatPage() {
           )}
 
           {error && (
-            <Alert variant="destructive" className="rounded-2xl bg-destructive/5 border-destructive/20 text-destructive">
+            <Alert
+              variant="destructive"
+              className="rounded-2xl bg-destructive/5 border-destructive/20 text-destructive"
+            >
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-xs font-semibold">
                 {error.message || "Connection lost. Please try again."}
-                <button 
-                  onClick={() => regenerate()} 
+                <button
+                  onClick={() => regenerate()}
                   className="ml-2 underline hover:no-underline"
                 >
                   Retry
@@ -175,7 +199,7 @@ export default function ChatPage() {
         </div>
       </ScrollArea>
 
-      <div className="p-4 sm:p-6 bg-gradient-to-t from-background to-transparent">
+      <div className="p-4 sm:p-6 bg-linear-to-t from-background to-transparent">
         <div className="mx-auto max-w-3xl">
           <div className="mb-2 flex items-center gap-1.5 px-2">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -195,7 +219,8 @@ export default function ChatPage() {
           />
           <div className="mt-2 text-center">
             <p className="text-[10px] text-muted-foreground/40">
-              AI can make mistakes. Always verify recipe safety and measurements.
+              AI can make mistakes. Always verify recipe safety and
+              measurements.
             </p>
           </div>
         </div>

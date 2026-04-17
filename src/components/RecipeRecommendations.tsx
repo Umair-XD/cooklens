@@ -28,8 +28,8 @@ export function RecipeRecommendations({
 
   if (recipes.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <p>{emptyMessage}</p>
+      <div className="w-full text-center py-16 px-6 glass rounded-3xl border border-border/50 shadow-premium w-full mx-auto max-w-lg mt-8">
+        <p className="text-muted-foreground font-bold">{emptyMessage}</p>
       </div>
     );
   }

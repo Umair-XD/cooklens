@@ -90,12 +90,12 @@ export default function RegisterForm() {
                 <FormControl>
                   <Input
                     placeholder="Your name"
-                    className="h-10 text-[14px]"
+                    className="h-10 text-sm"
                     disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-[12px]" />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -110,12 +110,12 @@ export default function RegisterForm() {
                   <Input
                     type="email"
                     placeholder="you@example.com"
-                    className="h-10 text-[14px]"
+                    className="h-10 text-sm"
                     disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-[12px]" />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -132,19 +132,19 @@ export default function RegisterForm() {
                   <Input
                     type="password"
                     placeholder="Min. 8 characters"
-                    className="h-10 text-[14px]"
+                    className="h-10 text-sm"
                     disabled={isLoading}
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-[12px]" />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
 
           <Button
             type="submit"
-            className="w-full h-10 text-[14px]"
+            className="w-full h-10 text-sm"
             disabled={isLoading}
           >
             {isLoading ? "Creating account..." : "Create account"}

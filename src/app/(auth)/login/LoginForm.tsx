@@ -78,7 +78,7 @@ export default function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
-            className="h-10 text-[14px]"
+            className="h-10 text-sm"
           />
         </div>
         <div className="space-y-2">
@@ -100,12 +100,12 @@ export default function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className="h-10 text-[14px]"
+            className="h-10 text-sm"
           />
         </div>
         <Button
           type="submit"
-          className="w-full h-10 text-[14px]"
+          className="w-full h-10 text-sm"
           disabled={isLoading}
         >
           {isLoading ? "Signing in..." : "Sign in"}
@@ -125,7 +125,7 @@ export default function LoginForm() {
 
       <Button
         variant="outline"
-        className="w-full h-10 text-[14px]"
+        className="w-full h-10 text-sm"
         onClick={handleGoogleSignIn}
         disabled={isLoading}
       >

@@ -18,7 +18,6 @@ import { Providers } from "@/components/Providers";
 import Link from "next/link";
 import { signOut } from "@/lib/actions/auth.actions";
 import { ChefHat, Search, Calendar, Heart, MessageSquare, User, LogOut, Settings } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -44,7 +43,7 @@ async function UserNav() {
 
   if (!session?.user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="hidden sm:flex items-center gap-2">
         <Link
           href="/login"
           className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
@@ -133,6 +132,8 @@ async function UserNav() {
   );
 }
 
+import { MobileNav } from "@/components/MobileNav";
+
 async function FullHeader() {
   const session = await getServerSessionSafe();
 
@@ -142,21 +143,22 @@ async function FullHeader() {
         <div className="flex items-center gap-10">
           <Link
             href="/"
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-2.5 group"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
               <ChefHat className="h-5 w-5 fill-current" />
             </div>
             <span className="text-xl font-black tracking-tighter font-outfit">CookLens</span>
           </Link>
         </div>
 
+        {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-1 bg-muted/30 p-1 rounded-2xl border border-border/50 glass">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all border border-transparent hover:border-border/40"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all"
             >
               <link.icon className="h-3.5 w-3.5" />
               {link.label}
@@ -164,11 +166,15 @@ async function FullHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="pr-2 border-r border-border/50 hidden sm:block">
              <ThemeToggle />
           </div>
+          
           <UserNav />
+
+          {/* Mobile Navigation */}
+          <MobileNav session={session} />
         </div>
       </div>
     </header>
