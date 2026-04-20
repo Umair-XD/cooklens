@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getServerSessionSafe } from "@/lib/auth";
 
 const features = [
   {
@@ -74,7 +75,9 @@ const stats = [
   { value: "99%", label: "Plan Precision" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getServerSessionSafe();
+
   return (
     <>
       <FullHeader />
@@ -95,11 +98,13 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-            <Link href="/register">
-              <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
-                Get Started
-              </Button>
-            </Link>
+            {!session && (
+              <Link href="/register">
+                <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
+                  Get Started
+                </Button>
+              </Link>
+            )}
             <Link href="/recipes">
               <Button
                 variant="outline"
@@ -238,11 +243,13 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
-                <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
-                  Get Started for Free
-                </Button>
-              </Link>
+              {!session && (
+                <Link href="/register">
+                  <Button className="h-12 px-8 text-base font-black rounded-xl shadow-xl shadow-primary/10 transition-all font-outfit">
+                    Get Started for Free
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
