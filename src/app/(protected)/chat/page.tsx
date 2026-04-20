@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, memo, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Streamdown } from "streamdown";
@@ -14,6 +14,129 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+// Separate memoized component for each message to maximize efficiency
+  const ChatMessage = memo(({ 
+  message, 
+  isLast, 
+  isStreaming, 
+  isLoading, 
+  onCopy, 
+  copiedId, 
+  onRegenerate 
+}: { 
+  message: UIMessage; 
+  isLast: boolean; 
+  isStreaming: boolean; 
+  isLoading: boolean;
+  onCopy: (text: string, id: string) => void;
+  copiedId: string | null;
+  onRegenerate: () => void;
+}) => {
+  const isUser = (message.role as string) === "user";
+  const shouldStream = isLast && isStreaming && !isUser;
+  
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 md:gap-5 group/msg animate-in fade-in slide-in-from-bottom-4 duration-500",
+        isUser ? "flex-row-reverse" : "flex-row",
+      )}
+    >
+      <div className="shrink-0 mt-1">
+        <Avatar className={cn(
+          "h-10 w-10 border shadow-md transition-all duration-300",
+          isUser ? "bg-primary border-primary/20" : "bg-card border-border/50 glass"
+        )}>
+          <AvatarFallback className={cn("text-xs font-bold", isUser ? "text-primary-foreground" : "text-primary")}>
+            {isUser ? <User className="h-5 w-5" /> : <ChefHat className="h-5 w-5" />}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+
+      <div className={cn(
+        "relative flex flex-col gap-2 max-w-[85%] md:max-w-[75%]",
+        isUser ? "items-end" : "items-start"
+      )}>
+        <div className={cn(
+          "relative rounded-3xl px-5 py-4 shadow-sm text-base leading-relaxed wrap-break-word",
+          isUser 
+            ? "bg-primary text-primary-foreground font-medium rounded-tr-none shadow-primary/20" 
+            : "bg-card/50 border border-border/40 backdrop-blur-md rounded-tl-none"
+        )}>
+          <div className="prose prose-sm dark:prose-invert max-w-none font-medium prose-p:my-1 prose-headings:mt-4 prose-headings:mb-2 prose-ul:my-1 prose-li:my-0 prose-pre:my-2">
+            {(message.parts as any[]).map((part: any, partIdx: number) => {
+              if (part.type === "text") {
+                return (
+                  <div key={partIdx} className="w-full">
+                    <Streamdown mode={shouldStream ? "streaming" : "static"}>
+                      {part.text}
+                    </Streamdown>
+                  </div>
+                );
+              }
+              if (part.type === "reasoning") {
+                return (
+                  <div key={partIdx} className="my-2 p-3 bg-muted/30 rounded-xl border-l-2 border-primary/30 text-muted-foreground text-sm italic">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="h-3 w-3" />
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">Thinking</span>
+                    </div>
+                    {part.text}
+                  </div>
+                );
+              }
+              if (part.type === "file") {
+                return (
+                  <div key={partIdx} className="relative group/img overflow-hidden rounded-2xl border border-border/50 shadow-lg mt-2 mb-4">
+                    <img
+                      src={part.url}
+                      alt="Shared image"
+                      className="max-h-[70dvh] w-auto object-contain transition-transform duration-500 group-hover/img:scale-[1.02]"
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        </div>
+
+        {!isUser && (
+          <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-300 translate-x-1">
+            <Button
+              variant={null as any}
+              size="icon"
+              className="h-7 w-7 rounded-lg hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+              onClick={() => onCopy(
+                message.parts.filter((p:any) => p.type === 'text').map((p:any) => p.text).join(' '), 
+                message.id
+              )}
+            >
+              {copiedId === message.id ? (
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
+            </Button>
+            {isLast && !isStreaming && !isLoading && (
+               <Button
+                variant={null as any}
+                size="icon"
+                className="h-7 w-7 rounded-lg hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                onClick={onRegenerate}
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+ChatMessage.displayName = "ChatMessage";
+
 export default function ChatPage() {
   const [localInput, setLocalInput] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -26,46 +149,49 @@ export default function ChatPage() {
     messages: [] as UIMessage[],
   });
 
-  const isStreaming = status === "streaming" || status === "submitted";
+  const isStreaming = status === "streaming";
+  const isLoading = status === "submitted";
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isAtBottom = useRef(true);
 
-  const handleSend = (text: string, files?: FileList) => {
+  const handleSend = useCallback((text: string, files?: FileList) => {
     if (!text.trim() && (!files || files.length === 0)) return;
     isAtBottom.current = true;
     sendMessage({ text, files });
     setLocalInput("");
-  };
+  }, [sendMessage]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     isAtBottom.current = true;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const isAtBottom = useRef(true);
+  }, []);
 
   // Universal scroll effect for both user and AI updates
   useEffect(() => {
     if (messages.length === 0) return;
 
     // Force stick to bottom when AI starts or user sends a message
-    if (status === "streaming" || status === "submitted") {
+    if (isStreaming || isLoading) {
       isAtBottom.current = true;
     }
 
     if (isAtBottom.current) {
       // Use requestAnimationFrame for smoother synchronization with the browser's render cycle
       const scroll = () => {
-        messagesEndRef.current?.scrollIntoView({ 
-          behavior: isStreaming ? "auto" : "smooth",
-          block: "end" 
-        });
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ 
+            behavior: isStreaming ? "instant" : "smooth" as ScrollBehavior,
+            block: "end" 
+          });
+        }
       };
       
-      const timeoutId = setTimeout(scroll, 0);
-      return () => clearTimeout(timeoutId);
+      const frameId = requestAnimationFrame(scroll);
+      return () => cancelAnimationFrame(frameId);
     }
-  }, [messages, isStreaming, status]);
+  }, [messages, isStreaming, isLoading]);
 
   // Track scroll position to update "isAtBottom" and toggle floating button
   useEffect(() => {
@@ -86,12 +212,12 @@ export default function ChatPage() {
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [messages.length]);
 
-  const handleCopy = (text: string, id: string) => {
+  const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     toast.success("Copied to clipboard");
     setTimeout(() => setCopiedId(null), 2000);
-  };
+  }, []);
 
   return (
     <div className="relative flex h-[calc(100dvh-4rem)] flex-col bg-background/30 overflow-hidden">
@@ -150,112 +276,20 @@ export default function ChatPage() {
             className="h-full px-4 overflow-y-auto scroll-smooth no-scrollbar"
           >
             <div className="mx-auto max-w-4xl py-10 space-y-6 pb-40">
-              {messages.map((message, i) => {
-                const isUser = (message.role as string) === "user";
-                
-                return (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex items-start gap-3 md:gap-5 group/msg animate-in fade-in slide-in-from-bottom-4 duration-500",
-                      isUser ? "flex-row-reverse" : "flex-row",
-                    )}
-                  >
-                    <div className="shrink-0 mt-1">
-                      <Avatar className={cn(
-                        "h-10 w-10 border shadow-md transition-all duration-300 group-hover/msg:scale-105",
-                        isUser ? "bg-primary border-primary/20" : "bg-card border-border/50 glass"
-                      )}>
-                        <AvatarFallback className={cn("text-xs font-bold", isUser ? "text-primary-foreground" : "text-primary")}>
-                          {isUser ? <User className="h-5 w-5" /> : <ChefHat className="h-5 w-5" />}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
+              {messages.map((message, i) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  isLast={i === messages.length - 1}
+                  isStreaming={isStreaming}
+                  isLoading={isLoading}
+                  onCopy={handleCopy}
+                  copiedId={copiedId}
+                  onRegenerate={regenerate}
+                />
+              ))}
 
-                    <div className={cn(
-                      "relative flex flex-col gap-2 max-w-[85%] md:max-w-[75%]",
-                      isUser ? "items-end" : "items-start"
-                    )}>
-                      <div className={cn(
-                        "relative rounded-3xl px-5 py-4 shadow-sm text-base leading-relaxed wrap-break-word",
-                        isUser 
-                          ? "bg-primary text-primary-foreground font-medium rounded-tr-none shadow-primary/20" 
-                          : "bg-card/50 border border-border/40 backdrop-blur-md rounded-tl-none"
-                      )}>
-                        <div className="prose prose-sm dark:prose-invert max-w-none font-medium prose-p:my-1 prose-headings:mt-4 prose-headings:mb-2 prose-ul:my-1 prose-li:my-0 prose-pre:my-2">
-                          {message.parts.map((part: any, partIdx: number) => {
-                            if (part.type === "text") {
-                              return (
-                                <div key={partIdx} className="w-full">
-                                  <Streamdown mode={isStreaming ? "streaming" : "static"}>
-                                    {part.text}
-                                  </Streamdown>
-                                </div>
-                              );
-                            }
-                            if (part.type === "reasoning") {
-                              return (
-                                <div key={partIdx} className="my-2 p-3 bg-muted/30 rounded-xl border-l-2 border-primary/30 text-muted-foreground text-sm italic">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Sparkles className="h-3 w-3" />
-                                    <span className="text-[10px] font-bold uppercase tracking-tighter">Thinking</span>
-                                  </div>
-                                  {part.text}
-                                </div>
-                              );
-                            }
-                            if (part.type === "file") {
-                              return (
-                                <div key={partIdx} className="relative group/img overflow-hidden rounded-2xl border border-border/50 shadow-lg mt-2 mb-4">
-                                  <img
-                                    src={part.url}
-                                    alt="Shared image"
-                                    className="max-h-[70dvh] w-auto object-contain transition-transform duration-500 group-hover/img:scale-[1.02]"
-                                  />
-                                </div>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Message Actions */}
-                      {!isUser && (
-                        <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-300 translate-x-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 rounded-lg hover:bg-muted/50 focus-visible:ring-0 focus-visible:ring-offset-0"
-                            onClick={() => handleCopy(
-                              message.parts.filter(p => p.type === 'text').map(p => p.text).join(' '), 
-                              message.id
-                            )}
-                          >
-                            {copiedId === message.id ? (
-                              <Check className="h-3.5 w-3.5 text-green-500" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                          </Button>
-                          {i === messages.length - 1 && !isStreaming && (
-                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 rounded-lg hover:bg-muted/50 focus-visible:ring-0 focus-visible:ring-offset-0"
-                              onClick={() => regenerate()}
-                            >
-                              <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {isStreaming && (
+              {isLoading && (
                 <div className="flex items-start gap-3 md:gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <Avatar className="h-10 w-10 bg-card glass border border-border/50 shadow-md">
                     <AvatarFallback>
@@ -301,7 +335,7 @@ export default function ChatPage() {
         <Button
           variant="secondary"
           size="icon"
-          className="absolute bottom-32 right-8 h-10 w-10 rounded-full shadow-2xl bg-card/80 backdrop-blur-md border border-border/50 hover:bg-card hover:scale-110 active:scale-90 transition-all z-10 animate-in fade-in zoom-in duration-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="absolute bottom-32 right-8 h-10 w-10 rounded-full shadow-2xl bg-card/80 backdrop-blur-md border border-border/50 hover:bg-card transition-all z-10 animate-in fade-in zoom-in duration-300 focus-visible:ring-0 focus-visible:ring-offset-0"
           onClick={scrollToBottom}
         >
           <ArrowDown className="h-5 w-5 text-primary" />
@@ -314,9 +348,9 @@ export default function ChatPage() {
           input={localInput}
           onInputChange={setLocalInput}
           onSubmit={(e, files) => handleSend(localInput, files)}
-          isStreaming={isStreaming}
+          isStreaming={isStreaming || isLoading}
           onStop={async () => stop()}
-          className="relative px-4 pb-6"
+          className="pb-2"
         />
       </div>
     </div>
