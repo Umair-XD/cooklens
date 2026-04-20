@@ -38,6 +38,7 @@ import {
 } from "@/lib/actions/favorites.actions";
 import { getServerSessionSafe } from "@/lib/auth";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { RecipeDetailClient } from "./RecipeDetailClient";
 
 const difficultyStyles: Record<string, string> = {
   EASY: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -83,7 +84,7 @@ async function getRecipe(id: string): Promise<RecipeData | null> {
       ing.ingredientId,
     ).lean()) as unknown as IIngredient | null;
     ingredientsWithDetails.push({
-      ingredientId: ing.ingredientId,
+      ingredientId: ing.ingredientId.toString(),
       quantity: ing.quantity,
       unit: ing.unit,
       canonicalName: ingredient?.canonicalName ?? "Unknown",
@@ -99,50 +100,21 @@ async function getRecipe(id: string): Promise<RecipeData | null> {
     cookTimeMinutes: recipe.cookTimeMinutes,
     servings: recipe.servings,
     utensils: recipe.utensils,
-    steps: recipe.steps,
+    steps: recipe.steps.map((s) => ({
+      stepNumber: s.stepNumber,
+      instruction: s.instruction,
+    })),
     ingredients: ingredientsWithDetails,
-    nutrition: recipe.nutrition,
+    nutrition: {
+      caloriesPerServing: recipe.nutrition.caloriesPerServing,
+      proteinGrams: recipe.nutrition.proteinGrams,
+      carbsGrams: recipe.nutrition.carbsGrams,
+      fatGrams: recipe.nutrition.fatGrams,
+    },
     imageUrl: recipe.imageUrl,
   };
 }
 
-function IngredientsTab({
-  ingredients,
-}: {
-  ingredients: IngredientWithDetails[];
-}) {
-  if (ingredients.length === 0) {
-    return (
-      <div className="flex flex-col items-center py-10 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border/60">
-        <p className="text-sm font-bold">No ingredients identified.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {ingredients.map((ing, index) => (
-        <div
-          key={index}
-          className="flex items-center justify-between rounded-2xl border border-border/50 p-4 bg-card/40 glass group hover:border-primary/30 transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
-            <span className="font-bold text-sm tracking-tight">
-              {ing.canonicalName}
-            </span>
-          </div>
-          <Badge
-            variant="secondary"
-            className="rounded-lg bg-primary/5 text-primary border-primary/10"
-          >
-            {ing.quantity} {ing.unit}
-          </Badge>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 async function SubstitutionPanelWrapper({
   ingredients,
@@ -245,100 +217,21 @@ export default async function RecipeDetailPage({
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 -mt-10 relative z-10">
+        <div className="mx-auto max-w-7xl px-6 -mt-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Left Column: Core Info */}
             <div className="lg:col-span-2 space-y-12">
-              <GlassCard className="p-1 overflow-hidden" hover={false}>
-                <Tabs defaultValue="ingredients" className="w-full">
-                  <TabsList className="w-full justify-start rounded-none bg-muted/20 p-1 h-14 border-b border-border/50">
-                    <TabsTrigger
-                      value="ingredients"
-                      className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                    >
-                      <UtensilsCrossed className="h-4 w-4 mr-2" />
-                      Ingredients
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="steps"
-                      className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                    >
-                      <ScrollText className="h-4 w-4 mr-2" />
-                      Cooking Steps
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="nutrition"
-                      className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                    >
-                      <Activity className="h-4 w-4 mr-2" />
-                      Nutrition
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="substitutions"
-                      className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                    >
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
-                      Swaps
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <div className="p-8">
-                    <TabsContent
-                      value="ingredients"
-                      className="mt-0 outline-none"
-                    >
-                      <div className="mb-8">
-                        <h2 className="text-xl font-black font-outfit tracking-tight mb-2">
-                          What you'll need
-                        </h2>
-                        <p className="text-sm text-muted-foreground font-medium">
-                          Click on ingredients to see available substitutions if
-                          you're missing something.
-                        </p>
-                      </div>
-                      <IngredientsTab ingredients={recipe.ingredients} />
-                    </TabsContent>
-
-                    <TabsContent value="steps" className="mt-0 outline-none">
-                      <div className="mb-8">
-                        <h2 className="text-xl font-black font-outfit tracking-tight mb-2">
-                          How to cook it
-                        </h2>
-                        <p className="text-sm text-muted-foreground font-medium">
-                          Follow these steps for a perfect result every time.
-                        </p>
-                      </div>
-                      <StepList steps={recipe.steps} />
-                    </TabsContent>
-
-                    <TabsContent
-                      value="nutrition"
-                      className="mt-0 outline-none"
-                    >
-                      <NutritionPanel
-                        nutrition={{
-                          caloriesPerServing:
-                            recipe.nutrition.caloriesPerServing,
-                          proteinGrams: recipe.nutrition.proteinGrams,
-                          carbsGrams: recipe.nutrition.carbsGrams,
-                          fatGrams: recipe.nutrition.fatGrams,
-                        }}
-                        baseServings={recipe.servings}
-                      />
-                    </TabsContent>
-
-                    <TabsContent
-                      value="substitutions"
-                      className="mt-0 outline-none"
-                    >
-                      <SubstitutionPanelWrapper
-                        ingredients={recipe.ingredients}
-                        availableIngredientIds={availableIngredientIds}
-                      />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </GlassCard>
+            <RecipeDetailClient
+              recipe={recipe}
+              substitutionPanel={
+                <Suspense fallback={<div className="h-40 animate-pulse bg-muted/20 rounded-2xl" />}>
+                  <SubstitutionPanelWrapper
+                    ingredients={recipe.ingredients}
+                    availableIngredientIds={availableIngredientIds}
+                  />
+                </Suspense>
+              }
+            />
             </div>
 
             {/* Right Column: Meta & Dashboard */}

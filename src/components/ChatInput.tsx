@@ -114,7 +114,7 @@ const ChatInput = memo(
           className,
         )}
       >
-        <div className="relative flex flex-col w-full bg-card/60 backdrop-blur-xl border border-border/50 shadow-2xl rounded-[1.5rem] ring-offset-background focus-within:border-primary/40 overflow-hidden">
+        <div className="relative flex flex-col w-full bg-card/60 backdrop-blur-xl border border-border/50 rounded-[1.5rem] ring-offset-background focus-within:border-primary/40 overflow-hidden">
           {/* File Previews */}
           {previewUrls.length > 0 && (
             <div className="flex gap-3 px-4 pt-4 overflow-x-auto no-scrollbar scroll-smooth">

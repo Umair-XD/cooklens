@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Minus, Plus, Activity, Zap, Flame } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Activity, Zap, Flame } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -18,59 +15,16 @@ export interface NutritionInfo {
 interface NutritionPanelProps {
   nutrition: NutritionInfo;
   baseServings: number;
+  currentServings?: number;
 }
 
-function NumberInput({
-  value,
-  onChange,
-  min = 1,
-  max = 99,
-}: {
-  value: number;
-  onChange: (val: number) => void;
-  min?: number;
-  max?: number;
-}) {
-  const increment = () => {
-    if (value < max) onChange(value + 1);
-  };
-
-  const decrement = () => {
-    if (value > min) onChange(value - 1);
-  };
-
-  return (
-    <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/30 border border-border/50">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-background shadow-sm transition-all"
-        onClick={decrement}
-        disabled={value <= min}
-      >
-        <Minus className="h-3.5 w-3.5" />
-      </Button>
-      <div className="w-10 text-center text-sm font-black font-outfit">
-        {value}
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 rounded-lg hover:bg-background shadow-sm transition-all"
-        onClick={increment}
-        disabled={value >= max}
-      >
-        <Plus className="h-3.5 w-3.5" />
-      </Button>
-    </div>
-  );
-}
 
 export function NutritionPanel({
   nutrition,
   baseServings,
+  currentServings = 1,
 }: NutritionPanelProps) {
-  const [servings, setServings] = useState(baseServings);
+  const servings = currentServings;
 
   const scaleFactor = servings / baseServings;
 
@@ -95,7 +49,6 @@ export function NutritionPanel({
            <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">Macro Analysis</h3>
            <p className="text-xs font-bold text-primary">Dynamic Serving Calibration</p>
         </div>
-        <NumberInput value={servings} onChange={setServings} min={1} max={99} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
