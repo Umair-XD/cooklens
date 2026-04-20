@@ -19,6 +19,7 @@ import {
   type FormEvent,
   type ChangeEvent,
   type KeyboardEvent,
+  type ClipboardEvent,
 } from "react";
 
 interface ChatInputProps {
@@ -99,6 +100,25 @@ const ChatInput = memo(
       }
     };
 
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const files: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          if (file) files.push(file);
+        }
+      }
+
+      if (files.length > 0) {
+        setSelectedFiles((prev) => [...prev, ...files]);
+        const urls = files.map((file) => URL.createObjectURL(file));
+        setPreviewUrls((prev) => [...prev, ...urls]);
+      }
+    };
+
     // Auto-resize textarea
     useEffect(() => {
       if (textareaRef.current) {
@@ -167,6 +187,7 @@ const ChatInput = memo(
               value={input}
               onChange={(e) => onInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               placeholder={placeholder}
               className="min-h-[44px] max-h-[200px] w-full resize-none bg-transparent border-none focus-visible:ring-0 px-2 py-3 text-base leading-relaxed placeholder:text-muted-foreground/40 transition-all font-medium"
               rows={1}
