@@ -30,7 +30,6 @@ export default async function AdminRecipesPage() {
       <RecipeManager
         recipes={recipeData}
         ingredientOptions={ingredientOptions}
-        onRefresh={() => {}}
       />
     </div>
   );

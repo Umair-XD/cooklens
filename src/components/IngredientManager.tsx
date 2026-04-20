@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -48,7 +49,6 @@ export interface IngredientRecord {
 
 interface IngredientManagerProps {
   ingredients: IngredientRecord[];
-  onRefresh: () => void;
 }
 
 const columns: ColumnDef<IngredientRecord>[] = [
@@ -147,8 +147,8 @@ function ActionCell({ ingredient }: { ingredient: IngredientRecord }) {
 
 export function IngredientManager({
   ingredients,
-  onRefresh,
 }: IngredientManagerProps) {
+  const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -200,7 +200,7 @@ export function IngredientManager({
             <IngredientForm
               onSuccess={() => {
                 setCreateOpen(false);
-                onRefresh();
+                router.refresh();
               }}
               onCancel={() => setCreateOpen(false)}
             />

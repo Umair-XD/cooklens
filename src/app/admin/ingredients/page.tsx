@@ -17,7 +17,7 @@ export default async function AdminIngredientsPage() {
       <h2 className="text-xl font-semibold tracking-tight">
         Ingredient Management
       </h2>
-      <IngredientManager ingredients={ingredientData} onRefresh={() => {}} />
+      <IngredientManager ingredients={ingredientData} />
     </div>
   );
 }
