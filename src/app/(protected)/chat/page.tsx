@@ -8,7 +8,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatInput from "@/components/ChatInput";
-import ChatMessageSkeleton from "@/components/ChatMessageSkeleton";
 import { ChefHat, AlertCircle, Sparkles, User, Copy, Check, RotateCcw, ArrowDown, Zap, UtensilsCrossed, Soup } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -293,11 +292,18 @@ export default function ChatPage() {
                 <div className="flex items-start gap-3 md:gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <Avatar className="h-10 w-10 bg-card glass border border-border/50 shadow-md">
                     <AvatarFallback>
-                      <ChefHat className="h-5 w-5 text-primary animate-pulse" />
+                      <ChefHat className="h-5 w-5 text-primary" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="bg-card/40 border border-border/40 backdrop-blur-md rounded-3xl rounded-tl-none px-6 py-5 w-full max-w-[200px] shadow-sm">
-                    <ChatMessageSkeleton lines={2} />
+                  <div className="bg-card/40 border border-border/40 backdrop-blur-md rounded-3xl rounded-tl-none px-6 py-4 shadow-sm flex items-center gap-3">
+                    <div className="flex gap-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-primary/60">
+                      ChefLens is thinking...
+                    </span>
                   </div>
                 </div>
               )}

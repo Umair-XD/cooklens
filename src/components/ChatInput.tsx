@@ -226,7 +226,7 @@ const ChatInput = memo(
         </div>
         <div className="mt-2 text-center pb-2">
           <p className="text-[11px] text-muted-foreground/50 font-medium tracking-tight">
-            Chef Lens AI can make mistakes. Check important info.
+            ChefLens AI can make mistakes. Check important info.
           </p>
         </div>
       </div>
