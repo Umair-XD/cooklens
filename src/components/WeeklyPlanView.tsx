@@ -92,7 +92,7 @@ export default function WeeklyPlanView({
 
   const handleExportPdf = () => {
     window.open(
-      `/api/planner/export-pdf?planId=${plan._id.toString()}`,
+      `/planner/${plan._id.toString()}/preview`,
       "_blank",
     );
   };

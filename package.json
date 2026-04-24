@@ -35,7 +35,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@react-pdf/renderer": "^3.4.0",
+    "@react-pdf/renderer": "^4.5.1",
     "@tanstack/react-table": "^8.20.0",
     "ai": "^6.0.149",
     "bcryptjs": "^2.4.3",
@@ -76,5 +76,8 @@
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
+  },
+  "overrides": {
+    "uuid": "14.0.0"
   }
 }
