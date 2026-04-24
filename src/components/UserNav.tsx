@@ -75,7 +75,7 @@ export function UserNav({ session }: UserNavProps) {
 
       {isOpen && (
         <div 
-          className="absolute right-0 mt-2 w-64 p-2 rounded-2xl glass shadow-premium border border-border/50 z-[100] animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+          className="absolute right-0 mt-2 w-64 p-2 rounded-2xl bg-background shadow-premium border border-border/50 z-[100] animate-in fade-in zoom-in-95 duration-200 origin-top-right"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="font-normal p-3">
