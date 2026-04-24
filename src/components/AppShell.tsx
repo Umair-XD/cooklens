@@ -1,18 +1,9 @@
 import Link from "next/link";
-import { ChefHat, Search, Calendar, Heart, MessageSquare, User, LogOut, Settings } from "lucide-react";
+import { ChefHat, Search, Calendar, Heart, MessageSquare } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MobileNav } from "@/components/MobileNav";
+import { UserNav } from "@/components/UserNav";
 import { getServerSessionSafe } from "@/lib/auth";
-import { signOut } from "@/lib/actions/auth.actions";
 
 const navLinks = [
   { href: "/recipes", label: "Recipes", icon: Search },
@@ -21,99 +12,7 @@ const navLinks = [
   { href: "/chat", label: "Assistant", icon: MessageSquare },
 ];
 
-async function UserNav() {
-  const session = await getServerSessionSafe();
 
-  if (!session?.user) {
-    return (
-      <div className="hidden sm:flex items-center gap-2">
-        <Link
-          href="/login"
-          className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Login
-        </Link>
-        <Link
-          href="/register"
-          className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 transition-all font-outfit"
-        >
-          Join
-        </Link>
-      </div>
-    );
-  }
-
-  const initials = (session.user.name || session.user.email || "U")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full outline-none hover:bg-accent/50 p-1 group transition-all">
-          <Avatar className="h-8 w-8 border-2 border-transparent group-hover:border-primary/20 transition-all">
-            <AvatarImage src={session.user.image || undefined} />
-            <AvatarFallback className="text-xs font-black bg-primary/10 text-primary">{initials}</AvatarFallback>
-          </Avatar>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl glass shadow-premium border-border/50">
-        <DropdownMenuLabel className="font-normal p-3">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-black tracking-tight">{session.user.name}</p>
-            <p className="text-xs font-medium text-muted-foreground truncate">
-              {session.user.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-border/50" />
-        <div className="py-1">
-          <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
-            <Link href="/profile" className="flex items-center gap-2.5 font-bold text-sm">
-              <User className="h-4 w-4 text-primary" />
-              Account Profile
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
-            <Link href="/favorites" className="flex items-center gap-2.5 font-bold text-sm">
-              <Heart className="h-4 w-4 text-primary" />
-              Saved Recipes
-            </Link>
-          </DropdownMenuItem>
-        </div>
-        {session.user.role === "ADMIN" && (
-          <>
-            <DropdownMenuSeparator className="bg-border/50" />
-            <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 cursor-pointer p-2.5">
-              <Link href="/admin/recipes" className="flex items-center gap-2.5 font-bold text-sm">
-                <Settings className="h-4 w-4 text-primary" />
-                Kitchen Admin
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
-        <DropdownMenuSeparator className="bg-border/50" />
-        <DropdownMenuItem asChild className="rounded-xl focus:bg-destructive/5 text-destructive cursor-pointer p-2.5">
-          <form
-            action={async () => {
-              "use server";
-              await signOut();
-            }}
-            className="w-full"
-          >
-            <button type="submit" className="w-full flex items-center gap-2.5 font-bold text-sm">
-              <LogOut className="h-4 w-4" />
-              Terminate Session
-            </button>
-          </form>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
 
 export async function FullHeader() {
   const session = await getServerSessionSafe();
@@ -148,7 +47,7 @@ export async function FullHeader() {
           <div className="pr-2 border-r border-border/50 hidden sm:block">
             <ThemeToggle />
           </div>
-          <UserNav />
+          <UserNav session={session} />
           {/* Mobile Navigation */}
           <MobileNav session={session} />
         </div>
