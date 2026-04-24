@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   ColumnDef,
@@ -52,45 +52,14 @@ interface RecipeManagerProps {
   ingredientOptions: { _id: string; canonicalName: string }[];
 }
 
-const columns: ColumnDef<RecipeRecord>[] = [
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Name
-      </Button>
-    ),
-  },
-  {
-    accessorKey: "cuisineType",
-    header: "Cuisine",
-  },
-  {
-    accessorKey: "difficulty",
-    header: "Difficulty",
-  },
-  {
-    accessorKey: "prepTimeMinutes",
-    header: "Prep (min)",
-  },
-  {
-    accessorKey: "cookTimeMinutes",
-    header: "Cook (min)",
-  },
-  {
-    accessorKey: "servings",
-    header: "Servings",
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => <ActionCell recipe={row.original} />,
-  },
-];
-
-function ActionCell({ recipe }: { recipe: RecipeRecord }) {
+function ActionCell({ 
+  recipe, 
+  ingredientOptions 
+}: { 
+  recipe: RecipeRecord, 
+  ingredientOptions: { _id: string; canonicalName: string }[] 
+}) {
+  const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -99,6 +68,7 @@ function ActionCell({ recipe }: { recipe: RecipeRecord }) {
     setIsDeleting(true);
     try {
       await deleteRecipe(recipe._id);
+      router.refresh();
     } finally {
       setIsDeleting(false);
     }
@@ -118,9 +88,10 @@ function ActionCell({ recipe }: { recipe: RecipeRecord }) {
           </DialogHeader>
           <RecipeForm
             recipe={recipe as unknown as RecipeFormProps["recipe"]}
-            ingredientOptions={[]}
+            ingredientOptions={ingredientOptions}
             onSuccess={() => {
               setEditOpen(false);
+              router.refresh();
             }}
             onCancel={() => setEditOpen(false)}
           />
@@ -158,6 +129,52 @@ export function RecipeManager({
     pageSize: 10,
   });
   const [createOpen, setCreateOpen] = useState(false);
+
+  const columns = useMemo<ColumnDef<RecipeRecord>[]>(() => [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+        </Button>
+      ),
+    },
+    {
+      accessorKey: "cuisineType",
+      header: "Cuisine",
+    },
+    {
+      accessorKey: "difficulty",
+      header: "Difficulty",
+    },
+    {
+      accessorKey: "prepTimeMinutes",
+      header: "Prep (min)",
+    },
+    {
+      accessorKey: "cookTimeMinutes",
+      header: "Cook (min)",
+    },
+    {
+      accessorKey: "servings",
+      header: "Servings",
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right pr-4">Actions</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end pr-2">
+          <ActionCell 
+            recipe={row.original} 
+            ingredientOptions={ingredientOptions} 
+          />
+        </div>
+      ),
+    },
+  ], [ingredientOptions]);
 
   const table = useReactTable({
     data: recipes,

@@ -84,11 +84,17 @@ const columns: ColumnDef<IngredientRecord>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <ActionCell ingredient={row.original} />,
+    header: () => <div className="text-right pr-4">Actions</div>,
+    cell: ({ row }) => (
+      <div className="flex justify-end pr-2">
+        <ActionCell ingredient={row.original} />
+      </div>
+    ),
   },
 ];
 
 function ActionCell({ ingredient }: { ingredient: IngredientRecord }) {
+  const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,6 +103,7 @@ function ActionCell({ ingredient }: { ingredient: IngredientRecord }) {
     setIsDeleting(true);
     try {
       await deleteIngredient(ingredient._id);
+      router.refresh();
     } finally {
       setIsDeleting(false);
     }
@@ -120,6 +127,7 @@ function ActionCell({ ingredient }: { ingredient: IngredientRecord }) {
             }
             onSuccess={() => {
               setEditOpen(false);
+              router.refresh();
             }}
             onCancel={() => setEditOpen(false)}
           />

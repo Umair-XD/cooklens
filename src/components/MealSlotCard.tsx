@@ -1,14 +1,7 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MoreHorizontal, UtensilsCrossed, Zap, Flame, Target } from "lucide-react";
@@ -71,6 +64,27 @@ export default function MealSlotCard({
   isLoadingAlternatives,
   onLoadAlternatives,
 }: MealSlotCardProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   const mealLabel =
     slot.mealType.charAt(0) + slot.mealType.slice(1).toLowerCase();
   const cal = recipe?.nutrition?.caloriesPerServing ?? 0;
@@ -94,53 +108,65 @@ export default function MealSlotCard({
             {mealLabel}
           </span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-primary/10 transition-colors">
-              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl backdrop-blur-xl bg-background/90 border-border/50">
-            <DropdownMenuLabel className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              <Zap className="h-3 w-3" />
-              Swap Options
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="my-1 bg-border/40" />
-            {isLoadingAlternatives ? (
-              <div className="px-2 py-4 flex flex-col gap-2">
-                <Skeleton className="h-8 w-full rounded-lg" />
-                <Skeleton className="h-8 w-full rounded-lg" />
+        
+        <div className="relative" ref={containerRef}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-7 w-7 rounded-full hover:bg-primary/10 transition-colors"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+          </Button>
+
+          {isOpen && (
+            <div className="absolute right-0 top-full mt-1 w-64 p-2 rounded-xl bg-background shadow-premium border border-border/50 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+              <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <Zap className="h-3 w-3" />
+                Swap Options
               </div>
-            ) : alternatives.length === 0 ? (
-              <DropdownMenuItem
-                onSelect={() => onLoadAlternatives(slot._id?.toString() ?? "")}
-                className="rounded-lg p-2 focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer group/item"
-              >
-                <UtensilsCrossed className="mr-2 h-4 w-4 text-muted-foreground group-hover/item:text-primary" />
-                <span className="text-sm font-medium">Load alternative meals</span>
-              </DropdownMenuItem>
-            ) : (
-              <div className="max-h-60 overflow-y-auto custom-scrollbar flex flex-col gap-1">
-                {alternatives.map((alt) => (
-                  <DropdownMenuItem
-                    key={alt._id.toString()}
-                    onSelect={() =>
-                      onSwap(slot._id?.toString() ?? "", alt._id.toString())
-                    }
-                    className="flex flex-col items-start rounded-lg p-2 focus:bg-primary/10 transition-all cursor-pointer border border-transparent hover:border-primary/20"
-                  >
-                    <div className="flex w-full items-center justify-between gap-2">
-                       <span className="truncate text-sm font-bold">{alt.name}</span>
-                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
-                         {alt.nutrition?.caloriesPerServing ?? 0} kcal
-                       </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </div>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <div className="h-px bg-border/40 my-1 mx-0.5" />
+              
+              {isLoadingAlternatives ? (
+                <div className="px-2 py-4 flex flex-col gap-2">
+                  <Skeleton className="h-8 w-full rounded-lg" />
+                  <Skeleton className="h-8 w-full rounded-lg" />
+                </div>
+              ) : alternatives.length === 0 ? (
+                <button
+                  onClick={() => {
+                    onLoadAlternatives(slot._id?.toString() ?? "");
+                    // Note: we don't necessarily close here as it might show loading state
+                  }}
+                  className="w-full flex items-center rounded-lg p-2 hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer text-left font-medium text-sm group/item"
+                >
+                  <UtensilsCrossed className="mr-2 h-4 w-4 text-muted-foreground group-hover/item:text-primary" />
+                  Load alternative meals
+                </button>
+              ) : (
+                <div className="max-h-60 overflow-y-auto custom-scrollbar flex flex-col gap-1">
+                  {alternatives.map((alt) => (
+                    <button
+                      key={alt._id.toString()}
+                      onClick={() => {
+                        onSwap(slot._id?.toString() ?? "", alt._id.toString());
+                        setIsOpen(false);
+                      }}
+                      className="w-full flex flex-col items-start rounded-lg p-2 hover:bg-primary/5 transition-all cursor-pointer border border-transparent hover:border-primary/20 text-left"
+                    >
+                      <div className="flex w-full items-center justify-between gap-2">
+                         <span className="truncate text-sm font-bold">{alt.name}</span>
+                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                           {alt.nutrition?.caloriesPerServing ?? 0} kcal
+                         </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </CardHeader>
 
       <CardContent className="px-4 pb-4 space-y-3 relative">

@@ -3,7 +3,7 @@ import { Recipe } from "@/lib/db/models/Recipe";
 import { Ingredient } from "@/lib/db/models/Ingredient";
 import { User } from "@/lib/db/models/User";
 import Link from "next/link";
-import { ChefHat, Leaf, ArrowRight, Activity, Users } from "lucide-react";
+import { ChefHat, Leaf, ArrowRight, Users } from "lucide-react";
 
 export default async function AdminDashboardPage() {
   await dbConnect();
@@ -24,9 +24,9 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-3">
         {/* Users Card */}
         <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm relative overflow-hidden group">
-          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Users className="h-6 w-6" />
             </div>
             <div>
@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
           <div className="relative mt-6 flex justify-end">
             <Link 
               href="/admin/users" 
-              className="flex items-center gap-2 text-sm font-bold text-indigo-500 hover:text-indigo-600 transition-colors"
+              className="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
             >
               Manage Users <ArrowRight className="h-4 w-4" />
             </Link>
@@ -68,9 +68,9 @@ export default async function AdminDashboardPage() {
 
         {/* Ingredients Card */}
         <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm relative overflow-hidden group">
-          <div className="absolute inset-0 bg-linear-to-br from-secondary-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/20 text-secondary-foreground">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Leaf className="h-6 w-6" />
             </div>
             <div>
@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
           <div className="relative mt-6 flex justify-end">
             <Link 
               href="/admin/ingredients" 
-              className="flex items-center gap-2 text-sm font-bold text-secondary-foreground hover:text-secondary-foreground/80 transition-colors"
+              className="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
             >
               Manage Ingredients <ArrowRight className="h-4 w-4" />
             </Link>

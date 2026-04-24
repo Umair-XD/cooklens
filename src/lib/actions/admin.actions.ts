@@ -6,6 +6,7 @@ import { getServerSessionSafe } from "@/lib/auth";
 import { dbConnect } from "@/lib/db/connect";
 import { Recipe, IRecipe, IRecipeIngredient, IRecipeStep, INutrition, Difficulty } from "@/lib/db/models/Recipe";
 import { Ingredient, IIngredient } from "@/lib/db/models/Ingredient";
+import { User } from "@/lib/db/models/User";
 import { Types } from "mongoose";
 
 // ---------------------------------------------------------------------------
@@ -292,6 +293,63 @@ export async function deleteIngredient(id: string) {
   } catch (error) {
     console.error("Error deleting ingredient:", error);
     return { success: false, errors: [{ field: "general", message: "Failed to delete ingredient" }] };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// User Management
+// ---------------------------------------------------------------------------
+
+export async function updateUserRole(id: string, role: "USER" | "ADMIN") {
+  const auth = await requireAdmin();
+  if (!auth.success) return auth;
+
+  if (!id || !Types.ObjectId.isValid(id)) {
+    return { success: false, errors: [{ field: "general", message: "Invalid user ID" }] };
+  }
+
+  try {
+    await dbConnect();
+    
+    const user = await User.findByIdAndUpdate(
+      id,
+      { role },
+      { new: true }
+    );
+
+    if (!user) {
+      return { success: false, errors: [{ field: "general", message: "User not found" }] };
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return { success: false, errors: [{ field: "general", message: "Failed to update user role" }] };
+  }
+}
+
+export async function deleteUser(id: string) {
+  const auth = await requireAdmin();
+  if (!auth.success) return auth;
+
+  if (!id || !Types.ObjectId.isValid(id)) {
+    return { success: false, errors: [{ field: "general", message: "Invalid user ID" }] };
+  }
+
+  try {
+    await dbConnect();
+
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return { success: false, errors: [{ field: "general", message: "User not found" }] };
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return { success: false, errors: [{ field: "general", message: "Failed to delete user" }] };
   }
 }
 
