@@ -9,6 +9,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -338,7 +339,7 @@ export function RecipeForm({
         {/* Ingredients */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <FormLabel>Ingredients</FormLabel>
+            <Label>Ingredients</Label>
             <Button
               type="button"
               variant="outline"
@@ -421,7 +422,7 @@ export function RecipeForm({
         {/* Steps */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <FormLabel>Steps</FormLabel>
+            <Label>Steps</Label>
             <Button type="button" variant="outline" size="sm" onClick={addStep}>
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
@@ -461,7 +462,7 @@ export function RecipeForm({
 
         {/* Nutrition */}
         <div>
-          <FormLabel className="mb-2 block">Nutrition (per serving)</FormLabel>
+          <Label className="mb-2 block">Nutrition (per serving)</Label>
           <div className="grid gap-4 sm:grid-cols-4">
             <FormField
               control={form.control}

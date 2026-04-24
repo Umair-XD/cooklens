@@ -12,7 +12,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { ManualDeleteDialog } from "@/components/ManualDialog";
 import { updateUserRole, deleteUser } from "@/lib/actions/admin.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -167,7 +167,7 @@ function UserActionCell({
         </div>
       )}
 
-      <DeleteConfirmDialog
+      <ManualDeleteDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
         title="Delete User"

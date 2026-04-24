@@ -9,6 +9,7 @@ import { X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -151,8 +152,8 @@ export function IngredientForm({
           )}
         />
 
-        <div>
-          <FormLabel className="mb-2 block">Aliases</FormLabel>
+        <div className="space-y-2">
+          <Label>Aliases</Label>
           <div className="flex gap-2 mb-2">
             <Input
               placeholder="Type an alias and press Enter"
@@ -191,7 +192,11 @@ export function IngredientForm({
           <FormField
             control={form.control}
             name="aliases"
-            render={() => <FormMessage />}
+            render={() => (
+              <FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
