@@ -25,30 +25,30 @@ export function ServingsAdjuster({
   };
 
   return (
-    <div className="flex items-center gap-3 p-1.5 px-3 rounded-2xl bg-primary/5 border border-primary/10 transition-all hover:border-primary/20">
-      <div className="flex items-center gap-2 mr-2">
+    <div className="flex w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-primary/5 px-3 py-2 transition-all hover:border-primary/20 sm:w-auto sm:justify-start sm:px-3 sm:py-1.5">
+      <div className="flex min-w-0 items-center gap-2 sm:mr-2">
         <Users className="h-4 w-4 text-primary" />
-        <span className="text-xs font-black uppercase tracking-widest text-primary/70">
+        <span className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-primary/70 sm:text-xs sm:tracking-widest">
           Servings
         </span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="ml-auto flex shrink-0 items-center justify-end gap-1">
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-xl hover:bg-background transition-all text-primary"
+          className="h-9 w-9 rounded-xl text-primary transition-all hover:bg-background sm:h-8 sm:w-8"
           onClick={decrement}
           disabled={value <= min}
         >
           <Minus className="h-3.5 w-3.5" />
         </Button>
-        <div className="w-8 text-center text-base font-black font-outfit text-primary">
+        <div className="w-9 text-center text-base font-black font-outfit text-primary sm:w-8">
           {value}
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-xl hover:bg-background transition-all text-primary"
+          className="h-9 w-9 rounded-xl text-primary transition-all hover:bg-background sm:h-8 sm:w-8"
           onClick={increment}
           disabled={value >= max}
         >

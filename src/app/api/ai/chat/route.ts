@@ -1,9 +1,81 @@
 import { streamText, convertToModelMessages } from "ai";
 import { aiGateway } from "@/lib/ai-gateway";
 
+interface RecipeChatContext {
+  id?: string;
+  name?: string;
+  cuisineType?: string;
+  difficulty?: string;
+  servings?: number;
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  utensils?: string[];
+  ingredients?: Array<{
+    name?: string;
+    quantity?: number;
+    unit?: string;
+  }>;
+  steps?: Array<{
+    stepNumber?: number;
+    instruction?: string;
+  }>;
+  nutrition?: {
+    caloriesPerServing?: number;
+    proteinGrams?: number;
+    carbsGrams?: number;
+    fatGrams?: number;
+  };
+}
+
+function formatRecipeContext(recipeContext?: RecipeChatContext) {
+  if (!recipeContext?.name) return "";
+
+  const ingredients = recipeContext.ingredients?.length
+    ? recipeContext.ingredients
+        .map(
+          (ingredient) =>
+            `- ${ingredient.quantity ?? ""} ${ingredient.unit ?? ""} ${ingredient.name ?? ""}`.trim(),
+        )
+        .join("\n")
+    : "- Not provided";
+
+  const steps = recipeContext.steps?.length
+    ? recipeContext.steps
+        .map(
+          (step) =>
+            `${step.stepNumber ?? "?"}. ${step.instruction ?? "No instruction provided"}`,
+        )
+        .join("\n")
+    : "Not provided";
+
+  const utensils = recipeContext.utensils?.length
+    ? recipeContext.utensils.join(", ")
+    : "Not provided";
+
+  return `
+Current recipe context:
+- Name: ${recipeContext.name}
+- Cuisine: ${recipeContext.cuisineType ?? "Not provided"}
+- Difficulty: ${recipeContext.difficulty ?? "Not provided"}
+- Servings: ${recipeContext.servings ?? "Not provided"}
+- Prep time: ${recipeContext.prepTimeMinutes ?? "Not provided"} minutes
+- Cook time: ${recipeContext.cookTimeMinutes ?? "Not provided"} minutes
+- Utensils: ${utensils}
+- Nutrition per serving: ${recipeContext.nutrition?.caloriesPerServing ?? "?"} kcal, ${recipeContext.nutrition?.proteinGrams ?? "?"}g protein, ${recipeContext.nutrition?.carbsGrams ?? "?"}g carbs, ${recipeContext.nutrition?.fatGrams ?? "?"}g fat
+
+Ingredients:
+${ingredients}
+
+Steps:
+${steps}
+
+When the user refers to "this recipe" or asks follow-up questions, assume they mean the recipe above unless they explicitly switch context.
+Keep answers grounded in this recipe's ingredients, timings, servings, and technique.`;
+}
+
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, recipeContext } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -36,8 +108,16 @@ export async function POST(req: Request) {
             4. SAFETY FIRST: Never suggest consuming poisonous plants, inedible items, or dangerous chemical combinations. Always prioritize food safety and hygiene.
             
             Personality: Warm, professional, and encouraging. You are an expert chef and an insightful teacher.
-            Formatting: Use clean markdown. Keep responses compact and mobile-friendly. Avoid excessive spacing.`
+            Formatting: Use clean markdown. Keep responses compact and mobile-friendly. Avoid excessive spacing.`,
           },
+          ...(recipeContext
+            ? [
+                {
+                  role: "system" as const,
+                  content: formatRecipeContext(recipeContext),
+                },
+              ]
+            : []),
           ...await modelMessages
         ],
         timeout: {

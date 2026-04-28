@@ -1,17 +1,43 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo, memo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { Streamdown } from "streamdown";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ChatInput from "@/components/ChatInput";
 import { ChefHat, AlertCircle, Sparkles, User, Copy, Check, RotateCcw, ArrowDown, Zap, UtensilsCrossed, Soup } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+interface RecipeChatContext {
+  id: string;
+  name: string;
+  cuisineType: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  servings: number;
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  utensils: string[];
+  ingredients: Array<{
+    name: string;
+    quantity: number;
+    unit: string;
+  }>;
+  steps: Array<{
+    stepNumber: number;
+    instruction: string;
+  }>;
+  nutrition: {
+    caloriesPerServing: number;
+    proteinGrams: number;
+    carbsGrams: number;
+    fatGrams: number;
+  };
+}
 
 // Separate memoized component for each message to maximize efficiency
   const ChatMessage = memo(({ 
@@ -137,14 +163,41 @@ import { toast } from "sonner";
 ChatMessage.displayName = "ChatMessage";
 
 export default function ChatPage() {
+  const searchParams = useSearchParams();
   const [localInput, setLocalInput] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [recipeContext, setRecipeContext] = useState<RecipeChatContext | null>(null);
+  const recipeNameFromUrl = searchParams.get("recipeName");
+  const recipeId = searchParams.get("recipeId");
+
+  useEffect(() => {
+    if (!recipeId) {
+      setRecipeContext(null);
+      return;
+    }
+
+    const storedContext = sessionStorage.getItem(`chat:recipe:${recipeId}`);
+    if (!storedContext) return;
+
+    try {
+      setRecipeContext(JSON.parse(storedContext) as RecipeChatContext);
+    } catch {
+      sessionStorage.removeItem(`chat:recipe:${recipeId}`);
+      setRecipeContext(null);
+    }
+  }, [recipeId]);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/ai/chat",
+      }),
+    [],
+  );
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/ai/chat",
-    }),
+    transport,
     messages: [] as UIMessage[],
   });
 
@@ -154,11 +207,23 @@ export default function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isAtBottom = useRef(true);
+  const recipeContextRef = useRef<RecipeChatContext | null>(null);
+
+  useEffect(() => {
+    recipeContextRef.current = recipeContext;
+  }, [recipeContext]);
 
   const handleSend = useCallback((text: string, files?: FileList) => {
     if (!text.trim() && (!files || files.length === 0)) return;
     isAtBottom.current = true;
-    sendMessage({ text, files });
+    sendMessage(
+      { text, files },
+      {
+        body: recipeContextRef.current
+          ? { recipeContext: recipeContextRef.current }
+          : undefined,
+      },
+    );
     setLocalInput("");
   }, [sendMessage]);
 
@@ -237,19 +302,38 @@ export default function ChatPage() {
             </div>
             
             <h1 className="text-2xl md:text-5xl font-black tracking-tighter mb-2 text-foreground leading-tight">
-              What's on the menu?
+              {recipeContext
+                ? `Ask about ${recipeContext.name}`
+                : "What's on the menu?"}
             </h1>
             <p className="text-muted-foreground/40 text-base md:text-lg max-w-lg mb-10 font-medium leading-relaxed">
-              Your AI-powered culinary companion for recipes<br className="hidden md:block" /> and kitchen tips.
+              {recipeContext ? (
+                <>
+                  Recipe context is loaded for{" "}
+                  <span className="text-foreground/70">{recipeNameFromUrl ?? recipeContext.name}</span>.
+                  Ask for substitutions, scaling, timing, or technique help.
+                </>
+              ) : (
+                <>
+                  Your AI-powered culinary companion for recipes<br className="hidden md:block" /> and kitchen tips.
+                </>
+              )}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl text-left">
-              {[
-                { icon: Sparkles, text: "Healthy keto breakfast ideas", sub: "QUICK" },
-                { icon: Soup, text: "Dinner with zero waste", sub: "SMART" },
-                { icon: UtensilsCrossed, text: "Homemade pizza dough", sub: "GUIDE" },
-                { icon: Zap, text: "Substitute for eggs", sub: "SCIENCE" },
-              ].map((tip) => (
+              {(recipeContext
+                ? [
+                    { icon: Sparkles, text: `How can I make ${recipeContext.name} healthier?`, sub: "BALANCE" },
+                    { icon: Soup, text: `What can I substitute in ${recipeContext.name}?`, sub: "SWAPS" },
+                    { icon: UtensilsCrossed, text: `Walk me through the tricky steps in ${recipeContext.name}.`, sub: "GUIDE" },
+                    { icon: Zap, text: `Scale ${recipeContext.name} for more servings.`, sub: "PORTIONS" },
+                  ]
+                : [
+                    { icon: Sparkles, text: "Healthy keto breakfast ideas", sub: "QUICK" },
+                    { icon: Soup, text: "Dinner with zero waste", sub: "SMART" },
+                    { icon: UtensilsCrossed, text: "Homemade pizza dough", sub: "GUIDE" },
+                    { icon: Zap, text: "Substitute for eggs", sub: "SCIENCE" },
+                  ]).map((tip) => (
                 <button
                   key={tip.text}
                   onClick={() => handleSend(tip.text)}
@@ -284,7 +368,13 @@ export default function ChatPage() {
                   isLoading={isLoading}
                   onCopy={handleCopy}
                   copiedId={copiedId}
-                  onRegenerate={regenerate}
+                  onRegenerate={() =>
+                    regenerate({
+                      body: recipeContextRef.current
+                        ? { recipeContext: recipeContextRef.current }
+                        : undefined,
+                    })
+                  }
                 />
               ))}
 
@@ -321,7 +411,13 @@ export default function ChatPage() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => regenerate()}
+                      onClick={() =>
+                        regenerate({
+                          body: recipeContextRef.current
+                            ? { recipeContext: recipeContextRef.current }
+                            : undefined,
+                        })
+                      }
                       className="bg-background/50 border-destructive/20 hover:bg-destructive/10 text-destructive rounded-xl h-8 px-3 focus-visible:ring-0 focus-visible:ring-offset-0"
                     >
                       Retry
@@ -362,4 +458,3 @@ export default function ChatPage() {
     </div>
   );
 }
-

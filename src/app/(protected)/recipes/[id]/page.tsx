@@ -155,69 +155,71 @@ export default async function RecipeDetailPage({
     <div className="min-h-screen bg-background/50 pb-20">
       <Suspense fallback={<RecipeDetailSkeleton />}>
         {/* Cinematic Hero */}
-        <div className="relative w-full aspect-[21/9] md:aspect-[25/9] overflow-hidden">
-          {recipe.imageUrl ? (
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-muted/30 flex items-center justify-center">
-              <ChefHat className="h-20 w-20 text-muted-foreground/20" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
-
-          <div className="absolute top-6 right-6 md:top-12 md:right-12 lg:right-20 z-20">
-            <FavoriteButton
-              recipeId={id}
-              initialIsFavorite={initialIsFavorite}
-              className="h-12 w-12 shadow-2xl"
-            />
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-20">
-            <div className="mx-auto max-w-7xl">
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                <Badge
-                  className={cn(
-                    "px-3 py-1 text-[11px] font-black uppercase tracking-widest backdrop-blur-md border",
-                    difficultyStyles[recipe.difficulty],
-                  )}
-                >
-                  {recipe.difficulty}
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="px-3 py-1 text-[11px] font-black uppercase tracking-widest glass"
-                >
-                  <Globe className="h-3 w-3 mr-1.5" />
-                  {recipe.cuisineType}
-                </Badge>
+        <div className="mx-auto w-full max-w-7xl px-0 sm:px-6 lg:px-6">
+          <div className="relative w-full overflow-hidden aspect-video">
+            {recipe.imageUrl ? (
+              <img
+                src={recipe.imageUrl}
+                alt={recipe.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted/30 flex items-center justify-center">
+                <ChefHat className="h-20 w-20 text-muted-foreground/20" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-black font-outfit tracking-tighter mb-4 max-w-4xl">
-                {recipe.name}
-              </h1>
-              <div className="flex flex-wrap items-center gap-8 text-sm font-bold text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" />
-                  <span>{totalTime} Minutes</span>
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent" />
+
+            <div className="absolute top-6 right-6 md:top-8 md:right-8 lg:top-12 lg:right-12 z-20">
+              <FavoriteButton
+                recipeId={id}
+                initialIsFavorite={initialIsFavorite}
+                className="h-12 w-12 shadow-2xl"
+              />
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 px-4 py-6 sm:px-0 md:py-10 lg:py-14">
+              <div className="w-full">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <Badge
+                    className={cn(
+                      "px-3 py-1 text-[11px] font-black uppercase tracking-widest backdrop-blur-md border",
+                      difficultyStyles[recipe.difficulty],
+                    )}
+                  >
+                    {recipe.difficulty}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="px-3 py-1 text-[11px] font-black uppercase tracking-widest glass"
+                  >
+                    <Globe className="h-3 w-3 mr-1.5" />
+                    {recipe.cuisineType}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
-                  <span>{recipe.servings} Servings</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Flame className="h-4 w-4 text-primary" />
-                  <span>{recipe.nutrition.caloriesPerServing} kcal</span>
+                <h1 className="text-4xl md:text-6xl font-black font-outfit tracking-tighter mb-4 max-w-4xl">
+                  {recipe.name}
+                </h1>
+                <div className="flex flex-wrap items-center gap-8 text-sm font-bold text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span>{totalTime} Minutes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>{recipe.servings} Servings</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-4 w-4 text-primary" />
+                    <span>{recipe.nutrition.caloriesPerServing} kcal</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 -mt-6 relative z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 -mt-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Left Column: Core Info */}
             <div className="lg:col-span-2 space-y-12">

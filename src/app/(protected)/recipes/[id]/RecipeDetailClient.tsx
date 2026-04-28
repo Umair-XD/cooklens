@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   UtensilsCrossed,
   ScrollText,
   Activity,
   CheckCircle2,
+  MessageSquare,
 } from "lucide-react";
 import { StepList } from "@/components/StepList";
 import { NutritionPanel } from "@/components/NutritionPanel";
 import { ServingsAdjuster } from "@/components/ServingsAdjuster";
-import { cn } from "@/lib/utils";
 
 interface IngredientWithDetails {
   ingredientId: any;
@@ -24,10 +26,21 @@ interface IngredientWithDetails {
 interface RecipeDetailClientProps {
   recipe: {
     _id: string;
+    name: string;
+    cuisineType: string;
+    difficulty: "EASY" | "MEDIUM" | "HARD";
+    prepTimeMinutes: number;
+    cookTimeMinutes: number;
     servings: number;
+    utensils: string[];
     ingredients: IngredientWithDetails[];
-    steps: any[];
-    nutrition: any;
+    steps: { stepNumber: number; instruction: string }[];
+    nutrition: {
+      caloriesPerServing: number;
+      proteinGrams: number;
+      carbsGrams: number;
+      fatGrams: number;
+    };
   };
   substitutionPanel: React.ReactNode;
 }
@@ -37,25 +50,69 @@ export function RecipeDetailClient({
   substitutionPanel,
 }: RecipeDetailClientProps) {
   const [servings, setServings] = useState(recipe.servings);
+  const router = useRouter();
   const scale = servings / recipe.servings;
+
+  const handleAskAI = () => {
+    const recipeContext = {
+      id: recipe._id,
+      name: recipe.name,
+      cuisineType: recipe.cuisineType,
+      difficulty: recipe.difficulty,
+      servings: recipe.servings,
+      prepTimeMinutes: recipe.prepTimeMinutes,
+      cookTimeMinutes: recipe.cookTimeMinutes,
+      utensils: recipe.utensils,
+      ingredients: recipe.ingredients.map((ingredient) => ({
+        name: ingredient.canonicalName,
+        quantity: ingredient.quantity,
+        unit: ingredient.unit,
+      })),
+      steps: recipe.steps.map((step) => ({
+        stepNumber: step.stepNumber,
+        instruction: step.instruction,
+      })),
+      nutrition: recipe.nutrition,
+    };
+
+    sessionStorage.setItem(
+      `chat:recipe:${recipe._id}`,
+      JSON.stringify(recipeContext),
+    );
+    router.push(
+      `/chat?recipeId=${encodeURIComponent(recipe._id)}&recipeName=${encodeURIComponent(recipe.name)}`,
+    );
+  };
 
   return (
     <div className="lg:col-span-2 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black font-outfit tracking-tighter">
+          <h2 className="text-2xl sm:text-3xl font-black font-outfit tracking-tighter">
             Recipe Dashboard
           </h2>
           <p className="text-sm text-muted-foreground font-medium">
             Scale ingredients and nutrition for any group size.
           </p>
         </div>
-        <ServingsAdjuster
-          value={servings}
-          onChange={setServings}
-          min={1}
-          max={99}
-        />
+        <div className="flex w-full flex-col items-stretch gap-3 md:w-auto md:flex-row md:items-center">
+          <Button
+            type="button"
+            onClick={handleAskAI}
+            className="h-11 w-full rounded-2xl px-5 font-bold shadow-sm md:w-auto"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Ask AI
+          </Button>
+          <div className="w-full md:w-auto">
+            <ServingsAdjuster
+              value={servings}
+              onChange={setServings}
+              min={1}
+              max={99}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="p-1 overflow-hidden bg-card/60 backdrop-blur-xl border border-border/50 rounded-[2rem]">
