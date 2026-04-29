@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, memo, useCallback } from "react";
+import { useRef, useEffect, useState, useMemo, memo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -162,7 +162,7 @@ interface RecipeChatContext {
 
 ChatMessage.displayName = "ChatMessage";
 
-export default function ChatPage() {
+function ChatPage() {
   const searchParams = useSearchParams();
   const [localInput, setLocalInput] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -456,5 +456,13 @@ export default function ChatPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function ChatPageWrapper() {
+  return (
+    <Suspense>
+      <ChatPage />
+    </Suspense>
   );
 }

@@ -29,7 +29,6 @@ import { StepList, type RecipeStep } from "@/components/StepList";
 import { NutritionPanel } from "@/components/NutritionPanel";
 import { SubstitutionPanel } from "@/components/SubstitutionPanel";
 import { RecipeDetailSkeleton } from "@/components/RecipeDetailSkeleton";
-import { Types } from "mongoose";
 import { GlassCard } from "@/components/ui/glass-card";
 import { cn } from "@/lib/utils";
 import {
@@ -47,7 +46,7 @@ const difficultyStyles: Record<string, string> = {
 };
 
 interface IngredientWithDetails {
-  ingredientId: Types.ObjectId;
+  ingredientId: string;
   quantity: number;
   unit: string;
   canonicalName: string;

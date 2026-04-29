@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, X, Filter, LayoutGrid, ChevronRight, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { Search, SlidersHorizontal, X, Filter, LayoutGrid, ChevronRight, RotateCcw, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -228,6 +229,12 @@ export default function SearchPageContent() {
               Find your next <span className="text-primary italic">Meal</span>
             </h1>
           </div>
+          <Link href="/recipes/by-ingredients">
+            <Button variant="outline" className="h-11 rounded-xl border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2 shrink-0">
+              <Sparkles className="h-4 w-4" />
+              Cook from pantry
+            </Button>
+          </Link>
         </div>
 
         {/* Search bar Area */}

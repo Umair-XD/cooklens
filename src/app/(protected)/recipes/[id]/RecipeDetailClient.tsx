@@ -196,13 +196,6 @@ export function RecipeDetailClient({
             </TabsContent>
 
             <TabsContent value="nutrition" className="mt-0 outline-none">
-               {/* 
-                Since NutritionPanel has its own internal state, 
-                we key it with servings to force a re-render when servings change 
-                OR we can update NutritionPanel to be a simple display component.
-                Let's use the key approach for quick integration, 
-                or pass the scale factor if supported.
-               */}
               <NutritionPanel
                 nutrition={{
                   caloriesPerServing: recipe.nutrition.caloriesPerServing,
@@ -212,7 +205,6 @@ export function RecipeDetailClient({
                 }}
                 baseServings={recipe.servings}
                 currentServings={servings}
-                onServingsChange={setServings}
               />
             </TabsContent>
 
