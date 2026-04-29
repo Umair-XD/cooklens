@@ -177,12 +177,12 @@ export default async function RecipeDetailPage({
               />
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 px-4 py-6 sm:px-0 md:py-10 lg:py-14">
+            <div className="absolute bottom-0 left-0 right-0 px-4 py-4 sm:px-0 sm:py-8 md:py-10 lg:py-14">
               <div className="w-full">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
+                <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-4">
                   <Badge
                     className={cn(
-                      "px-3 py-1 text-[11px] font-black uppercase tracking-widest backdrop-blur-md border",
+                      "px-2.5 py-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest backdrop-blur-md border",
                       difficultyStyles[recipe.difficulty],
                     )}
                   >
@@ -190,26 +190,26 @@ export default async function RecipeDetailPage({
                   </Badge>
                   <Badge
                     variant="secondary"
-                    className="px-3 py-1 text-[11px] font-black uppercase tracking-widest glass"
+                    className="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest glass"
                   >
-                    <Globe className="h-3 w-3 mr-1.5" />
+                    <Globe className="h-3 w-3 mr-1" />
                     {recipe.cuisineType}
                   </Badge>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black font-outfit tracking-tighter mb-4 max-w-4xl">
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-black font-outfit tracking-tighter mb-2 sm:mb-4 max-w-4xl leading-tight">
                   {recipe.name}
                 </h1>
-                <div className="flex flex-wrap items-center gap-8 text-sm font-bold text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span>{totalTime} Minutes</span>
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm font-bold text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                    <span>{totalTime} min</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span>{recipe.servings} Servings</span>
+                  <div className="flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                    <span>{recipe.servings} servings</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-1.5">
+                    <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                     <span>{recipe.nutrition.caloriesPerServing} kcal</span>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ export default async function RecipeDetailPage({
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 -mt-6 relative z-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-6 sm:-mt-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Left Column: Core Info */}
             <div className="lg:col-span-2 space-y-12">

@@ -100,6 +100,12 @@
     *::-webkit-scrollbar {
         display: none; /* Chrome, Safari, Opera */
     }
+
+    ::selection {
+        background-color: oklch(60% 0.16 250 / 0.35);
+        color: inherit;
+    }
+
 }
 
 @layer utilities {

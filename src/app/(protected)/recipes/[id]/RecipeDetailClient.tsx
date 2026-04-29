@@ -115,40 +115,40 @@ export function RecipeDetailClient({
         </div>
       </div>
 
-      <div className="p-1 overflow-hidden bg-card/60 backdrop-blur-xl border border-border/50 rounded-[2rem]">
+      <div className="overflow-hidden bg-card/60 backdrop-blur-xl border border-border/50 rounded-[2rem]">
         <Tabs defaultValue="ingredients" className="w-full">
-          <TabsList className="w-full justify-start rounded-none bg-muted/20 p-1 h-14 border-b border-border/50">
+          <TabsList className="w-full justify-start rounded-none bg-muted/20 p-1 h-12 sm:h-14 border-b border-border/50 overflow-x-auto flex-nowrap">
             <TabsTrigger
               value="ingredients"
-              className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-xl px-3 sm:px-5 shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <UtensilsCrossed className="h-4 w-4 mr-2" />
-              Ingredients
+              <UtensilsCrossed className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Ingredients</span>
             </TabsTrigger>
             <TabsTrigger
               value="steps"
-              className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-xl px-3 sm:px-5 shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <ScrollText className="h-4 w-4 mr-2" />
-              Steps
+              <ScrollText className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Steps</span>
             </TabsTrigger>
             <TabsTrigger
               value="nutrition"
-              className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-xl px-3 sm:px-5 shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <Activity className="h-4 w-4 mr-2" />
-              Nutrition
+              <Activity className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Nutrition</span>
             </TabsTrigger>
             <TabsTrigger
               value="substitutions"
-              className="rounded-xl px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              className="rounded-xl px-3 sm:px-5 shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Swaps
+              <CheckCircle2 className="h-4 w-4 sm:mr-2 shrink-0" />
+              <span className="hidden sm:inline">Swaps</span>
             </TabsTrigger>
           </TabsList>
 
-          <div className="p-10">
+          <div className="p-4 sm:p-6 md:p-10">
             <TabsContent value="ingredients" className="mt-0 outline-none">
               <div className="mb-8">
                 <h2 className="text-xl font-black font-outfit tracking-tight mb-2">
