@@ -1,0 +1,331 @@
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
+import { Plus, Pencil, Trash2, ArrowRight, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  getAllSubstitutions,
+  createSubstitution,
+  updateSubstitution,
+  deleteSubstitution,
+  type SubstitutionRow,
+} from "@/lib/actions/substitution.actions";
+import { getAllIngredients } from "@/lib/actions/admin.actions";
+
+interface IngredientOption {
+  _id: string;
+  canonicalName: string;
+}
+
+const emptyForm = { fromIngredientId: "", toIngredientId: "", impactNote: "" };
+
+export default function SubstitutionsPage() {
+  const [subs, setSubs] = useState<SubstitutionRow[]>([]);
+  const [ingredients, setIngredients] = useState<IngredientOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<SubstitutionRow | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([getAllSubstitutions(), getAllIngredients()]).then(
+      ([s, i]) => {
+        setSubs(s);
+        setIngredients(i);
+        setLoading(false);
+      },
+    );
+  }, []);
+
+  const refresh = async () => {
+    const s = await getAllSubstitutions();
+    setSubs(s);
+  };
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setFormError(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (row: SubstitutionRow) => {
+    setEditing(row);
+    setForm({
+      fromIngredientId: row.fromIngredientId,
+      toIngredientId: row.toIngredientId,
+      impactNote: row.impactNote,
+    });
+    setFormError(null);
+    setDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    setFormError(null);
+    startTransition(async () => {
+      const result = editing
+        ? await updateSubstitution(editing._id, form)
+        : await createSubstitution(form);
+
+      if (!result.success) {
+        setFormError((result as any).error ?? "Failed");
+        return;
+      }
+      toast.success(editing ? "Substitution updated" : "Substitution created");
+      setDialogOpen(false);
+      await refresh();
+    });
+  };
+
+  const handleDelete = (id: string) => setDeleteTarget(id);
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    startTransition(async () => {
+      const result = await deleteSubstitution(deleteTarget);
+      if (!result.success) {
+        toast.error((result as any).error ?? "Delete failed");
+      } else {
+        toast.success("Substitution deleted");
+        await refresh();
+      }
+      setDeleteTarget(null);
+    });
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-black font-outfit tracking-tight">
+            Ingredient Swaps
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Define what can substitute for each ingredient and the impact it has.
+          </p>
+        </div>
+        <Button onClick={openCreate} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Swap
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-24 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          Loading…
+        </div>
+      ) : subs.length === 0 ? (
+        <div className="py-24 text-center border border-dashed border-border/60 rounded-2xl text-muted-foreground">
+          <p className="font-semibold">No substitutions yet.</p>
+          <p className="text-sm mt-1">Click "Add Swap" to create the first one.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {subs.map((row) => (
+            <div
+              key={row._id}
+              className="flex items-center gap-3 rounded-2xl border border-border/50 bg-card/60 px-4 py-3 glass"
+            >
+              <Badge
+                variant="outline"
+                className="shrink-0 font-bold text-xs rounded-lg"
+              >
+                {row.fromName}
+              </Badge>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+              <Badge
+                variant="secondary"
+                className="shrink-0 font-bold text-xs rounded-lg"
+              >
+                {row.toName}
+              </Badge>
+              <span className="flex-1 text-sm text-muted-foreground truncate">
+                {row.impactNote}
+              </span>
+              <div className="flex gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg"
+                  onClick={() => openEdit(row)}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(row._id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Create / Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editing ? "Edit Swap" : "Add Swap"}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {formError && (
+              <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+                {formError}
+              </p>
+            )}
+
+            <div className="space-y-2">
+              <Label>If you don't have…</Label>
+              <Select
+                value={form.fromIngredientId}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, fromIngredientId: v }))
+                }
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select ingredient" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {ingredients.map((i) => (
+                    <SelectItem key={i._id} value={i._id}>
+                      {i.canonicalName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>You can use…</Label>
+              <Select
+                value={form.toIngredientId}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, toIngredientId: v }))
+                }
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select substitute" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {ingredients
+                    .filter((i) => i._id !== form.fromIngredientId)
+                    .map((i) => (
+                      <SelectItem key={i._id} value={i._id}>
+                        {i.canonicalName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Impact / Note</Label>
+              <Input
+                placeholder="e.g. Slightly less creamy texture"
+                value={form.impactNote}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, impactNote: e.target.value }))
+                }
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => setDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="rounded-xl"
+              onClick={handleSave}
+              disabled={
+                isPending ||
+                !form.fromIngredientId ||
+                !form.toIngredientId ||
+                !form.impactNote.trim()
+              }
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editing ? (
+                "Save Changes"
+              ) : (
+                "Create Swap"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirm */}
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+      >
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this swap?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This substitution will be removed globally and won't appear in any
+              recipe's Swaps tab.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl bg-destructive hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

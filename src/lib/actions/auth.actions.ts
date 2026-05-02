@@ -188,7 +188,14 @@ export async function updateUserPreferences(
       };
     }
 
-    return { success: true, preferences: user.preferences };
+    return {
+      success: true,
+      preferences: {
+        cuisineTypes: user.preferences?.cuisineTypes?.map(String) ?? [],
+        dietaryRestrictions: user.preferences?.dietaryRestrictions?.map(String) ?? [],
+        dislikedIngredients: user.preferences?.dislikedIngredients?.map(String) ?? [],
+      },
+    };
   } catch (error) {
     console.error("Preferences update error:", error);
     return {

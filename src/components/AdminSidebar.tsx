@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  ChefHat, 
-  Leaf, 
-  Users, 
-  Settings, 
-  LogOut,
+import {
+  LayoutDashboard,
+  ChefHat,
+  Leaf,
+  Users,
+  ArrowLeftRight,
   ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +17,7 @@ const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Recipes", href: "/admin/recipes", icon: ChefHat },
   { name: "Ingredients", href: "/admin/ingredients", icon: Leaf },
+  { name: "Swaps", href: "/admin/substitutions", icon: ArrowLeftRight },
   { name: "Users", href: "/admin/users", icon: Users },
 ];
 

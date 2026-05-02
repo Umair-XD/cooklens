@@ -147,7 +147,7 @@ export default function WeeklyPlanView({
       </div>
 
       {/* Main Grid Container */}
-      <div className="relative group">
+      <div className="relative">
         <div className="overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar">
           <div className="flex gap-6 min-w-[max-content]">
             {DAYS.map((dayName, dayIndex) => (
@@ -169,7 +169,7 @@ export default function WeeklyPlanView({
                 </div>
 
                 {/* Vertical Meal Stack */}
-                <div className="flex flex-col gap-4 bg-muted/5 rounded-3xl p-2 border border-border/50 transition-colors hover:bg-muted/10">
+                <div className="flex flex-col gap-1 bg-muted/5 rounded-3xl p-1 border border-border/50">
                   {MEALS.map((meal) => {
                     const slot = planSlots.find(
                       (s) => s.dayIndex === dayIndex && s.mealType === meal,

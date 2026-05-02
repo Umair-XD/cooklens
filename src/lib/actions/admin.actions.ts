@@ -54,6 +54,7 @@ const recipeFormSchema = z.object({
   steps: z.array(recipeStepSchema).min(1, "At least one step is required"),
   ingredients: z.array(recipeIngredientSchema).min(1, "At least one ingredient is required"),
   nutrition: nutritionSchema,
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 const ingredientFormSchema = z.object({
@@ -104,6 +105,7 @@ export async function createRecipe(values: RecipeFormValues) {
         unit: i.unit,
       })),
       nutrition: values.nutrition,
+      ...(values.imageUrl ? { imageUrl: values.imageUrl } : {}),
     });
 
     revalidatePath("/admin/recipes");
@@ -152,6 +154,7 @@ export async function updateRecipe(id: string, values: RecipeFormValues) {
           unit: i.unit,
         })),
         nutrition: values.nutrition,
+        imageUrl: values.imageUrl || undefined,
       },
       { new: true, runValidators: true },
     );

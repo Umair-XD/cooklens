@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,6 +65,7 @@ export default function MealSlotCard({
   isLoadingAlternatives,
   onLoadAlternatives,
 }: MealSlotCardProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -96,11 +98,19 @@ export default function MealSlotCard({
         ? "text-blue-500 bg-blue-500/10 border-blue-500/20"
         : "text-amber-500 bg-amber-500/10 border-amber-500/20";
 
+  const recipeId = recipe?._id?.toString();
+
   return (
-    <Card className="group relative border-none bg-card/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 glass overflow-hidden">
+    <Card
+      className={cn(
+        "group/card relative border border-transparent bg-card/60 shadow-sm transition-all duration-300 glass overflow-hidden",
+        recipeId && "cursor-pointer hover:shadow-md hover:border-primary/40 hover:bg-card/80"
+      )}
+      onClick={() => recipeId && router.push(`/recipes/${recipeId}`)}
+    >
       {/* Decorative gradient overlay */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-colors" />
-      
+      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover/card:bg-primary/10 transition-colors" />
+
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -108,8 +118,9 @@ export default function MealSlotCard({
             {mealLabel}
           </span>
         </div>
-        
-        <div className="relative" ref={containerRef}>
+
+        {/* stopPropagation so swap button doesn't trigger card navigation */}
+        <div className="relative" ref={containerRef} onClick={(e) => e.stopPropagation()}>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -172,7 +183,7 @@ export default function MealSlotCard({
       <CardContent className="px-4 pb-4 space-y-3 relative">
         {recipe ? (
           <>
-            <h3 className="text-sm font-bold leading-tight line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">
+            <h3 className="text-sm font-bold leading-tight line-clamp-2 min-h-[2.5rem] group-hover/card:text-primary transition-colors">
               {recipe.name}
             </h3>
             

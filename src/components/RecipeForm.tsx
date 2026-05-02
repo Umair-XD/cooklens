@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { ImageUploader } from "@/components/ImageUploader";
+import { createSubstitution } from "@/lib/actions/substitution.actions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,7 @@ const recipeFormSchema = z.object({
   cookTimeMinutes: z.coerce.number().min(0, "Must be 0 or greater"),
   servings: z.coerce.number().min(1, "Must be at least 1"),
   utensils: z.string().min(1, "At least one utensil is required"),
+  imageUrl: z.string().optional(),
   steps: z
     .array(
       z.object({
@@ -67,7 +70,7 @@ const recipeFormSchema = z.object({
 export type RecipeFormSchema = z.infer<typeof recipeFormSchema>;
 
 export interface RecipeFormProps {
-  recipe?: RecipeFormSchema & { _id?: string };
+  recipe?: RecipeFormSchema & { _id?: string; imageUrl?: string };
   ingredientOptions: { _id: string; canonicalName: string }[];
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -81,6 +84,7 @@ const defaultValues: RecipeFormSchema = {
   cookTimeMinutes: 0,
   servings: 1,
   utensils: "",
+  imageUrl: "",
   steps: [{ stepNumber: 1, instruction: "" }],
   ingredients: [{ ingredientId: "", quantity: 0, unit: "" }],
   nutrition: {
@@ -99,6 +103,10 @@ export function RecipeForm({
 }: RecipeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Substitution quick-add state
+  const [swaps, setSwaps] = useState<{ fromId: string; toId: string; note: string }[]>([]);
+  const [swapSaving, setSwapSaving] = useState(false);
 
   const form = useForm<RecipeFormSchema>({
     resolver: zodResolver(recipeFormSchema),
@@ -183,6 +191,7 @@ export function RecipeForm({
           carbsGrams: Number(values.nutrition.carbsGrams),
           fatGrams: Number(values.nutrition.fatGrams),
         },
+        imageUrl: values.imageUrl || undefined,
       };
 
       const result = recipe?._id
@@ -206,6 +215,20 @@ export function RecipeForm({
         return;
       }
 
+      // Save any pending substitution swaps
+      if (swaps.length > 0) {
+        setSwapSaving(true);
+        await Promise.allSettled(
+          swaps
+            .filter((s) => s.fromId && s.toId && s.note.trim())
+            .map((s) =>
+              createSubstitution({ fromIngredientId: s.fromId, toIngredientId: s.toId, impactNote: s.note }),
+            ),
+        );
+        setSwapSaving(false);
+        setSwaps([]);
+      }
+
       form.reset(defaultValues);
       onSuccess?.();
     } catch {
@@ -223,6 +246,28 @@ export function RecipeForm({
             {error}
           </div>
         )}
+
+        {/* Cover Image */}
+        <div>
+          <Label className="mb-2 block">Cover Image</Label>
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <ImageUploader
+                    variant="cover"
+                    folder="cooklens/recipes"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Basic info */}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -517,6 +562,95 @@ export function RecipeForm({
               )}
             />
           </div>
+        </div>
+
+        {/* Ingredient Swaps */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label>Ingredient Swaps (optional)</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setSwaps((prev) => [...prev, { fromId: "", toId: "", note: "" }])
+              }
+            >
+              <Plus className="w-4 h-4 mr-1" /> Add Swap
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Define what ingredient can substitute another. These are saved globally and appear in every recipe's Swaps tab.
+          </p>
+          {swaps.map((swap, idx) => (
+            <div key={idx} className="flex gap-2 items-center mb-2 flex-wrap">
+              <Select
+                value={swap.fromId}
+                onValueChange={(v) =>
+                  setSwaps((prev) =>
+                    prev.map((s, i) => (i === idx ? { ...s, fromId: v } : s)),
+                  )
+                }
+              >
+                <SelectTrigger className="flex-1 min-w-[130px]">
+                  <SelectValue placeholder="If missing…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ingredientOptions.map((ing) => (
+                    <SelectItem key={ing._id} value={ing._id}>
+                      {ing.canonicalName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+
+              <Select
+                value={swap.toId}
+                onValueChange={(v) =>
+                  setSwaps((prev) =>
+                    prev.map((s, i) => (i === idx ? { ...s, toId: v } : s)),
+                  )
+                }
+              >
+                <SelectTrigger className="flex-1 min-w-[130px]">
+                  <SelectValue placeholder="Use instead…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ingredientOptions
+                    .filter((i) => i._id !== swap.fromId)
+                    .map((ing) => (
+                      <SelectItem key={ing._id} value={ing._id}>
+                        {ing.canonicalName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              <Input
+                className="flex-1 min-w-[140px]"
+                placeholder="Impact note…"
+                value={swap.note}
+                onChange={(e) =>
+                  setSwaps((prev) =>
+                    prev.map((s, i) =>
+                      i === idx ? { ...s, note: e.target.value } : s,
+                    ),
+                  )
+                }
+              />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setSwaps((prev) => prev.filter((_, i) => i !== idx))}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
         </div>
 
         {/* Actions */}

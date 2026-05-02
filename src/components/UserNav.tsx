@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { User, Heart, Settings, LogOut } from "lucide-react";
+import { Heart, Settings, LogOut, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -78,28 +78,35 @@ export function UserNav({ session }: UserNavProps) {
           className="absolute right-0 mt-2 w-64 p-2 rounded-2xl bg-background shadow-premium border border-border/50 z-[100] animate-in fade-in zoom-in-95 duration-200 origin-top-right"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="font-normal p-3">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-black tracking-tight">{session.user.name}</p>
-              <p className="text-xs font-medium text-muted-foreground truncate">
-                {session.user.email}
-              </p>
+          <Link
+            href="/profile"
+            onClick={() => setIsOpen(false)}
+            className="group flex items-center justify-between gap-3 rounded-xl p-3 hover:bg-primary/5 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-9 w-9 border border-border/50 shrink-0">
+                <AvatarImage src={session.user.image || undefined} />
+                <AvatarFallback className="text-xs font-black bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-sm font-black tracking-tight leading-tight truncate">
+                  {session.user.name}
+                </p>
+                <p className="text-xs font-medium text-muted-foreground truncate">
+                  {session.user.email}
+                </p>
+              </div>
             </div>
-          </div>
-          
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
+          </Link>
+
           <div className="h-px bg-border/50 my-1 mx-1" />
-          
+
           <div className="py-1 flex flex-col gap-1">
-            <Link 
-              href="/profile" 
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2.5 font-bold text-sm rounded-xl hover:bg-primary/5 cursor-pointer p-2.5 transition-colors"
-            >
-              <User className="h-4 w-4 text-primary" />
-              Account Profile
-            </Link>
-            <Link 
-              href="/favorites" 
+            <Link
+              href="/favorites"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-2.5 font-bold text-sm rounded-xl hover:bg-primary/5 cursor-pointer p-2.5 transition-colors"
             >
