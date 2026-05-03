@@ -75,7 +75,7 @@ Keep answers grounded in this recipe's ingredients, timings, servings, and techn
 
 export async function POST(req: Request) {
   try {
-    const { messages, recipeContext } = await req.json();
+    const { messages, recipeContext, attachments } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -89,30 +89,87 @@ export async function POST(req: Request) {
     try {
       const model = aiGateway().getChatModel();
 
-      // convertToModelMessages can return non-iterable values with certain
-      // UIMessage shapes, so we fall back to a manual extraction when needed.
-      let modelMessages: ModelMessage[] = [];
-      try {
-        const converted = convertToModelMessages(messages);
-        if (Array.isArray(converted) && converted.length > 0) {
-          modelMessages = converted;
-        } else {
-          throw new Error("empty or non-array result");
+      // Build model messages manually so image (file) parts are never dropped.
+      // convertToModelMessages may silently strip file parts in some SDK versions,
+      // so we do the conversion ourselves and use it as the source of truth.
+      const modelMessages: ModelMessage[] = [];
+
+      for (const m of messages as any[]) {
+        const role = m.role as "user" | "assistant";
+
+        if (Array.isArray(m.parts) && m.parts.length > 0) {
+          const content: any[] = [];
+
+          for (const part of m.parts) {
+            if (part.type === "text" && typeof part.text === "string" && part.text) {
+              content.push({ type: "text", text: part.text });
+            } else if (part.type === "file" && part.url) {
+              // Image attachment — forward as-is (data URL or remote URL)
+              content.push({
+                type: "image",
+                image: part.url,
+                ...(part.mediaType ? { mimeType: part.mediaType } : {}),
+              });
+            }
+          }
+
+          if (content.length === 0) continue;
+
+          // Single plain-text messages can use the string shorthand
+          modelMessages.push({
+            role,
+            content:
+              content.length === 1 && content[0].type === "text"
+                ? content[0].text
+                : content,
+          });
+        } else if (typeof m.content === "string" && m.content) {
+          modelMessages.push({ role, content: m.content });
         }
-      } catch {
-        modelMessages = messages
-          .map((m: any) => {
-            const text = Array.isArray(m.parts)
-              ? m.parts
-                  .filter((p: any) => p.type === "text")
-                  .map((p: any) => p.text)
-                  .join("\n")
-              : typeof m.content === "string"
-              ? m.content
-              : "";
-            return { role: m.role as "user" | "assistant", content: text };
-          })
-          .filter((m: any) => m.content);
+      }
+
+      // Last-resort: if manual pass produced nothing, try the SDK helper
+      if (modelMessages.length === 0) {
+        try {
+          const converted = convertToModelMessages(messages);
+          if (Array.isArray(converted)) modelMessages.push(...converted);
+        } catch {
+          // ignore — we'll get the "no messages" error below
+        }
+      }
+
+      // Inject pre-encoded image attachments sent directly from the client.
+      // This guarantees the model receives real base64 data URLs even when the
+      // AI SDK transport stored ephemeral blob:// URLs in the message parts.
+      if (
+        Array.isArray(attachments) &&
+        attachments.length > 0 &&
+        modelMessages.length > 0
+      ) {
+        const lastMsg = modelMessages[modelMessages.length - 1];
+        if (lastMsg.role === "user") {
+          // Normalise content to an array of parts
+          const existingParts: any[] =
+            typeof lastMsg.content === "string"
+              ? [{ type: "text", text: lastMsg.content }]
+              : [...(lastMsg.content as any[])];
+
+          for (const att of attachments as { url: string; mediaType: string }[]) {
+            // Only add if not already present (avoid double-sending on correct SDKs)
+            const alreadyHas = existingParts.some(
+              (p) => p.type === "image" && p.image === att.url,
+            );
+            if (!alreadyHas && att.url) {
+              existingParts.push({
+                type: "image",
+                image: att.url,
+                ...(att.mediaType ? { mimeType: att.mediaType } : {}),
+              });
+            }
+          }
+
+          lastMsg.content = existingParts;
+        }
       }
 
       const result = streamText({

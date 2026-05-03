@@ -308,15 +308,39 @@ function ChatPage() {
   }, [recipeContext]);
 
   const handleSend = useCallback(
-    (text: string, files?: FileList) => {
+    async (text: string, files?: FileList) => {
       if (!text.trim() && (!files || files.length === 0)) return;
       isAtBottom.current = true;
+
+      // Pre-encode every image to base64 so the server always receives a
+      // proper data URL, regardless of what the AI SDK puts in the transport.
+      // (Some SDK versions store ephemeral blob:// URLs that are unreachable
+      // server-side, causing the model to never see the image.)
+      let attachments: { url: string; mediaType: string }[] | undefined;
+      if (files && files.length > 0) {
+        attachments = await Promise.all(
+          Array.from(files).map(
+            (file) =>
+              new Promise<{ url: string; mediaType: string }>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () =>
+                  resolve({ url: reader.result as string, mediaType: file.type });
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              }),
+          ),
+        );
+      }
+
       sendMessage(
         { text, files },
         {
-          body: recipeContextRef.current
-            ? { recipeContext: recipeContextRef.current }
-            : undefined,
+          body: {
+            ...(recipeContextRef.current
+              ? { recipeContext: recipeContextRef.current }
+              : {}),
+            ...(attachments && attachments.length > 0 ? { attachments } : {}),
+          },
         },
       );
       setLocalInput("");

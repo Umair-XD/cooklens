@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { ImageUploader } from "@/components/ImageUploader";
-import { createSubstitution } from "@/lib/actions/substitution.actions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,25 +103,39 @@ export function RecipeForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Substitution quick-add state
-  const [swaps, setSwaps] = useState<{ fromId: string; toId: string; note: string }[]>([]);
-  const [swapSaving, setSwapSaving] = useState(false);
+  // Build a fully-populated initial value so every input starts controlled.
+  // If recipe is provided it may be a partial RecipeRecord (no ingredients /
+  // steps / nutrition), so we merge with defaultValues to fill gaps.
+  const mergedDefaults: RecipeFormSchema = recipe
+    ? {
+        ...defaultValues,
+        ...recipe,
+        utensils: Array.isArray((recipe as any).utensils)
+          ? (recipe as any).utensils.join(", ")
+          : (recipe as any).utensils ?? "",
+        ingredients: (recipe as any).ingredients?.length
+          ? (recipe as any).ingredients
+          : defaultValues.ingredients,
+        steps: (recipe as any).steps?.length
+          ? (recipe as any).steps
+          : defaultValues.steps,
+        nutrition: (recipe as any).nutrition ?? defaultValues.nutrition,
+        imageUrl: (recipe as any).imageUrl ?? "",
+      }
+    : defaultValues;
 
   const form = useForm<RecipeFormSchema>({
     resolver: zodResolver(recipeFormSchema),
-    defaultValues: recipe ?? defaultValues,
+    defaultValues: mergedDefaults,
   });
 
+  // Re-sync if the recipe prop changes (e.g. switching edited record).
   useEffect(() => {
     if (recipe) {
-      form.reset({
-        ...recipe,
-        utensils: Array.isArray(recipe.utensils)
-          ? recipe.utensils.join(", ")
-          : recipe.utensils,
-      });
+      form.reset(mergedDefaults);
     }
-  }, [recipe, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe?._id]);
 
   const addStep = () => {
     const steps = form.getValues("steps");
@@ -215,20 +228,6 @@ export function RecipeForm({
         return;
       }
 
-      // Save any pending substitution swaps
-      if (swaps.length > 0) {
-        setSwapSaving(true);
-        await Promise.allSettled(
-          swaps
-            .filter((s) => s.fromId && s.toId && s.note.trim())
-            .map((s) =>
-              createSubstitution({ fromIngredientId: s.fromId, toIngredientId: s.toId, impactNote: s.note }),
-            ),
-        );
-        setSwapSaving(false);
-        setSwaps([]);
-      }
-
       form.reset(defaultValues);
       onSuccess?.();
     } catch {
@@ -306,16 +305,13 @@ export function RecipeForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Difficulty</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-[200]">
                     <SelectItem value="EASY">Easy</SelectItem>
                     <SelectItem value="MEDIUM">Medium</SelectItem>
                     <SelectItem value="HARD">Hard</SelectItem>
@@ -394,23 +390,20 @@ export function RecipeForm({
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
           </div>
-          {form.watch("ingredients").map((_, index) => (
+          {(form.watch("ingredients") || []).map((_, index) => (
             <div key={index} className="flex gap-2 items-start mb-2">
               <FormField
                 control={form.control}
                 name={`ingredients.${index}.ingredientId`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select ingredient" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="z-[200]">
                         {ingredientOptions.map((ing) => (
                           <SelectItem key={ing._id} value={ing._id}>
                             {ing.canonicalName}
@@ -456,7 +449,7 @@ export function RecipeForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeIngredient(index)}
-                disabled={form.watch("ingredients").length <= 1}
+                disabled={(form.watch("ingredients") || []).length <= 1}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -472,7 +465,7 @@ export function RecipeForm({
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
           </div>
-          {form.watch("steps").map((_, index) => (
+          {(form.watch("steps") || []).map((_, index) => (
             <div key={index} className="flex gap-2 items-start mb-2">
               <span className="pt-2 text-sm text-muted-foreground w-8 text-right">
                 {index + 1}.
@@ -497,7 +490,7 @@ export function RecipeForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeStep(index)}
-                disabled={form.watch("steps").length <= 1}
+                disabled={(form.watch("steps") || []).length <= 1}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -562,95 +555,6 @@ export function RecipeForm({
               )}
             />
           </div>
-        </div>
-
-        {/* Ingredient Swaps */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label>Ingredient Swaps (optional)</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setSwaps((prev) => [...prev, { fromId: "", toId: "", note: "" }])
-              }
-            >
-              <Plus className="w-4 h-4 mr-1" /> Add Swap
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            Define what ingredient can substitute another. These are saved globally and appear in every recipe's Swaps tab.
-          </p>
-          {swaps.map((swap, idx) => (
-            <div key={idx} className="flex gap-2 items-center mb-2 flex-wrap">
-              <Select
-                value={swap.fromId}
-                onValueChange={(v) =>
-                  setSwaps((prev) =>
-                    prev.map((s, i) => (i === idx ? { ...s, fromId: v } : s)),
-                  )
-                }
-              >
-                <SelectTrigger className="flex-1 min-w-[130px]">
-                  <SelectValue placeholder="If missing…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ingredientOptions.map((ing) => (
-                    <SelectItem key={ing._id} value={ing._id}>
-                      {ing.canonicalName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-
-              <Select
-                value={swap.toId}
-                onValueChange={(v) =>
-                  setSwaps((prev) =>
-                    prev.map((s, i) => (i === idx ? { ...s, toId: v } : s)),
-                  )
-                }
-              >
-                <SelectTrigger className="flex-1 min-w-[130px]">
-                  <SelectValue placeholder="Use instead…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ingredientOptions
-                    .filter((i) => i._id !== swap.fromId)
-                    .map((ing) => (
-                      <SelectItem key={ing._id} value={ing._id}>
-                        {ing.canonicalName}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-
-              <Input
-                className="flex-1 min-w-[140px]"
-                placeholder="Impact note…"
-                value={swap.note}
-                onChange={(e) =>
-                  setSwaps((prev) =>
-                    prev.map((s, i) =>
-                      i === idx ? { ...s, note: e.target.value } : s,
-                    ),
-                  )
-                }
-              />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setSwaps((prev) => prev.filter((_, i) => i !== idx))}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
         </div>
 
         {/* Actions */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,23 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ManualDialog, ManualDeleteDialog } from "@/components/ManualDialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -56,7 +40,7 @@ export default function SubstitutionsPage() {
   const [editing, setEditing] = useState<SubstitutionRow | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -93,9 +77,10 @@ export default function SubstitutionsPage() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setFormError(null);
-    startTransition(async () => {
+    setIsSaving(true);
+    try {
       const result = editing
         ? await updateSubstitution(editing._id, form)
         : await createSubstitution(form);
@@ -107,23 +92,23 @@ export default function SubstitutionsPage() {
       toast.success(editing ? "Substitution updated" : "Substitution created");
       setDialogOpen(false);
       await refresh();
-    });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDelete = (id: string) => setDeleteTarget(id);
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    startTransition(async () => {
-      const result = await deleteSubstitution(deleteTarget);
-      if (!result.success) {
-        toast.error((result as any).error ?? "Delete failed");
-      } else {
-        toast.success("Substitution deleted");
-        await refresh();
-      }
-      setDeleteTarget(null);
-    });
+    const result = await deleteSubstitution(deleteTarget);
+    if (!result.success) {
+      toast.error((result as any).error ?? "Delete failed");
+    } else {
+      toast.success("Substitution deleted");
+      await refresh();
+    }
+    setDeleteTarget(null);
   };
 
   return (
@@ -200,97 +185,95 @@ export default function SubstitutionsPage() {
       )}
 
       {/* Create / Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editing ? "Edit Swap" : "Add Swap"}
-            </DialogTitle>
-          </DialogHeader>
+      <ManualDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        title={editing ? "Edit Swap" : "Add Swap"}
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          {formError && (
+            <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+              {formError}
+            </p>
+          )}
 
-          <div className="space-y-4 py-2">
-            {formError && (
-              <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
-                {formError}
-              </p>
-            )}
+          <div className="space-y-2">
+            <Label>If you don't have…</Label>
+            <Select
+              value={form.fromIngredientId}
+              onValueChange={(v) =>
+                setForm((f) => ({ ...f, fromIngredientId: v }))
+              }
+            >
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Select ingredient" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl z-[200]">
+                {ingredients.map((i) => (
+                  <SelectItem key={i._id} value={i._id}>
+                    {i.canonicalName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <Label>If you don't have…</Label>
-              <Select
-                value={form.fromIngredientId}
-                onValueChange={(v) =>
-                  setForm((f) => ({ ...f, fromIngredientId: v }))
-                }
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Select ingredient" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {ingredients.map((i) => (
+          <div className="space-y-2">
+            <Label>You can use…</Label>
+            <Select
+              value={form.toIngredientId}
+              onValueChange={(v) =>
+                setForm((f) => ({ ...f, toIngredientId: v }))
+              }
+            >
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Select substitute" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl z-[200]">
+                {ingredients
+                  .filter((i) => i._id !== form.fromIngredientId)
+                  .map((i) => (
                     <SelectItem key={i._id} value={i._id}>
                       {i.canonicalName}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>You can use…</Label>
-              <Select
-                value={form.toIngredientId}
-                onValueChange={(v) =>
-                  setForm((f) => ({ ...f, toIngredientId: v }))
-                }
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Select substitute" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {ingredients
-                    .filter((i) => i._id !== form.fromIngredientId)
-                    .map((i) => (
-                      <SelectItem key={i._id} value={i._id}>
-                        {i.canonicalName}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Impact / Note</Label>
-              <Input
-                placeholder="e.g. Slightly less creamy texture"
-                value={form.impactNote}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, impactNote: e.target.value }))
-                }
-                className="rounded-xl"
-              />
-            </div>
+              </SelectContent>
+            </Select>
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
+          <div className="space-y-2">
+            <Label>Impact / Note</Label>
+            <Input
+              placeholder="e.g. Slightly less creamy texture"
+              value={form.impactNote}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, impactNote: e.target.value }))
+              }
               className="rounded-xl"
+            />
+          </div>
+
+          <div className="flex gap-3 justify-end pt-2">
+            <Button
+              variant="ghost"
+              className="rounded-xl font-bold"
               onClick={() => setDialogOpen(false)}
+              disabled={isSaving}
             >
               Cancel
             </Button>
             <Button
-              className="rounded-xl"
+              className="rounded-xl font-bold"
               onClick={handleSave}
               disabled={
-                isPending ||
+                isSaving ||
                 !form.fromIngredientId ||
                 !form.toIngredientId ||
                 !form.impactNote.trim()
               }
             >
-              {isPending ? (
+              {isSaving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : editing ? (
                 "Save Changes"
@@ -298,34 +281,18 @@ export default function SubstitutionsPage() {
                 "Create Swap"
               )}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </ManualDialog>
 
       {/* Delete confirm */}
-      <AlertDialog
+      <ManualDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
-      >
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this swap?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This substitution will be removed globally and won't appear in any
-              recipe's Swaps tab.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="rounded-xl bg-destructive hover:bg-destructive/90"
-              onClick={confirmDelete}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Delete Swap"
+        description="This substitution will be removed globally and won't appear in any recipe's Swaps tab."
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

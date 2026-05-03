@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -98,7 +98,7 @@ export function ManualDeleteDialog({
   itemName,
   onConfirm,
 }: ManualDeleteDialogProps) {
-  const [isDeleting, setIsDeleting] = (require("react").useState)(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
     setIsDeleting(true);
