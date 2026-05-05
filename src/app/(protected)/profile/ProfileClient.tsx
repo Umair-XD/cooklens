@@ -131,7 +131,7 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
 
           {/* ── Account Info (2 cols) ── */}
           <div
-            className="lg:col-span-2 flex flex-col rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="lg:col-span-2 flex flex-col rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ animationDelay: "100ms", animationFillMode: "both" }}
           >
             {/* Card header */}
@@ -213,7 +213,7 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
 
           {/* ── Preferences (3 cols) ── */}
           <div
-            className="lg:col-span-3 flex flex-col rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="lg:col-span-3 flex flex-col rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ animationDelay: "200ms", animationFillMode: "both" }}
           >
             {/* Card header */}

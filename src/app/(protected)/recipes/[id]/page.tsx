@@ -225,7 +225,7 @@ export default async function RecipeDetailPage({
             <RecipeDetailClient
               recipe={recipe}
               substitutionPanel={
-                <Suspense fallback={<div className="h-40 animate-pulse bg-muted/20 rounded-2xl" />}>
+                <Suspense fallback={<div className="h-40 animate-pulse bg-muted/20 rounded-xl" />}>
                   <SubstitutionPanelWrapper
                     ingredients={recipe.ingredients}
                     availableIngredientIds={availableIngredientIds}

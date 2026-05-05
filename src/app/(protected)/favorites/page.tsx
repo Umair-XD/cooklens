@@ -27,7 +27,7 @@ async function FavoritesList({ userId }: { userId: string }) {
         <div className="p-12 max-w-lg border-2 border-dashed border-border/50 rounded-[32px] flex flex-col items-center gap-6">
           <div className="relative">
              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
-             <div className="relative h-16 w-16 bg-background rounded-2xl border flex items-center justify-center text-muted-foreground/30">
+             <div className="relative h-16 w-16 bg-background rounded-xl border flex items-center justify-center text-muted-foreground/30">
                 <Bookmark className="h-8 w-8" />
              </div>
           </div>

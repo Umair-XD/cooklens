@@ -26,14 +26,14 @@ export function WeeklyPlanSkeleton() {
         <Skeleton className="h-8 w-48 rounded-lg" />
         <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
-      <div className="overflow-x-auto rounded-2xl border bg-muted/5 p-6 shadow-premium">
+      <div className="overflow-x-auto rounded-xl border bg-muted/5 p-6 shadow-premium">
         <div className="flex gap-6 min-w-[1200px]">
           {DAYS.map((day) => (
             <div key={day} className={`${COL_W} flex-shrink-0 space-y-4`}>
               <Skeleton className="h-6 w-16 mx-auto rounded" />
-              <Skeleton className="h-32 w-full rounded-2xl" />
-              <Skeleton className="h-32 w-full rounded-2xl" />
-              <Skeleton className="h-32 w-full rounded-2xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
             </div>
           ))}
         </div>
@@ -107,7 +107,7 @@ export default function WeeklyPlanView({
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/40 p-4 rounded-2xl border border-border/50 glass">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/40 p-4 rounded-xl border border-border/50 glass">
         <div className="flex items-center gap-4">
           <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
             <CalendarDays className="h-5 w-5" />
@@ -169,7 +169,7 @@ export default function WeeklyPlanView({
                 </div>
 
                 {/* Vertical Meal Stack */}
-                <div className="flex flex-col gap-1 bg-muted/5 rounded-3xl p-1 border border-border/50">
+                <div className="flex flex-col gap-1 bg-muted/5 rounded-xl p-1 border border-border/50">
                   {MEALS.map((meal) => {
                     const slot = planSlots.find(
                       (s) => s.dayIndex === dayIndex && s.mealType === meal,

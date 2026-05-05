@@ -152,7 +152,7 @@ export default async function HomePage() {
             {features.map((feature, i) => (
               <div
                 key={feature.title}
-                className="group relative p-6 rounded-2xl border border-border/50 bg-card/60 glass hover:border-primary/30 transition-all duration-300 overflow-hidden"
+                className="group relative p-6 rounded-xl border border-border/50 bg-card/60 glass hover:border-primary/30 transition-all duration-300 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div
@@ -213,7 +213,7 @@ export default async function HomePage() {
             ].map((item) => (
               <div
                 key={item.step}
-                className="relative flex flex-col gap-4 p-6 rounded-2xl border border-border/40 bg-card/10"
+                className="relative flex flex-col gap-4 p-6 rounded-xl border border-border/40 bg-card/10"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 border border-primary/10">
                   <item.icon className="h-6 w-6 text-primary" />
@@ -231,7 +231,7 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-6">
-          <div className="relative p-12 md:p-16 rounded-4xl border border-primary/10 bg-primary/5 text-center">
+          <div className="relative p-12 md:p-16 rounded-2xl border border-primary/10 bg-primary/5 text-center">
             <h2 className="text-4xl md:text-5xl font-black font-outfit tracking-tighter mb-4">
               Join CookLens. <br />
               <span className="text-primary italic">Start cooking today.</span>

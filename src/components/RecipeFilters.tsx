@@ -58,7 +58,7 @@ export function RecipeFilters({
   };
 
   return (
-    <div className={cn('flex flex-col gap-6 p-6 md:p-8 rounded-[2rem] glass-dark border-border/10 shadow-premium relative overflow-hidden', className)}>
+    <div className={cn('flex flex-col gap-6 p-6 md:p-8 rounded-xl glass-dark border-border/10 shadow-premium relative overflow-hidden', className)}>
       <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
          <Filter size={120} />
       </div>
@@ -76,10 +76,10 @@ export function RecipeFilters({
               updateFilters({ cuisineType: value || undefined })
             }
           >
-            <SelectTrigger id="cuisine-select" className="h-12 rounded-2xl bg-background/40 border-border/20 focus:ring-primary/20 transition-all font-bold">
+            <SelectTrigger id="cuisine-select" className="h-12 rounded-xl bg-background/40 border-border/20 focus:ring-primary/20 transition-all font-bold">
               <SelectValue placeholder="Any cuisine" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl glass p-1">
+            <SelectContent className="rounded-xl glass p-1">
               <SelectItem value="__any__" className="rounded-xl font-bold">Any cuisine</SelectItem>
               {cuisines.map((cuisine) => (
                 <SelectItem key={cuisine} value={cuisine} className="rounded-xl font-bold">
@@ -102,10 +102,10 @@ export function RecipeFilters({
               updateFilters({ difficulty: value || undefined })
             }
           >
-            <SelectTrigger id="difficulty-select" className="h-12 rounded-2xl bg-background/40 border-border/20 focus:ring-primary/20 transition-all font-bold">
+            <SelectTrigger id="difficulty-select" className="h-12 rounded-xl bg-background/40 border-border/20 focus:ring-primary/20 transition-all font-bold">
               <SelectValue placeholder="Any level" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl glass p-1">
+            <SelectContent className="rounded-xl glass p-1">
               <SelectItem value="__any__" className="rounded-xl font-bold">Any difficulty</SelectItem>
               {DIFFICULTY_OPTIONS.map((d) => (
                 <SelectItem key={d} value={d} className="rounded-xl font-bold">

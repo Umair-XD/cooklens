@@ -192,7 +192,7 @@ export function IngredientManager({
             return (
               <div
                 key={ingredient._id}
-                className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm"
+                className="rounded-xl border border-border/50 bg-card p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -239,13 +239,13 @@ export function IngredientManager({
             );
           })
         ) : (
-          <div className="rounded-2xl border border-dashed border-border/60 bg-card py-16 text-center font-medium text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-border/60 bg-card py-16 text-center font-medium text-muted-foreground">
             No ingredients found.
           </div>
         )}
       </div>
 
-      <div className="hidden rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm md:block">
+      <div className="hidden rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm md:block">
         <Table>
           <TableHeader className="bg-muted/30">
             {table.getHeaderGroups().map((headerGroup) => (

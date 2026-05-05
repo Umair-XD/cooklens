@@ -151,7 +151,7 @@ export default function SubstitutionsPage() {
           Loading…
         </div>
       ) : subs.length === 0 ? (
-        <div className="py-24 text-center border border-dashed border-border/60 rounded-2xl text-muted-foreground">
+        <div className="py-24 text-center border border-dashed border-border/60 rounded-xl text-muted-foreground">
           <p className="font-semibold">No substitutions yet.</p>
           <p className="text-sm mt-1">Click "Add Swap" to create the first one.</p>
         </div>
@@ -160,7 +160,7 @@ export default function SubstitutionsPage() {
           {subs.map((row) => (
             <div
               key={row._id}
-              className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/60 px-4 py-3 glass sm:flex-row sm:items-center"
+              className="flex flex-col gap-3 rounded-xl border border-border/50 bg-card/60 px-4 py-3 glass sm:flex-row sm:items-center"
             >
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <Badge

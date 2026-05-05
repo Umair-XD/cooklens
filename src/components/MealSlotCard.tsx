@@ -216,7 +216,7 @@ export default function MealSlotCard({
             </div>
           </>
         ) : (
-          <div className="py-6 flex flex-col items-center justify-center border border-dashed rounded-2xl bg-muted/5">
+          <div className="py-6 flex flex-col items-center justify-center border border-dashed rounded-xl bg-muted/5">
              <Target className="h-5 w-5 text-muted-foreground/30 mb-1" />
              <p className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-widest">No Selection</p>
           </div>

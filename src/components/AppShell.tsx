@@ -30,7 +30,7 @@ export async function FullHeader() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 bg-muted/30 p-1 rounded-2xl border border-border/50 glass">
+        <nav className="hidden lg:flex items-center gap-1 bg-muted/30 p-1 rounded-xl border border-border/50 glass">
           {navLinks.map((link) => (
             <Link
               key={link.href}

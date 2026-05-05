@@ -82,7 +82,7 @@ export default function PlannerPageClient({
           </div>
 
           {plan && (
-            <div className="flex items-center gap-3 p-1 rounded-2xl bg-muted/20 border border-border/50 glass">
+            <div className="flex items-center gap-3 p-1 rounded-xl bg-muted/20 border border-border/50 glass">
               <div className="px-4 py-2 rounded-xl bg-background/60 text-sm font-bold shadow-sm">
                 Current Plan Active
               </div>
@@ -91,7 +91,7 @@ export default function PlannerPageClient({
         </div>
 
         {error && (
-          <div className="mb-8 rounded-2xl border border-destructive/20 bg-destructive/5 px-6 py-4 flex items-center gap-3 text-sm font-semibold text-destructive animate-in bounce-in">
+          <div className="mb-8 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-4 flex items-center gap-3 text-sm font-semibold text-destructive animate-in bounce-in">
             <div className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
             {error}
           </div>
@@ -108,7 +108,7 @@ export default function PlannerPageClient({
             />
 
             {!plan && (
-              <div className="p-6 rounded-3xl border border-dashed border-border/60 bg-muted/5 flex flex-col items-center text-center gap-3">
+              <div className="p-6 rounded-xl border border-dashed border-border/60 bg-muted/5 flex flex-col items-center text-center gap-3">
                 <LayoutGrid className="h-8 w-8 text-muted-foreground/20" />
                 <p className="text-xs font-bold uppercase tracking-tighter text-muted-foreground/40">
                   Plan Preview Region
@@ -122,7 +122,7 @@ export default function PlannerPageClient({
             {isLoading && !plan && <WeeklyPlanSkeleton />}
 
             {!isLoading && !plan && (
-              <div className="relative group overflow-hidden rounded-3xl border border-dashed border-border/60 bg-muted/5 py-32 text-center transition-all hover:bg-muted/10">
+              <div className="relative group overflow-hidden rounded-xl border border-dashed border-border/60 bg-muted/5 py-32 text-center transition-all hover:bg-muted/10">
                 <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex flex-col items-center">
                   <div className="mb-6 p-4 rounded-full bg-background border shadow-premium animate-float">

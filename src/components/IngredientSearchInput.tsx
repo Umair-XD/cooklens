@@ -71,10 +71,10 @@ export function IngredientSearchInput({
 
   return (
     <div className="relative group">
-      <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-accent/20 rounded-[2rem] blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200 pointer-events-none" />
+      <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-accent/20 rounded-xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200 pointer-events-none" />
       <Command
         shouldFilter={false}
-        className="relative rounded-[1.5rem] border border-border/40 selection:bg-primary/20 bg-background/60 shadow-lg backdrop-blur-xl overflow-hidden focus-within:border-primary/50 transition-all"
+        className="relative rounded-lg border border-border/40 selection:bg-primary/20 bg-background/60 shadow-lg backdrop-blur-xl overflow-hidden focus-within:border-primary/50 transition-all"
       >
         <div className="flex items-center px-4 border-b border-border/10 bg-muted/20">
           <Search className="h-5 w-5 text-muted-foreground/60 mr-2" />

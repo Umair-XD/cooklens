@@ -57,7 +57,7 @@ export function ManualDialog({
       <div 
         ref={contentRef}
         className={cn(
-          "relative w-full max-w-lg bg-background rounded-3xl shadow-2xl border border-border/50 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300",
+          "relative w-full max-w-lg bg-background rounded-xl shadow-2xl border border-border/50 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300",
           className
         )}
       >

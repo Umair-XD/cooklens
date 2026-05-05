@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function RecipeCardSkeleton() {
   return (
     <div className="group relative h-full">
-      <Card className="relative overflow-hidden border-border/50 bg-card/60 glass h-full flex flex-col rounded-2xl animate-pulse">
+      <Card className="relative overflow-hidden border-border/50 bg-card/60 glass h-full flex flex-col rounded-xl animate-pulse">
         {/* Image Area Skeleton */}
         <div className="block relative aspect-[4/3] bg-muted/40 overflow-hidden">
           <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between z-10">

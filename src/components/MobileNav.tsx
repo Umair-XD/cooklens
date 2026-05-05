@@ -90,7 +90,7 @@ export function MobileNav({ session }: MobileNavProps) {
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
-                className="flex items-center gap-4 p-4 rounded-2xl text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-xl text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   <link.icon className="h-5 w-5" />

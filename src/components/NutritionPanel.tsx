@@ -60,7 +60,7 @@ export function NutritionPanel({
            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Calories</div>
         </GlassCard>
 
-        <div className="md:col-span-3 space-y-6 flex flex-col justify-center bg-muted/20 p-6 rounded-3xl border border-border/50">
+        <div className="md:col-span-3 space-y-6 flex flex-col justify-center bg-muted/20 p-6 rounded-xl border border-border/50">
           <MacroBar
             label="Protein"
             value={adjustedProtein}
@@ -85,7 +85,7 @@ export function NutritionPanel({
         </div>
       </div>
       
-      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20">
+      <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
          <p className="text-[10px] font-bold text-center text-primary uppercase tracking-[0.2em]">
             Values adjusted for {servings} serving{servings !== 1 ? "s" : ""}
          </p>

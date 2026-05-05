@@ -238,16 +238,16 @@ export default function SearchPageContent() {
         </div>
 
         {/* Search bar Area */}
-        <div className="mb-12 glass sm:p-1.5 p-1.5 rounded-2xl border border-border/50 shadow-premium animate-in fade-in slide-in-from-bottom-2 duration-500 relative z-10 w-full">
+        <div className="mb-12 glass sm:p-1.5 p-1.5 rounded-xl border border-border/50 shadow-premium animate-in fade-in slide-in-from-bottom-2 duration-500 relative z-10 w-full">
            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-            <div className="relative flex-1 group bg-background/50 sm:bg-transparent rounded-2xl">
+            <div className="relative flex-1 group bg-background/50 sm:bg-transparent rounded-xl">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
                 type="text"
                 placeholder="What do you feel like cooking?"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-12 pr-12 h-12 sm:h-14 bg-transparent border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-within:ring-0 text-sm sm:text-base font-medium placeholder:text-muted-foreground/40 rounded-2xl shadow-none"
+                className="w-full pl-12 pr-12 h-12 sm:h-14 bg-transparent border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-within:ring-0 text-sm sm:text-base font-medium placeholder:text-muted-foreground/40 rounded-xl shadow-none"
               />
               {query && (
                 <button
@@ -285,7 +285,7 @@ export default function SearchPageContent() {
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Desktop sidebar */}
           <aside id="filters-panel" className="hidden lg:block w-72 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700">
-            <div className="sticky top-24 rounded-2xl border border-border/50 bg-card/60 p-6 glass shadow-premium">
+            <div className="sticky top-24 rounded-xl border border-border/50 bg-card/60 p-6 glass shadow-premium">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 font-bold text-sm">
                    <Filter className="h-4 w-4 text-primary" />
@@ -321,7 +321,7 @@ export default function SearchPageContent() {
             {isLoading && <SearchResultsSkeleton />}
 
             {!isLoading && noResults && (
-              <div className="py-32 text-center rounded-2xl border border-dashed border-border/60 bg-muted/5">
+              <div className="py-32 text-center rounded-xl border border-dashed border-border/60 bg-muted/5">
                 <div className="mb-4 inline-flex p-4 rounded-full bg-background border shadow-sm">
                    <Search className="h-8 w-8 text-muted-foreground/20" />
                 </div>

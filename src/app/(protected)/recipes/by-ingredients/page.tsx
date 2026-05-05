@@ -147,7 +147,7 @@ export default function ByIngredientsPage() {
 
         {/* Ingredient selector */}
         <div className="mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="glass rounded-2xl border border-border/50 shadow-premium p-4 sm:p-5">
+          <div className="glass rounded-xl border border-border/50 shadow-premium p-4 sm:p-5">
 
             {/* Selected tags */}
             {selected.length > 0 && (
@@ -239,7 +239,7 @@ export default function ByIngredientsPage() {
         {isFetching && <SearchResultsSkeleton />}
 
         {!isFetching && noResults && (
-          <div className="py-32 text-center rounded-2xl border border-dashed border-border/60 bg-muted/5">
+          <div className="py-32 text-center rounded-xl border border-dashed border-border/60 bg-muted/5">
             <div className="mb-4 inline-flex p-4 rounded-full bg-background border shadow-sm">
               <ChefHat className="h-8 w-8 text-muted-foreground/20" />
             </div>

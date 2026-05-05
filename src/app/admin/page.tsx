@@ -53,7 +53,7 @@ function StatCard({
   bg?: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:p-5">
+    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card p-4 shadow-sm sm:p-5">
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative flex items-center gap-3">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${bg} ${color}`}>
@@ -96,7 +96,7 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:p-6 ${className}`}>
+    <div className={`rounded-xl border border-border/50 bg-card p-4 shadow-sm sm:p-6 ${className}`}>
       <div className="mb-5">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">
           {title}

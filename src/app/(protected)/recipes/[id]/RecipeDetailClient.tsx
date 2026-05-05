@@ -99,7 +99,7 @@ export function RecipeDetailClient({
           <Button
             type="button"
             onClick={handleAskAI}
-            className="h-11 w-full rounded-2xl px-5 font-bold shadow-sm md:w-auto"
+            className="h-11 w-full rounded-xl px-5 font-bold shadow-sm md:w-auto"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Ask AI
@@ -115,7 +115,7 @@ export function RecipeDetailClient({
         </div>
       </div>
 
-      <div className="overflow-hidden bg-card/60 backdrop-blur-xl border border-border/50 rounded-[2rem]">
+      <div className="overflow-hidden bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl">
         <Tabs defaultValue="ingredients" className="w-full">
           <TabsList className="w-full justify-start rounded-none bg-muted/20 p-1 h-12 sm:h-14 border-b border-border/50 overflow-x-auto flex-nowrap">
             <TabsTrigger
@@ -163,7 +163,7 @@ export function RecipeDetailClient({
                 {recipe.ingredients.map((ing, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between rounded-2xl border border-border/50 p-4 bg-card/40 glass group hover:border-primary/30 transition-all animate-in fade-in slide-in-from-bottom-2"
+                    className="flex items-center justify-between rounded-xl border border-border/50 p-4 bg-card/40 glass group hover:border-primary/30 transition-all animate-in fade-in slide-in-from-bottom-2"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-center gap-3">

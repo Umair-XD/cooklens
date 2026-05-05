@@ -108,8 +108,8 @@ const ChatMessage = memo(
             className={cn(
               "relative px-4 py-3 text-sm leading-relaxed break-words",
               isUser
-                ? "bg-primary text-primary-foreground font-medium rounded-2xl rounded-br-sm shadow-md shadow-primary/25 selection:bg-white/90 selection:text-slate-900"
-                : "bg-card border border-border/50 rounded-2xl rounded-bl-sm shadow-sm",
+                ? "bg-primary text-primary-foreground font-medium rounded-xl rounded-br-sm shadow-md shadow-primary/25 selection:bg-white/90 selection:text-slate-900"
+                : "bg-card border border-border/50 rounded-xl rounded-bl-sm shadow-sm",
             )}
           >
             {isUser ? (
@@ -239,7 +239,7 @@ function ThinkingIndicator() {
   return (
     <div className="flex items-end gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <AssistantAvatar className="h-9 w-9 mt-0.5" />
-      <div className="bg-card border border-border/50 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+      <div className="bg-card border border-border/50 rounded-xl rounded-bl-sm px-4 py-3 shadow-sm">
         <div className="flex items-center gap-1.5">
           <span
             className="h-2 w-2 rounded-full bg-primary/60 animate-bounce"
@@ -426,7 +426,7 @@ function ChatPage() {
           <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
             <div className="relative mb-5">
               <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-[2] opacity-40" />
-              <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/90 to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20">
+              <div className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20">
                 <ChefHat className="h-8 w-8 text-primary-foreground" />
               </div>
             </div>
@@ -504,7 +504,7 @@ function ChatPage() {
               {error && (
                 <Alert
                   variant="destructive"
-                  className="rounded-2xl bg-destructive/5 border-destructive/20 text-destructive"
+                  className="rounded-xl bg-destructive/5 border-destructive/20 text-destructive"
                 >
                   <div className="flex items-center gap-3">
                     <AlertCircle className="h-4 w-4 shrink-0" />

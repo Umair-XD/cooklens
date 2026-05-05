@@ -25,7 +25,7 @@ export function ServingsAdjuster({
   };
 
   return (
-    <div className="flex w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-primary/5 px-3 py-2 transition-all hover:border-primary/20 sm:w-auto sm:justify-start sm:px-3 sm:py-1.5">
+    <div className="flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-primary/10 bg-primary/5 px-3 py-2 transition-all hover:border-primary/20 sm:w-auto sm:justify-start sm:px-3 sm:py-1.5">
       <div className="flex min-w-0 items-center gap-2 sm:mr-2">
         <Users className="h-4 w-4 text-primary" />
         <span className="truncate text-[11px] font-black uppercase tracking-[0.2em] text-primary/70 sm:text-xs sm:tracking-widest">

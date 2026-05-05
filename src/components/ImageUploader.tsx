@@ -62,7 +62,7 @@ export function ImageUploader({
         <div
           className={cn(
             "group relative overflow-hidden border-2 border-dashed border-border/60 bg-muted/20 transition-colors hover:border-primary/40 hover:bg-muted/40 cursor-pointer",
-            isAvatar ? "h-24 w-24 rounded-full" : "h-44 w-full rounded-2xl",
+            isAvatar ? "h-24 w-24 rounded-full" : "h-44 w-full rounded-xl",
             uploading && "pointer-events-none opacity-60",
           )}
           onClick={() => inputRef.current?.click()}
