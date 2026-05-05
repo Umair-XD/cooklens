@@ -424,6 +424,7 @@ export function RecipeForm({
                       <Input
                         type="number"
                         min={0}
+                        step="any"
                         placeholder="Qty"
                         {...field}
                       />
@@ -509,7 +510,7 @@ export function RecipeForm({
                 <FormItem>
                   <FormLabel>Calories</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input type="number" min={0} step="any" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -522,7 +523,7 @@ export function RecipeForm({
                 <FormItem>
                   <FormLabel>Protein (g)</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input type="number" min={0} step="any" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -535,7 +536,7 @@ export function RecipeForm({
                 <FormItem>
                   <FormLabel>Carbs (g)</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input type="number" min={0} step="any" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -548,7 +549,7 @@ export function RecipeForm({
                 <FormItem>
                   <FormLabel>Fat (g)</FormLabel>
                   <FormControl>
-                    <Input type="number" min={0} {...field} />
+                    <Input type="number" min={0} step="any" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

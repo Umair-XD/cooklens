@@ -99,26 +99,19 @@ export function ImageUploader({
           )}
         </div>
 
-        {/* Remove button — corner X for avatar, text link for cover */}
+        {/* Remove button */}
         {value && !uploading && (
-          isAvatar ? (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onChange(""); }}
-              className="absolute top-0 right-0 h-6 w-6 rounded-full bg-destructive text-white flex items-center justify-center shadow-md hover:bg-destructive/90 transition-colors z-10"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onChange(""); }}
-              className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <X className="h-3 w-3" />
-              Remove image
-            </button>
-          )
+          <button
+            type="button"
+            aria-label="Remove image"
+            onClick={(e) => { e.stopPropagation(); onChange(""); }}
+            className={cn(
+              "absolute z-10 flex items-center justify-center rounded-full bg-destructive text-white shadow-md transition-colors hover:bg-destructive/90",
+              isAvatar ? "top-0 right-0 h-6 w-6" : "right-3 top-3 h-8 w-8",
+            )}
+          >
+            <X className={cn(isAvatar ? "h-3.5 w-3.5" : "h-4 w-4")} />
+          </button>
         )}
       </div>
 

@@ -34,10 +34,20 @@ export interface RecipeRecord {
   _id: string;
   name: string;
   cuisineType: string;
-  difficulty: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
+  imageUrl?: string;
+  utensils?: string[];
+  steps?: { stepNumber: number; instruction: string }[];
+  ingredients?: { ingredientId: string; quantity: number; unit: string }[];
+  nutrition?: {
+    caloriesPerServing: number;
+    proteinGrams: number;
+    carbsGrams: number;
+    fatGrams: number;
+  };
 }
 
 interface RecipeManagerProps {

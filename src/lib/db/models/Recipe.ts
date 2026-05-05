@@ -1,4 +1,4 @@
-import { Schema, model, models, Document, Types } from 'mongoose';
+import { Schema, model, models, Document, Types, deleteModel } from 'mongoose';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -38,6 +38,7 @@ export interface IRecipe extends Document {
 
 const RecipeSchema = new Schema<IRecipe>(
   {
+    imageUrl: { type: String },
     name: { type: String, required: true },
     cuisineType: { type: String, required: true },
     difficulty: { type: String, enum: ['EASY', 'MEDIUM', 'HARD'], required: true },
@@ -69,5 +70,9 @@ const RecipeSchema = new Schema<IRecipe>(
 );
 
 RecipeSchema.index({ name: 'text', cuisineType: 'text' });
+
+if (process.env.NODE_ENV !== 'production' && models.Recipe) {
+  deleteModel('Recipe');
+}
 
 export const Recipe = models.Recipe ?? model<IRecipe>('Recipe', RecipeSchema);

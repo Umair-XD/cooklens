@@ -15,6 +15,18 @@ export default async function AdminRecipesPage() {
     prepTimeMinutes: r.prepTimeMinutes,
     cookTimeMinutes: r.cookTimeMinutes,
     servings: r.servings,
+    imageUrl: r.imageUrl,
+    utensils: r.utensils ?? [],
+    steps: (r.steps ?? []).map((step) => ({
+      stepNumber: step.stepNumber,
+      instruction: step.instruction,
+    })),
+    ingredients: (r.ingredients ?? []).map((ingredient) => ({
+      ingredientId: ingredient.ingredientId.toString(),
+      quantity: ingredient.quantity,
+      unit: ingredient.unit,
+    })),
+    nutrition: r.nutrition,
   }));
 
   const ingredientOptions = ingredients.map((i) => ({

@@ -109,6 +109,7 @@ export async function createRecipe(values: RecipeFormValues) {
     });
 
     revalidatePath("/admin/recipes");
+    revalidatePath("/recipes");
     return { success: true, recipe: JSON.parse(JSON.stringify(recipe)) };
   } catch (error) {
     console.error("Error creating recipe:", error);
@@ -134,28 +135,30 @@ export async function updateRecipe(id: string, values: RecipeFormValues) {
   try {
     await dbConnect();
 
+    const recipeUpdate = {
+      name: values.name,
+      cuisineType: values.cuisineType,
+      difficulty: values.difficulty,
+      prepTimeMinutes: values.prepTimeMinutes,
+      cookTimeMinutes: values.cookTimeMinutes,
+      servings: values.servings,
+      utensils: values.utensils,
+      steps: values.steps.map((s) => ({
+        stepNumber: s.stepNumber,
+        instruction: s.instruction,
+      })),
+      ingredients: values.ingredients.map((i) => ({
+        ingredientId: new Types.ObjectId(i.ingredientId),
+        quantity: i.quantity,
+        unit: i.unit,
+      })),
+      nutrition: values.nutrition,
+      ...(values.imageUrl ? { imageUrl: values.imageUrl } : {}),
+    };
+
     const recipe = await Recipe.findByIdAndUpdate(
       id,
-      {
-        name: values.name,
-        cuisineType: values.cuisineType,
-        difficulty: values.difficulty,
-        prepTimeMinutes: values.prepTimeMinutes,
-        cookTimeMinutes: values.cookTimeMinutes,
-        servings: values.servings,
-        utensils: values.utensils,
-        steps: values.steps.map((s) => ({
-          stepNumber: s.stepNumber,
-          instruction: s.instruction,
-        })),
-        ingredients: values.ingredients.map((i) => ({
-          ingredientId: new Types.ObjectId(i.ingredientId),
-          quantity: i.quantity,
-          unit: i.unit,
-        })),
-        nutrition: values.nutrition,
-        imageUrl: values.imageUrl || undefined,
-      },
+      values.imageUrl ? recipeUpdate : { $set: recipeUpdate, $unset: { imageUrl: "" } },
       { new: true, runValidators: true },
     );
 
@@ -164,6 +167,8 @@ export async function updateRecipe(id: string, values: RecipeFormValues) {
     }
 
     revalidatePath("/admin/recipes");
+    revalidatePath("/recipes");
+    revalidatePath(`/recipes/${id}`);
     return { success: true, recipe: JSON.parse(JSON.stringify(recipe)) };
   } catch (error) {
     console.error("Error updating recipe:", error);
