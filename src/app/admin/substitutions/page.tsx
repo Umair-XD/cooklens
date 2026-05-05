@@ -129,13 +129,13 @@ export default function SubstitutionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div className="min-w-0">
-          <h1 className="text-2xl font-black font-outfit tracking-tight sm:text-3xl">
+          <h1 className="text-2xl font-black font-outfit tracking-tighter sm:text-3xl">
             Ingredient Swaps
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm font-medium text-muted-foreground sm:text-base">
             Define what can substitute for each ingredient and the impact it has.
           </p>
         </div>
