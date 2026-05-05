@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ChevronDown, X } from 'lucide-react';
 import {
   Command,
@@ -38,18 +39,70 @@ export function MultiSelect({
   className,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  const [dropdownStyle, setDropdownStyle] = React.useState<React.CSSProperties>();
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const updateDropdownPosition = React.useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const viewportPadding = 12;
+    const gap = 4;
+    const searchHeight = 45;
+    const preferredListHeight = Math.min(300, Math.max(180, options.length * 36));
+    const preferredHeight = searchHeight + preferredListHeight;
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding - gap;
+    const spaceAbove = rect.top - viewportPadding - gap;
+    const openAbove = spaceBelow < preferredHeight && spaceAbove > spaceBelow;
+    const availableHeight = Math.max(
+      160,
+      Math.min(preferredHeight, openAbove ? spaceAbove : spaceBelow),
+    );
+
+    setDropdownStyle({
+      left: Math.min(
+        Math.max(viewportPadding, rect.left),
+        window.innerWidth - rect.width - viewportPadding,
+      ),
+      top: openAbove ? rect.top - availableHeight - gap : rect.bottom + gap,
+      width: Math.min(rect.width, window.innerWidth - viewportPadding * 2),
+      maxHeight: availableHeight,
+      ['--multiselect-list-height' as string]: `${Math.max(96, availableHeight - searchHeight)}px`,
+    });
+  }, [options.length]);
 
   // Same pattern as UserNav — guaranteed to work
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    updateDropdownPosition();
+    window.addEventListener('resize', updateDropdownPosition);
+    window.addEventListener('scroll', updateDropdownPosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updateDropdownPosition);
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+    };
+  }, [open, updateDropdownPosition]);
 
   const toggle = (value: string) => {
     onChange(
@@ -71,10 +124,14 @@ export function MultiSelect({
     <div ref={containerRef} className={cn('relative', className)}>
       {/* Trigger — styled like SelectTrigger */}
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          updateDropdownPosition();
+          setOpen((v) => !v);
+        }}
         className={cn(
-          'flex h-11 w-full items-center justify-between rounded-xl border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+          'flex min-h-11 w-full items-center justify-between rounded-xl border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
           !selected.length && 'text-muted-foreground',
         )}
       >
@@ -101,11 +158,15 @@ export function MultiSelect({
       </button>
 
       {/* Dropdown — styled like SelectContent, uses Command for search + list */}
-      {open && (
-        <div className="absolute z-[200] mt-1 w-full overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 duration-100">
+      {open && dropdownStyle && createPortal(
+        <div
+          ref={dropdownRef}
+          style={dropdownStyle}
+          className="fixed z-[200] overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 duration-100"
+        >
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
-            <CommandList>
+            <CommandList className="max-h-[var(--multiselect-list-height)]">
               <CommandEmpty>{emptyText}</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => {
@@ -114,6 +175,7 @@ export function MultiSelect({
                     <CommandItem
                       key={option.value}
                       value={option.value}
+                      keywords={[option.label]}
                       onSelect={() => toggle(option.value)}
                     >
                       <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center">
@@ -126,7 +188,8 @@ export function MultiSelect({
               </CommandGroup>
             </CommandList>
           </Command>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

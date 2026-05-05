@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { ManualDialog, ManualDeleteDialog } from "@/components/ManualDialog";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/components/MultiSelect";
 import { toast } from "sonner";
 import {
   getAllSubstitutions,
@@ -29,7 +30,7 @@ interface IngredientOption {
   canonicalName: string;
 }
 
-const emptyForm = { fromIngredientId: "", toIngredientId: "", impactNote: "" };
+const emptyForm = { fromIngredientId: "", toIngredientIds: [] as string[], impactNote: "" };
 
 export default function SubstitutionsPage() {
   const [subs, setSubs] = useState<SubstitutionRow[]>([]);
@@ -70,7 +71,7 @@ export default function SubstitutionsPage() {
     setEditing(row);
     setForm({
       fromIngredientId: row.fromIngredientId,
-      toIngredientId: row.toIngredientId,
+      toIngredientIds: [row.toIngredientId],
       impactNote: row.impactNote,
     });
     setFormError(null);
@@ -81,13 +82,29 @@ export default function SubstitutionsPage() {
     setFormError(null);
     setIsSaving(true);
     try {
+      const [firstToIngredientId, ...additionalToIngredientIds] = form.toIngredientIds;
       const result = editing
-        ? await updateSubstitution(editing._id, form)
+        ? await updateSubstitution(editing._id, {
+            fromIngredientId: form.fromIngredientId,
+            toIngredientId: firstToIngredientId,
+            impactNote: form.impactNote,
+          })
         : await createSubstitution(form);
 
       if (!result.success) {
         setFormError((result as any).error ?? "Failed");
         return;
+      }
+      if (editing && additionalToIngredientIds.length > 0) {
+        const addResult = await createSubstitution({
+          fromIngredientId: form.fromIngredientId,
+          toIngredientIds: additionalToIngredientIds,
+          impactNote: form.impactNote,
+        });
+        if (!addResult.success) {
+          setFormError((addResult as any).error ?? "Failed to add extra substitutes");
+          return;
+        }
       }
       toast.success(editing ? "Substitution updated" : "Substitution created");
       setDialogOpen(false);
@@ -112,17 +129,17 @@ export default function SubstitutionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-black font-outfit tracking-tight">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-black font-outfit tracking-tight sm:text-3xl">
             Ingredient Swaps
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Define what can substitute for each ingredient and the impact it has.
           </p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
+        <Button onClick={openCreate} className="w-full gap-2 sm:w-auto">
           <Plus className="h-4 w-4" />
           Add Swap
         </Button>
@@ -139,29 +156,31 @@ export default function SubstitutionsPage() {
           <p className="text-sm mt-1">Click "Add Swap" to create the first one.</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {subs.map((row) => (
             <div
               key={row._id}
-              className="flex items-center gap-3 rounded-2xl border border-border/50 bg-card/60 px-4 py-3 glass"
+              className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/60 px-4 py-3 glass sm:flex-row sm:items-center"
             >
-              <Badge
-                variant="outline"
-                className="shrink-0 font-bold text-xs rounded-lg"
-              >
-                {row.fromName}
-              </Badge>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-              <Badge
-                variant="secondary"
-                className="shrink-0 font-bold text-xs rounded-lg"
-              >
-                {row.toName}
-              </Badge>
-              <span className="flex-1 text-sm text-muted-foreground truncate">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="max-w-full shrink-0 rounded-lg text-xs font-bold"
+                >
+                  <span className="truncate">{row.fromName}</span>
+                </Badge>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+                <Badge
+                  variant="secondary"
+                  className="max-w-full shrink-0 rounded-lg text-xs font-bold"
+                >
+                  <span className="truncate">{row.toName}</span>
+                </Badge>
+              </div>
+              <span className="min-w-0 flex-1 break-words text-sm text-muted-foreground sm:truncate">
                 {row.impactNote}
               </span>
-              <div className="flex gap-1 shrink-0">
+              <div className="flex shrink-0 justify-end gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -203,7 +222,11 @@ export default function SubstitutionsPage() {
             <Select
               value={form.fromIngredientId}
               onValueChange={(v) =>
-                setForm((f) => ({ ...f, fromIngredientId: v }))
+                setForm((f) => ({
+                  ...f,
+                  fromIngredientId: v,
+                  toIngredientIds: f.toIngredientIds.filter((id) => id !== v),
+                }))
               }
             >
               <SelectTrigger className="rounded-xl">
@@ -221,25 +244,18 @@ export default function SubstitutionsPage() {
 
           <div className="space-y-2">
             <Label>You can use…</Label>
-            <Select
-              value={form.toIngredientId}
-              onValueChange={(v) =>
-                setForm((f) => ({ ...f, toIngredientId: v }))
+            <MultiSelect
+              options={ingredients
+                .filter((i) => i._id !== form.fromIngredientId)
+                .map((i) => ({ label: i.canonicalName, value: i._id }))}
+              selected={form.toIngredientIds}
+              onChange={(selected) =>
+                setForm((f) => ({ ...f, toIngredientIds: selected }))
               }
-            >
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Select substitute" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl z-[200]">
-                {ingredients
-                  .filter((i) => i._id !== form.fromIngredientId)
-                  .map((i) => (
-                    <SelectItem key={i._id} value={i._id}>
-                      {i.canonicalName}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+              placeholder="Select one or more substitutes"
+              searchPlaceholder="Search substitutes..."
+              emptyText="No substitute ingredients found."
+            />
           </div>
 
           <div className="space-y-2">
@@ -269,7 +285,7 @@ export default function SubstitutionsPage() {
               disabled={
                 isSaving ||
                 !form.fromIngredientId ||
-                !form.toIngredientId ||
+                form.toIngredientIds.length === 0 ||
                 !form.impactNote.trim()
               }
             >

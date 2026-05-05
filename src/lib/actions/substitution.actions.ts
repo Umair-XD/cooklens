@@ -52,31 +52,43 @@ export async function getAllSubstitutions(): Promise<SubstitutionRow[]> {
 
 export async function createSubstitution(values: {
   fromIngredientId: string;
-  toIngredientId: string;
+  toIngredientId?: string;
+  toIngredientIds?: string[];
   impactNote: string;
 }) {
   const auth = await requireAdmin();
   if (!auth.success) return { success: false, error: auth.error };
 
-  if (!Types.ObjectId.isValid(values.fromIngredientId) || !Types.ObjectId.isValid(values.toIngredientId)) {
+  const toIngredientIds = values.toIngredientIds?.length
+    ? values.toIngredientIds
+    : values.toIngredientId
+      ? [values.toIngredientId]
+      : [];
+
+  if (!Types.ObjectId.isValid(values.fromIngredientId) || toIngredientIds.some((id) => !Types.ObjectId.isValid(id))) {
     return { success: false, error: "Invalid ingredient IDs" };
+  }
+  if (toIngredientIds.length === 0) {
+    return { success: false, error: "Select at least one substitute ingredient" };
   }
   if (!values.impactNote?.trim()) {
     return { success: false, error: "Impact note is required" };
   }
-  if (values.fromIngredientId === values.toIngredientId) {
+  if (toIngredientIds.includes(values.fromIngredientId)) {
     return { success: false, error: "From and To ingredients must differ" };
   }
 
   try {
     await dbConnect();
-    const sub = await IngredientSubstitution.create({
+    const uniqueToIngredientIds = [...new Set(toIngredientIds)];
+    const docs = uniqueToIngredientIds.map((toIngredientId) => ({
       fromIngredientId: new Types.ObjectId(values.fromIngredientId),
-      toIngredientId: new Types.ObjectId(values.toIngredientId),
+      toIngredientId: new Types.ObjectId(toIngredientId),
       impactNote: values.impactNote.trim(),
-    });
+    }));
+    const subs = await IngredientSubstitution.insertMany(docs);
     revalidatePath("/admin/substitutions");
-    return { success: true, id: sub._id.toString() };
+    return { success: true, ids: subs.map((sub) => sub._id.toString()) };
   } catch (err) {
     console.error("createSubstitution error:", err);
     return { success: false, error: "Failed to create substitution" };

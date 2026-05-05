@@ -181,7 +181,59 @@ function UserActionCell({
 
 export function UserManager({ users, currentUserId }: UserManagerProps) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-visible">
+    <>
+    <div className="space-y-3 md:hidden">
+      {users.map((user, index) => (
+        <div
+          key={user._id}
+          className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar className="h-10 w-10 shrink-0 border border-primary/20 bg-primary/10 text-primary">
+                <AvatarFallback className="font-bold text-xs">
+                  {user.displayName?.charAt(0).toUpperCase() ||
+                    user.email.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="break-words font-bold">
+                  {user.displayName || "No Name"}
+                </div>
+                <div className="break-all text-xs text-muted-foreground">
+                  {user.email}
+                </div>
+              </div>
+            </div>
+            <UserActionCell
+              user={user}
+              currentUserId={currentUserId}
+              isLast={index >= users.length - 2}
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            {user.role === "ADMIN" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-destructive">
+                <ShieldAlert className="h-3 w-3" /> Admin
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-foreground">
+                <Shield className="h-3 w-3" /> User
+              </span>
+            )}
+            <span className="text-xs font-medium text-muted-foreground">
+              {user.createdAt
+                ? formatDistanceToNow(new Date(user.createdAt), {
+                    addSuffix: true,
+                  })
+                : "Unknown"}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="hidden rounded-2xl border border-border/50 bg-card shadow-sm overflow-visible md:block">
       <div className="overflow-visible">
         <table className="w-full text-left text-sm">
           <thead className="bg-muted/30 text-xs uppercase tracking-widest text-muted-foreground">
@@ -249,5 +301,6 @@ export function UserManager({ users, currentUserId }: UserManagerProps) {
         </table>
       </div>
     </div>
+    </>
   );
 }

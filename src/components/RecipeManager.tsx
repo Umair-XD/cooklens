@@ -205,7 +205,73 @@ export function RecipeManager({
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+      <div className="space-y-3 md:hidden">
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => {
+            const recipe = row.original;
+            return (
+              <div
+                key={recipe._id}
+                className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words text-base font-black">
+                      {recipe.name}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="rounded-lg border border-primary/10 bg-primary/5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-primary">
+                        {recipe.cuisineType}
+                      </span>
+                      <span className="rounded-lg bg-muted px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                        {recipe.difficulty.toLowerCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary"
+                      onClick={() => handleEditClick(recipe)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => handleDeleteClick(recipe)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl bg-muted/40 p-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">Prep</p>
+                    <p className="text-sm font-black">{recipe.prepTimeMinutes}m</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">Cook</p>
+                    <p className="text-sm font-black">{recipe.cookTimeMinutes}m</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">Serves</p>
+                    <p className="text-sm font-black">{recipe.servings}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-card py-16 text-center font-medium text-muted-foreground">
+            No recipes found.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm md:block">
         <Table>
           <TableHeader className="bg-muted/30">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -251,11 +317,11 @@ export function RecipeManager({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between px-2">
-        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-2">
+        <div className="min-w-0 text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
           Showing {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} Pages
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             variant="ghost"
             size="sm"

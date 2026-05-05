@@ -185,7 +185,67 @@ export function IngredientManager({
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+      <div className="space-y-3 md:hidden">
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => {
+            const ingredient = row.original;
+            return (
+              <div
+                key={ingredient._id}
+                className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words text-base font-black">
+                      {ingredient.canonicalName}
+                    </p>
+                    <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+                      Aliases
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary"
+                      onClick={() => handleEditClick(ingredient)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => handleDeleteClick(ingredient)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {ingredient.aliases.length > 0 ? (
+                    ingredient.aliases.map((alias) => (
+                      <Badge key={alias} variant="secondary" className="rounded-md text-[10px] font-medium">
+                        {alias}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-xs italic text-muted-foreground/60">
+                      No aliases
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-card py-16 text-center font-medium text-muted-foreground">
+            No ingredients found.
+          </div>
+        )}
+      </div>
+
+      <div className="hidden rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm md:block">
         <Table>
           <TableHeader className="bg-muted/30">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -231,11 +291,11 @@ export function IngredientManager({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between px-2">
-        <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-2">
+        <div className="min-w-0 text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
           Showing {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} Pages
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             variant="ghost"
             size="sm"

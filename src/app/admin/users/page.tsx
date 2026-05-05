@@ -29,10 +29,10 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-3xl font-black font-outfit tracking-tighter">Manage Users</h1>
-          <p className="text-muted-foreground font-medium mt-1">View and manage system users and roles.</p>
+          <h1 className="text-2xl font-black font-outfit tracking-tighter sm:text-3xl">Manage Users</h1>
+          <p className="mt-1 text-sm font-medium text-muted-foreground sm:text-base">View and manage system users and roles.</p>
         </div>
       </div>
 

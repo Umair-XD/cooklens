@@ -53,7 +53,7 @@ function StatCard({
   bg?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5 shadow-sm relative overflow-hidden group">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:p-5">
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative flex items-center gap-3">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${bg} ${color}`}>
@@ -96,7 +96,7 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-border/50 bg-card p-6 shadow-sm ${className}`}>
+    <div className={`rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:p-6 ${className}`}>
       <div className="mb-5">
         <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground/60">
           {title}
@@ -210,13 +210,13 @@ export default async function AdminDashboardPage() {
   const newUsersThisWeek = userGrowthData.reduce((s, d) => s + d.count, 0);
 
   return (
-    <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 sm:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black font-outfit tracking-tighter">
+        <h1 className="text-2xl font-black font-outfit tracking-tighter sm:text-3xl">
           System Overview
         </h1>
-        <p className="text-muted-foreground font-medium mt-1">
+        <p className="text-sm text-muted-foreground font-medium mt-1 sm:text-base">
           High-level metrics and analytics across CookLens.
         </p>
       </div>
@@ -300,7 +300,7 @@ export default async function AdminDashboardPage() {
               {topFavoritedRaw.map((r: any, i: number) => (
                 <div
                   key={r._id?.toString()}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/40 transition-colors"
+                  className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-muted/40"
                 >
                   <span className="text-[10px] font-black text-muted-foreground/40 w-4 text-right shrink-0">
                     {i + 1}
@@ -311,7 +311,7 @@ export default async function AdminDashboardPage() {
                       {r.cuisineType}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex shrink-0 items-center gap-1">
                     <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
                     <span className="text-sm font-black tabular-nums">{r.count}</span>
                   </div>
@@ -330,7 +330,7 @@ export default async function AdminDashboardPage() {
               {recentUsersRaw.map((u: any) => (
                 <div
                   key={u._id?.toString()}
-                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/40 transition-colors"
+                  className="flex flex-wrap items-center gap-3 rounded-xl p-2 transition-colors hover:bg-muted/40 sm:flex-nowrap"
                 >
                   <div className="h-8 w-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">
                     {(u.displayName ?? u.email).charAt(0).toUpperCase()}
@@ -341,7 +341,7 @@ export default async function AdminDashboardPage() {
                     </p>
                     <p className="text-xs text-muted-foreground/60 truncate">{u.email}</p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0 text-muted-foreground/50">
+                  <div className="ml-11 flex shrink-0 items-center gap-1 text-muted-foreground/50 sm:ml-0">
                     <Clock className="h-3 w-3" />
                     <span className="text-[10px] font-medium whitespace-nowrap">
                       {formatDistanceToNow(new Date(u.createdAt), { addSuffix: true })}

@@ -46,7 +46,7 @@ export function ManualDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center p-3 sm:items-center sm:p-6">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
@@ -61,8 +61,8 @@ export function ManualDialog({
           className
         )}
       >
-        <div className="flex items-center justify-between p-6 border-b border-border/50">
-          <h2 className="text-2xl font-black tracking-tighter font-outfit">{title}</h2>
+        <div className="flex items-center justify-between gap-3 border-b border-border/50 p-4 sm:p-6">
+          <h2 className="min-w-0 break-words text-xl font-black tracking-tighter font-outfit sm:text-2xl">{title}</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -73,7 +73,7 @@ export function ManualDialog({
           </Button>
         </div>
         
-        <div className="p-6 overflow-y-auto max-h-[80vh]">
+        <div className="max-h-[78dvh] overflow-y-auto p-4 sm:max-h-[80vh] sm:p-6">
           {children}
         </div>
       </div>

@@ -14,7 +14,7 @@ export default async function AdminIngredientsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold tracking-tight">
+      <h2 className="text-2xl font-black font-outfit tracking-tighter sm:text-3xl">
         Ingredient Management
       </h2>
       <IngredientManager ingredients={ingredientData} />
