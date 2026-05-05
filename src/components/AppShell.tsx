@@ -18,6 +18,7 @@ export async function FullHeader() {
   const session = await getServerSessionSafe();
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full h-16 border-b border-border/40 bg-background/60 backdrop-blur-xl flex items-center shrink-0">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-10">
@@ -44,15 +45,15 @@ export async function FullHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="pr-2 border-r border-border/50 hidden sm:block">
+          <div className="hidden border-r border-border/50 pr-2 lg:block">
             <ThemeToggle />
           </div>
           <UserNav session={session} />
-          {/* Mobile Navigation */}
-          <MobileNav session={session} />
         </div>
       </div>
     </header>
+    <MobileNav />
+    </>
   );
 }
 

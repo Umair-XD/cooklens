@@ -7,7 +7,7 @@ import MealSlotCard, { MealSlotCardSkeleton } from "@/components/MealSlotCard";
 import { IMealPlan, IMealSlot, MealType } from "@/lib/db/models/MealPlan";
 import { IRecipe } from "@/lib/db/models/Recipe";
 import { swapMeal, getAlternatives } from "@/lib/actions/planner.actions";
-import { Download, RefreshCw, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, RefreshCw, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -26,7 +26,17 @@ export function WeeklyPlanSkeleton() {
         <Skeleton className="h-8 w-48 rounded-lg" />
         <Skeleton className="h-10 w-32 rounded-lg" />
       </div>
-      <div className="overflow-x-auto rounded-xl border bg-muted/5 p-6 shadow-premium">
+      <div className="space-y-4 rounded-xl border bg-muted/5 p-4 shadow-premium md:hidden">
+        <div className="grid grid-cols-7 gap-1">
+          {DAYS.map((day) => (
+            <Skeleton key={day} className="h-10 rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+      <div className="hidden overflow-x-auto rounded-xl border bg-muted/5 p-6 shadow-premium md:block">
         <div className="flex gap-6 min-w-[1200px]">
           {DAYS.map((day) => (
             <div key={day} className={`${COL_W} flex-shrink-0 space-y-4`}>
@@ -51,6 +61,8 @@ export default function WeeklyPlanView({
   >({});
   const [loadingAltId, setLoadingAltId] = useState<string | null>(null);
   const [swapping, setSwapping] = useState(false);
+  const todayIndex = (new Date().getDay() + 6) % 7;
+  const [selectedDayIndex, setSelectedDayIndex] = useState(todayIndex);
 
   const handleLoadAlternatives = useCallback(
     async (slotId: string) => {
@@ -104,6 +116,32 @@ export default function WeeklyPlanView({
   const weekStartDate = new Date(plan.weekStart);
   const weekLabel = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+  const renderMealStack = (dayIndex: number) => (
+    <div className="flex flex-col gap-1 rounded-xl border border-border/50 bg-muted/5 p-1">
+      {MEALS.map((meal) => {
+        const slot = planSlots.find(
+          (s) => s.dayIndex === dayIndex && s.mealType === meal,
+        ) as (typeof planSlots)[number] | undefined;
+        const recipe = (slot as any)?.recipeId ?? null;
+        const slotId = (slot as any)?._id?.toString() ?? "";
+        const alternatives = alternativesMap[slotId] ?? [];
+        const isLoading = loadingAltId === slotId;
+
+        return (
+          <MealSlotCard
+            key={`${dayIndex}-${meal}`}
+            slot={slot as any}
+            recipe={recipe}
+            onSwap={handleSwap}
+            alternatives={alternatives}
+            isLoadingAlternatives={isLoading}
+            onLoadAlternatives={handleLoadAlternatives}
+          />
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header Actions */}
@@ -118,7 +156,7 @@ export default function WeeklyPlanView({
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
           <Button 
             variant="outline" 
             size="sm" 
@@ -148,7 +186,48 @@ export default function WeeklyPlanView({
 
       {/* Main Grid Container */}
       <div className="relative">
-        <div className="overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar">
+        <div className="space-y-4 md:hidden">
+          <div className="grid grid-cols-7 gap-1 rounded-xl border border-border/50 bg-muted/20 p-1 glass">
+            {DAYS.map((dayName, dayIndex) => {
+              const selected = selectedDayIndex === dayIndex;
+
+              return (
+                <button
+                  key={dayName}
+                  type="button"
+                  onClick={() => setSelectedDayIndex(dayIndex)}
+                  className={cn(
+                    "relative rounded-lg px-1 py-3 text-center text-[10px] font-black uppercase tracking-wider transition-all",
+                    selected
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+                  )}
+                >
+                  {dayName}
+                  {dayIndex === todayIndex && (
+                    <span
+                      className={cn(
+                        "absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full",
+                        selected ? "bg-primary-foreground/90" : "bg-primary",
+                      )}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm font-black uppercase tracking-widest text-muted-foreground/70">
+              {DAYS[selectedDayIndex]}
+            </span>
+            <div className="h-1 w-8 rounded-full bg-border/40" />
+          </div>
+
+          {renderMealStack(selectedDayIndex)}
+        </div>
+
+        <div className="hidden overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar md:block">
           <div className="flex gap-6 min-w-[max-content]">
             {DAYS.map((dayName, dayIndex) => (
               <div
@@ -169,29 +248,7 @@ export default function WeeklyPlanView({
                 </div>
 
                 {/* Vertical Meal Stack */}
-                <div className="flex flex-col gap-1 bg-muted/5 rounded-xl p-1 border border-border/50">
-                  {MEALS.map((meal) => {
-                    const slot = planSlots.find(
-                      (s) => s.dayIndex === dayIndex && s.mealType === meal,
-                    ) as (typeof planSlots)[number] | undefined;
-                    const recipe = (slot as any)?.recipeId ?? null;
-                    const slotId = (slot as any)?._id?.toString() ?? "";
-                    const alternatives = alternativesMap[slotId] ?? [];
-                    const isLoading = loadingAltId === slotId;
-
-                    return (
-                      <MealSlotCard
-                        key={`${dayIndex}-${meal}`}
-                        slot={slot as any}
-                        recipe={recipe}
-                        onSwap={handleSwap}
-                        alternatives={alternatives}
-                        isLoadingAlternatives={isLoading}
-                        onLoadAlternatives={handleLoadAlternatives}
-                      />
-                    );
-                  })}
-                </div>
+                {renderMealStack(dayIndex)}
               </div>
             ))}
           </div>

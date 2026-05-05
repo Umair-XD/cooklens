@@ -130,7 +130,7 @@ const ChatInput = memo(
     return (
       <div
         className={cn(
-          "relative w-full max-w-4xl mx-auto px-4 bg-transparent",
+          "relative w-full max-w-4xl mx-auto px-3 bg-transparent sm:px-4",
           className,
         )}
       >
@@ -162,7 +162,7 @@ const ChatInput = memo(
             </div>
           )}
 
-          <div className="flex items-center gap-2 p-2 focus-within:outline-hidden">
+          <div className="flex items-center gap-1.5 p-1.5 focus-within:outline-hidden sm:gap-2 sm:p-2">
             <input
               type="file"
               ref={fileInputRef}
@@ -177,9 +177,9 @@ const ChatInput = memo(
               variant={null as any}
               size="icon"
               onClick={handleFileClick}
-              className="h-10 w-10 shrink-0 rounded-xl hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+              className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent sm:h-10 sm:w-10 sm:rounded-xl"
             >
-              <Paperclip className="h-5 w-5 text-muted-foreground/70" />
+              <Paperclip className="h-4 w-4 text-muted-foreground/70 sm:h-5 sm:w-5" />
             </Button>
 
             <Textarea
@@ -189,7 +189,7 @@ const ChatInput = memo(
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
               placeholder={placeholder}
-              className="min-h-[44px] max-h-[200px] w-full resize-none bg-transparent border-none focus-visible:ring-0 px-2 py-3 text-base leading-relaxed placeholder:text-muted-foreground/40 transition-all font-medium"
+              className="min-h-10 max-h-32 w-full resize-none bg-transparent border-none focus-visible:ring-0 px-1 py-2.5 text-sm leading-relaxed placeholder:text-muted-foreground/40 transition-all font-medium sm:min-h-[44px] sm:max-h-[200px] sm:px-2 sm:py-3 sm:text-base"
               rows={1}
               disabled={isStreaming}
             />
@@ -201,7 +201,7 @@ const ChatInput = memo(
                   variant="destructive"
                   size="icon"
                   onClick={onStop}
-                  className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-10 sm:w-10 sm:rounded-xl"
                 >
                   <Square className="h-4 w-4 fill-current text-white" />
                 </Button>
@@ -212,7 +212,7 @@ const ChatInput = memo(
                   disabled={!input.trim() && selectedFiles.length === 0}
                   onClick={submitMessage}
                   className={cn(
-                    "h-10 w-10 shrink-0 rounded-xl flex items-center justify-center focus-visible:ring-0 focus-visible:ring-offset-0",
+                    "h-9 w-9 shrink-0 rounded-lg flex items-center justify-center focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-10 sm:w-10 sm:rounded-xl",
                     !input.trim() && selectedFiles.length === 0
                       ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
                       : "bg-primary text-primary-foreground",
@@ -224,7 +224,7 @@ const ChatInput = memo(
             </div>
           </div>
         </div>
-        <div className="mt-2 text-center pb-2">
+        <div className="mt-1 text-center pb-0 sm:mt-2 sm:pb-2">
           <p className="text-[11px] text-muted-foreground/50 font-medium tracking-tight">
             ChefLens AI can make mistakes. Check important info.
           </p>

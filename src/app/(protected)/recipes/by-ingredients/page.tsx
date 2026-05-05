@@ -129,15 +129,15 @@ export default function ByIngredientsPage() {
 
   return (
     <div className="bg-background/50 min-h-screen">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
 
         {/* Header */}
-        <div className="mb-10 animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs mb-3">
+        <div className="mb-6 sm:mb-10">
+          <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs mb-2 sm:mb-3">
             <Sparkles className="h-4 w-4" />
             Ingredient Match
           </div>
-          <h1 className="text-4xl font-black font-outfit tracking-tighter lg:text-5xl mb-2">
+          <h1 className="text-3xl font-black font-outfit tracking-tighter sm:text-4xl lg:text-5xl mb-2">
             What's in your <span className="text-primary italic">kitchen?</span>
           </h1>
           <p className="text-muted-foreground font-medium text-sm max-w-lg">
@@ -146,8 +146,8 @@ export default function ByIngredientsPage() {
         </div>
 
         {/* Ingredient selector */}
-        <div className="mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="glass rounded-xl border border-border/50 shadow-premium p-4 sm:p-5">
+        <div className="mb-7 sm:mb-10">
+          <div className="glass rounded-xl border border-border/50 shadow-premium p-3 sm:p-5">
 
             {/* Selected tags */}
             {selected.length > 0 && (
@@ -190,14 +190,14 @@ export default function ByIngredientsPage() {
                       addIngredient(suggestions[0]);
                     }
                   }}
-                  className="pl-10 h-12 rounded-xl bg-background/60 border-border/50 focus-visible:ring-primary/30"
+                  className="pl-10 h-11 sm:h-12 rounded-xl bg-background/60 border-border/50 focus-visible:ring-primary/30"
                 />
 
                 {/* Autocomplete dropdown */}
                 {showSuggestions && (
                   <div
                     ref={suggestionsRef}
-                    className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-premium overflow-hidden"
+                    className="absolute left-0 right-0 top-full mt-1 z-50 max-h-64 overflow-y-auto rounded-xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-premium"
                   >
                     {suggestions.map((ing) => (
                       <button
@@ -220,7 +220,7 @@ export default function ByIngredientsPage() {
               <Button
                 onClick={findRecipes}
                 disabled={selected.length === 0 || isFetching}
-                className="h-12 px-8 rounded-xl font-bold shadow-none shrink-0"
+                className="h-11 sm:h-12 px-8 rounded-xl font-bold shadow-none shrink-0"
               >
                 <ChefHat className="h-4 w-4 mr-2" />
                 {isFetching ? "Finding…" : "Find Recipes"}
@@ -251,19 +251,18 @@ export default function ByIngredientsPage() {
         )}
 
         {!isFetching && results.length > 0 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+          <div className="space-y-5 sm:space-y-6">
             <div className="flex items-center gap-2 px-2">
               <LayoutGrid className="h-4 w-4 text-primary" />
               <span className="text-sm font-bold text-muted-foreground/80">
                 {results.length} recipe{results.length !== 1 ? "s" : ""} matched
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-              {results.map((recipe, i) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
+              {results.map((recipe) => (
                 <div
                   key={recipe._id}
-                  className="animate-in fade-in slide-in-from-bottom-4"
-                  style={{ animationDelay: `${i * 50}ms` }}
+                  className="transition-transform duration-200 hover:-translate-y-0.5"
                 >
                   <RecipeCard
                     _id={recipe._id}
@@ -284,7 +283,7 @@ export default function ByIngredientsPage() {
 
         {/* Placeholder when nothing searched yet */}
         {!isFetching && !hasSearched && selected.length === 0 && (
-          <div className="py-24 text-center animate-in fade-in duration-700">
+          <div className="py-16 text-center sm:py-24">
             <div className="inline-flex p-6 rounded-full bg-primary/5 border border-primary/10 mb-6">
               <ChefHat className="h-12 w-12 text-primary/30" />
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, ArrowRight, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ export default function SubstitutionsPage() {
   const [subs, setSubs] = useState<SubstitutionRow[]>([]);
   const [ingredients, setIngredients] = useState<IngredientOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SubstitutionRow | null>(null);
@@ -128,6 +129,10 @@ export default function SubstitutionsPage() {
     setDeleteTarget(null);
   };
 
+  const filteredSubs = subs.filter((row) =>
+    row.fromName.toLowerCase().includes(query.trim().toLowerCase()),
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
@@ -145,6 +150,28 @@ export default function SubstitutionsPage() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm group">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+          <Input
+            placeholder="Search source ingredient..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="h-11 rounded-xl border-border/50 bg-muted/30 pl-9 pr-4 transition-all focus:bg-background"
+          />
+        </div>
+        {query && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setQuery("")}
+            className="h-10 rounded-xl text-xs font-black uppercase tracking-widest text-muted-foreground"
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-24 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -155,52 +182,107 @@ export default function SubstitutionsPage() {
           <p className="font-semibold">No substitutions yet.</p>
           <p className="text-sm mt-1">Click "Add Swap" to create the first one.</p>
         </div>
+      ) : filteredSubs.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border/60 bg-card py-16 text-center font-medium text-muted-foreground">
+          No substitutions found.
+        </div>
       ) : (
-        <div className="space-y-3">
-          {subs.map((row) => (
+        <>
+        <div className="space-y-3 md:hidden">
+          {filteredSubs.map((row) => (
             <div
               key={row._id}
-              className="flex flex-col gap-3 rounded-xl border border-border/50 bg-card/60 px-4 py-3 glass sm:flex-row sm:items-center"
+              className="rounded-xl border border-border/50 bg-card p-4 shadow-sm"
             >
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+                    Source ingredient
+                  </p>
+                  <p className="mt-1 break-words text-base font-black">
+                    {row.fromName}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-lg text-primary hover:bg-primary/10 hover:text-primary"
+                    onClick={() => openEdit(row)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => handleDelete(row._id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2">
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                <Badge variant="secondary" className="rounded-lg text-xs font-bold">
+                  {row.toName}
+                </Badge>
+              </div>
+
+              <p className="mt-3 break-words text-sm text-muted-foreground">
+                {row.impactNote}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden rounded-xl border border-border/50 bg-card shadow-sm md:block">
+          <div className="divide-y divide-border/50">
+            {filteredSubs.map((row) => (
+              <div
+                key={row._id}
+                className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1.5fr)_auto] items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/20"
+              >
                 <Badge
                   variant="outline"
-                  className="max-w-full shrink-0 rounded-lg text-xs font-bold"
+                  className="max-w-full justify-self-start rounded-lg text-xs font-bold"
                 >
                   <span className="truncate">{row.fromName}</span>
                 </Badge>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
                 <Badge
                   variant="secondary"
-                  className="max-w-full shrink-0 rounded-lg text-xs font-bold"
+                  className="max-w-full justify-self-start rounded-lg text-xs font-bold"
                 >
                   <span className="truncate">{row.toName}</span>
                 </Badge>
+                <span className="min-w-0 truncate text-sm text-muted-foreground">
+                  {row.impactNote}
+                </span>
+                <div className="flex shrink-0 justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-primary hover:bg-primary/10 hover:text-primary"
+                    onClick={() => openEdit(row)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDelete(row._id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
-              <span className="min-w-0 flex-1 break-words text-sm text-muted-foreground sm:truncate">
-                {row.impactNote}
-              </span>
-              <div className="flex shrink-0 justify-end gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-lg"
-                  onClick={() => openEdit(row)}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(row._id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+        </>
       )}
 
       {/* Create / Edit Dialog */}

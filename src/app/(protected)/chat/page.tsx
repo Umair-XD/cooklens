@@ -88,7 +88,7 @@ const ChatMessage = memo(
     return (
       <div
         className={cn(
-          "flex items-start gap-3 md:gap-4 group/msg animate-in fade-in slide-in-from-bottom-4 duration-500",
+          "flex items-start gap-3 md:gap-4 group/msg animate-in slide-in-from-bottom-2 duration-200",
           isUser ? "flex-row-reverse" : "flex-row",
         )}
       >
@@ -237,7 +237,7 @@ ChatMessage.displayName = "ChatMessage";
 
 function ThinkingIndicator() {
   return (
-    <div className="flex items-end gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div className="flex items-end gap-3 md:gap-4 animate-in slide-in-from-bottom-2 duration-200">
       <AssistantAvatar className="h-9 w-9 mt-0.5" />
       <div className="bg-card border border-border/50 rounded-xl rounded-bl-sm px-4 py-3 shadow-sm">
         <div className="flex items-center gap-1.5">
@@ -418,25 +418,25 @@ function ChatPage() {
       ];
 
   return (
-    <div className="relative flex h-[calc(100dvh-4rem)] flex-col bg-background/30 overflow-hidden">
+    <div className="relative flex h-[calc(100dvh-4rem-6rem)] flex-col overflow-hidden bg-background/30 lg:h-[calc(100dvh-4rem)]">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.08),transparent)]" />
 
       <div className="flex-1 overflow-hidden relative">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-700">
-            <div className="relative mb-5">
-              <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-[2] opacity-40" />
-              <div className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20">
-                <ChefHat className="h-8 w-8 text-primary-foreground" />
+          <div className="h-full overflow-y-auto px-4 py-5 text-center sm:flex sm:flex-col sm:items-center sm:justify-center sm:py-8">
+            <div className="relative mb-4 mx-auto w-fit sm:mb-5">
+              <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full scale-[1.8] opacity-40" />
+              <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 sm:h-16 sm:w-16 sm:shadow-xl">
+                <ChefHat className="h-6 w-6 text-primary-foreground sm:h-8 sm:w-8" />
               </div>
             </div>
 
-            <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-2 text-foreground">
+            <h1 className="text-2xl md:text-5xl font-black tracking-tighter mb-1.5 text-foreground sm:mb-2">
               {recipeContext
                 ? `Ask about ${recipeContext.name}`
                 : "What's on the menu?"}
             </h1>
-            <p className="text-muted-foreground/60 text-sm md:text-base max-w-md mb-8 font-medium">
+            <p className="text-muted-foreground/60 text-sm md:text-base max-w-md mb-5 font-medium mx-auto sm:mb-8">
               {recipeContext ? (
                 <>
                   Recipe loaded:{" "}
@@ -450,14 +450,14 @@ function ChatPage() {
               )}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-lg text-left mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg text-left mb-5 sm:gap-2.5 sm:mb-8">
               {promptCards.map((card) => (
                 <button
                   key={card.text}
                   onClick={() => handleSend(card.text)}
-                  className="group flex items-start gap-3 p-3.5 rounded-xl border border-border/50 bg-card/50 hover:bg-card hover:border-primary/30 hover:shadow-sm transition-all text-left focus:outline-none"
+                  className="group flex items-start gap-3 rounded-xl border border-border/50 bg-card/50 p-3 text-left transition-transform duration-200 hover:-translate-y-0.5 hover:bg-card hover:border-primary/30 hover:shadow-sm active:scale-[0.98] focus:outline-none sm:p-3.5"
                 >
-                  <div className="mt-0.5 h-8 w-8 shrink-0 rounded-lg bg-primary/8 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                  <div className="mt-0.5 h-8 w-8 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
                     <card.icon className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors" />
                   </div>
                   <div>
@@ -540,20 +540,20 @@ function ChatPage() {
           variant="secondary"
           size="icon"
           onClick={scrollToBottom}
-          className="absolute bottom-28 right-6 h-9 w-9 rounded-full shadow-lg bg-card/90 backdrop-blur-md border border-border/50 hover:bg-card transition-all z-10 animate-in fade-in zoom-in duration-200"
+          className="absolute bottom-24 right-4 h-9 w-9 rounded-full shadow-lg bg-card/90 backdrop-blur-md border border-border/50 hover:bg-card transition-all z-10 animate-in zoom-in duration-150 sm:bottom-28 sm:right-6"
         >
           <ArrowDown className="h-4 w-4 text-primary" />
         </Button>
       )}
 
-      <div className="relative z-10 border-t border-border/30 bg-background/60 backdrop-blur-xl">
+      <div className="relative z-10 border-t border-border/30 bg-background/80 backdrop-blur-xl">
         <ChatInput
           input={localInput}
           onInputChange={setLocalInput}
           onSubmit={(e, files) => handleSend(localInput, files)}
           isStreaming={isStreaming || isLoading}
           onStop={async () => stop()}
-          className="pb-2"
+          className="pb-0 sm:pb-2"
         />
       </div>
     </div>

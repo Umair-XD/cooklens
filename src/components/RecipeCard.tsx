@@ -51,7 +51,7 @@ export function RecipeCard({
       >
         <Link
           href={`/recipes/${id}`}
-          className="block relative aspect-[4/3] bg-muted overflow-hidden"
+          className="block relative aspect-[16/10] bg-muted overflow-hidden sm:aspect-[4/3]"
         >
           {imageUrl ? (
             <img
@@ -103,14 +103,14 @@ export function RecipeCard({
         </Link>
 
         <Link href={`/recipes/${id}`} className="flex flex-col flex-1">
-          <CardHeader className="p-4 pb-2">
-            <h3 className="font-bold text-lg leading-tight line-clamp-2 hover:text-primary transition-colors">
+          <CardHeader className="p-3 pb-2 sm:p-4 sm:pb-2">
+            <h3 className="font-bold text-base leading-tight line-clamp-2 hover:text-primary transition-colors sm:text-lg">
               {name}
             </h3>
           </CardHeader>
 
-          <CardContent className="p-4 pt-0">
-            <div className="flex items-center justify-between gap-4 py-3 border-t border-border/30">
+          <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+            <div className="flex items-center justify-between gap-4 py-2.5 border-t border-border/30 sm:py-3">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground/60">
                   Prep Time

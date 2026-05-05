@@ -218,19 +218,19 @@ export default function SearchPageContent() {
 
   return (
     <div className="bg-background/50 min-h-screen">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:mb-10 sm:gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
               <RotateCcw className="h-4 w-4" />
               Recipe Discovery
             </div>
-            <h1 className="text-4xl font-black font-outfit tracking-tighter lg:text-5xl">
+            <h1 className="text-3xl font-black font-outfit tracking-tighter sm:text-4xl lg:text-5xl">
               Find your next <span className="text-primary italic">Meal</span>
             </h1>
           </div>
           <Link href="/recipes/by-ingredients">
-            <Button variant="outline" className="h-11 rounded-xl border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2 shrink-0">
+            <Button variant="outline" className="h-10 w-full rounded-xl border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2 shrink-0 sm:h-11 sm:w-auto">
               <Sparkles className="h-4 w-4" />
               Cook from pantry
             </Button>
@@ -238,7 +238,7 @@ export default function SearchPageContent() {
         </div>
 
         {/* Search bar Area */}
-        <div className="mb-12 glass sm:p-1.5 p-1.5 rounded-xl border border-border/50 shadow-premium animate-in fade-in slide-in-from-bottom-2 duration-500 relative z-10 w-full">
+        <div className="mb-7 glass p-1.5 rounded-xl border border-border/50 shadow-premium relative z-10 w-full sm:mb-12">
            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 sm:gap-2">
             <div className="relative flex-1 group bg-background/50 sm:bg-transparent rounded-xl">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -247,7 +247,7 @@ export default function SearchPageContent() {
                 placeholder="What do you feel like cooking?"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-12 pr-12 h-12 sm:h-14 bg-transparent border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-within:ring-0 text-sm sm:text-base font-medium placeholder:text-muted-foreground/40 rounded-xl shadow-none"
+                className="w-full pl-11 pr-11 h-11 sm:h-14 bg-transparent border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-within:ring-0 text-sm sm:text-base font-medium placeholder:text-muted-foreground/40 rounded-xl shadow-none"
               />
               {query && (
                 <button
@@ -266,7 +266,7 @@ export default function SearchPageContent() {
                 type="button"
                 variant="outline"
                 className={cn(
-                  "sm:hidden flex-1 h-12 rounded-xl border border-border/50 glass font-bold text-sm shadow-none focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0",
+                  "sm:hidden flex-1 h-11 rounded-xl border border-border/50 glass font-bold text-sm shadow-none focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0",
                   hasActiveFilters && "border-primary/50 bg-primary/5 text-primary"
                 )}
                 onClick={() => setMobileOpen(true)}
@@ -275,7 +275,7 @@ export default function SearchPageContent() {
                 Filters
               </Button>
 
-              <Button type="submit" className="flex-1 sm:flex-none h-12 sm:h-14 px-8 rounded-[1rem] font-bold shadow-none text-sm sm:text-base border border-transparent transition-transform hover:-translate-y-0.5 active:scale-95 focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0">
+              <Button type="submit" className="flex-1 sm:flex-none h-11 sm:h-14 px-8 rounded-xl font-bold shadow-none text-sm sm:text-base border border-transparent transition-transform hover:-translate-y-0.5 active:scale-95 focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0">
                 Search
               </Button>
             </div>
@@ -284,7 +284,7 @@ export default function SearchPageContent() {
 
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Desktop sidebar */}
-          <aside id="filters-panel" className="hidden lg:block w-72 shrink-0 animate-in fade-in slide-in-from-left-4 duration-700">
+          <aside id="filters-panel" className="hidden lg:block w-72 shrink-0">
             <div className="sticky top-24 rounded-xl border border-border/50 bg-card/60 p-6 glass shadow-premium">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 font-bold text-sm">
@@ -317,7 +317,7 @@ export default function SearchPageContent() {
           </aside>
 
           {/* Main content */}
-          <div className="min-w-0 flex-1 animate-in fade-in slide-in-from-right-4 duration-700">
+          <div className="min-w-0 flex-1">
             {isLoading && <SearchResultsSkeleton />}
 
             {!isLoading && noResults && (
@@ -343,12 +343,11 @@ export default function SearchPageContent() {
                    </div>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-                  {results.map((recipe, i) => (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
+                  {results.map((recipe) => (
                     <div 
                       key={recipe._id} 
-                      className="animate-in fade-in slide-in-from-bottom-4" 
-                      style={{ animationDelay: `${i * 50}ms` }}
+                      className="transition-transform duration-200 hover:-translate-y-0.5" 
                     >
                       <RecipeCard
                         _id={recipe._id}
@@ -384,13 +383,13 @@ export default function SearchPageContent() {
             />
             <div 
               className={cn(
-                "absolute bottom-0 left-0 right-0 max-h-[90vh] pb-12 glass bg-background/60 backdrop-blur-xl rounded-t-[2.5rem] p-8 shadow-premium overflow-y-auto border-t border-border/50 transition-transform duration-300 ease-out",
+                "absolute bottom-0 left-0 right-0 max-h-[90vh] pb-12 glass bg-background/80 backdrop-blur-xl rounded-t-2xl p-5 shadow-premium overflow-y-auto border-t border-border/50 transition-transform duration-300 ease-out sm:p-8",
                 mobileOpen ? "translate-y-0" : "translate-y-full"
               )}
             >
-              <div className="w-12 h-1.5 bg-muted/80 rounded-full mx-auto mb-8" />
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black font-outfit tracking-tighter">Refine Search</h2>
+              <div className="w-12 h-1.5 bg-muted/80 rounded-full mx-auto mb-5 sm:mb-8" />
+              <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-black font-outfit tracking-tighter">Refine Search</h2>
                 <Button
                   variant="ghost"
                   size="icon"

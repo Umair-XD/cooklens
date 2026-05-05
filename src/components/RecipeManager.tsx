@@ -147,7 +147,7 @@ export function RecipeManager({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-95"
+            className="h-8 w-8 rounded-lg text-primary hover:bg-primary/10 hover:text-primary transition-all active:scale-95"
             onClick={() => handleEditClick(row.original)}
           >
             <Pencil className="w-4 h-4" />
@@ -155,7 +155,7 @@ export function RecipeManager({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all active:scale-95"
+            className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive transition-all active:scale-95"
             onClick={() => handleDeleteClick(row.original)}
           >
             <Trash2 className="w-4 h-4" />
@@ -232,7 +232,7 @@ export function RecipeManager({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary"
+                      className="h-9 w-9 rounded-lg text-primary hover:bg-primary/10 hover:text-primary"
                       onClick={() => handleEditClick(recipe)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -240,7 +240,7 @@ export function RecipeManager({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                      className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => handleDeleteClick(recipe)}
                     >
                       <Trash2 className="h-4 w-4" />
