@@ -62,9 +62,14 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
       }
       if (trigger === 'update' && session) {
-        token = { ...token, ...session };
+        token.name = session.name ?? token.name;
+        token.email = session.email ?? token.email;
+        token.picture = session.image ?? token.picture;
       }
       return token;
     },
@@ -72,6 +77,9 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.picture as string;
       }
       return session;
     },
@@ -103,5 +111,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role?: string;
     id?: string;
+    picture?: string | null;
   }
 }

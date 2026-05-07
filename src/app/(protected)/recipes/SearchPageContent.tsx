@@ -232,7 +232,7 @@ export default function SearchPageContent() {
           <Link href="/recipes/by-ingredients">
             <Button variant="outline" className="h-10 w-full rounded-xl border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2 shrink-0 sm:h-11 sm:w-auto">
               <Sparkles className="h-4 w-4" />
-              Cook from pantry
+              Cook from ingredients
             </Button>
           </Link>
         </div>
@@ -275,7 +275,7 @@ export default function SearchPageContent() {
                 Filters
               </Button>
 
-              <Button type="submit" className="flex-1 sm:flex-none h-11 sm:h-14 px-8 rounded-xl font-bold shadow-none text-sm sm:text-base border border-transparent transition-transform hover:-translate-y-0.5 active:scale-95 focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0">
+              <Button type="submit" className="flex-1 sm:flex-none h-11 sm:h-14 px-8 rounded-xl font-bold shadow-none text-sm sm:text-base border border-transparent active:scale-95 focus:ring-0 focus-visible:ring-offset-0 focus-visible:ring-0">
                 Search
               </Button>
             </div>
@@ -345,10 +345,7 @@ export default function SearchPageContent() {
                 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
                   {results.map((recipe) => (
-                    <div 
-                      key={recipe._id} 
-                      className="transition-transform duration-200 hover:-translate-y-0.5" 
-                    >
+                    <div key={recipe._id}>
                       <RecipeCard
                         _id={recipe._id}
                         name={recipe.name}

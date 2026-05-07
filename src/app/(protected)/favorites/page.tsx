@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 function FavoritesSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <RecipeCardSkeleton key={i} />
       ))}
@@ -23,8 +23,8 @@ async function FavoritesList({ userId }: { userId: string }) {
 
   if (favorites.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="p-12 max-w-lg border-2 border-dashed border-border/50 rounded-[32px] flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center justify-center py-20 text-center sm:py-32">
+        <div className="flex max-w-lg flex-col items-center gap-6 rounded-xl border-2 border-dashed border-border/50 p-8 sm:p-12">
           <div className="relative">
              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
              <div className="relative h-16 w-16 bg-background rounded-xl border flex items-center justify-center text-muted-foreground/30">
@@ -48,9 +48,9 @@ async function FavoritesList({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {favorites.map((recipe, i) => (
-        <div key={recipe.id} className="animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 50}ms` }}>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+      {favorites.map((recipe) => (
+        <div key={recipe.id}>
           <RecipeCard
             _id={recipe.id}
             name={recipe.name}
@@ -58,6 +58,7 @@ async function FavoritesList({ userId }: { userId: string }) {
             difficulty={recipe.difficulty}
             prepTimeMinutes={recipe.prepTimeMinutes}
             cookTimeMinutes={recipe.cookTimeMinutes}
+            imageUrl={recipe.imageUrl}
             initialIsFavorite={true}
           />
         </div>
@@ -69,14 +70,14 @@ async function FavoritesList({ userId }: { userId: string }) {
 export default function FavoritesPage() {
   return (
     <div className="bg-background/50 min-h-screen">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end sm:mb-10">
           <div className="space-y-2">
              <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
                 <Heart className="h-4 w-4 fill-current" />
                 Favorites
              </div>
-             <h1 className="text-4xl font-black font-outfit tracking-tighter lg:text-5xl">
+             <h1 className="text-3xl font-black font-outfit tracking-tighter sm:text-4xl lg:text-5xl">
                Your <span className="text-primary italic">Recipes</span>
              </h1>
           </div>

@@ -22,6 +22,7 @@ export async function getUserFavorites(userId: string) {
       difficulty: (fav.recipeId as any).difficulty,
       prepTimeMinutes: (fav.recipeId as any).prepTimeMinutes,
       cookTimeMinutes: (fav.recipeId as any).cookTimeMinutes,
+      imageUrl: (fav.recipeId as any).imageUrl,
       nutrition: (fav.recipeId as any).nutrition,
     }));
   } catch (error) {

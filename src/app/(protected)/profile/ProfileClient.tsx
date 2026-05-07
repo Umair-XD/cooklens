@@ -89,7 +89,11 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
         return;
       }
       toast.success("Profile saved!");
-      await updateSession?.();
+      await updateSession?.({
+        name: displayName,
+        email,
+        image: photoUrl || null,
+      });
     });
   };
 

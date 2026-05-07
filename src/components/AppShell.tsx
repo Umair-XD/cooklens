@@ -12,7 +12,18 @@ const navLinks = [
   { href: "/chat", label: "Assistant", icon: MessageSquare },
 ];
 
-
+function BrandLogo({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link href="/" className="group flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+        <ChefHat className="h-5 w-5" />
+      </div>
+      <span className={compact ? "text-xl font-black tracking-tighter font-outfit" : "text-xl font-black tracking-tighter font-outfit"}>
+        CookLens
+      </span>
+    </Link>
+  );
+}
 
 export async function FullHeader() {
   const session = await getServerSessionSafe();
@@ -22,12 +33,7 @@ export async function FullHeader() {
     <header className="sticky top-0 z-50 w-full h-16 border-b border-border/40 bg-background/60 backdrop-blur-xl flex items-center shrink-0">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <ChefHat className="h-5 w-5 fill-current" />
-            </div>
-            <span className="text-xl font-black tracking-tighter font-outfit">CookLens</span>
-          </Link>
+          <BrandLogo />
         </div>
 
         {/* Desktop Navigation */}
@@ -61,12 +67,7 @@ export function AuthHeader() {
   return (
     <header className="sticky top-0 z-50 w-full bg-transparent">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-            <ChefHat className="h-5 w-5 fill-current" />
-          </div>
-          <span className="text-xl font-black tracking-tighter font-outfit">CookLens</span>
-        </Link>
+        <BrandLogo />
         <ThemeToggle />
       </div>
     </header>

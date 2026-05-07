@@ -260,10 +260,7 @@ export default function ByIngredientsPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3">
               {results.map((recipe) => (
-                <div
-                  key={recipe._id}
-                  className="transition-transform duration-200 hover:-translate-y-0.5"
-                >
+                <div key={recipe._id}>
                   <RecipeCard
                     _id={recipe._id}
                     name={recipe.name}

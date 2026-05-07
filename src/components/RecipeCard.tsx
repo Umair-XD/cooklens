@@ -45,7 +45,7 @@ export function RecipeCard({
     <div className="group relative h-full">
       <Card
         className={cn(
-          "relative overflow-hidden border-border/50 bg-card/60 glass h-full flex flex-col transition-all duration-200 rounded-xl",
+          "relative overflow-hidden border border-border/50 bg-card/60 glass h-full flex flex-col rounded-xl transition-colors duration-200 hover:border-primary/40",
           className,
         )}
       >

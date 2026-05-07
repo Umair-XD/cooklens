@@ -89,7 +89,7 @@ export default async function HomePage() {
           <h1 className="max-w-4xl text-5xl font-black leading-[1.02] tracking-tighter sm:text-7xl md:text-8xl font-outfit">
             Cook more.
             <br />
-            <span className="text-muted-foreground/40">Stress less.</span>
+            <span className="text-primary/80">Stress less.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg md:text-xl font-medium text-muted-foreground leading-relaxed">
