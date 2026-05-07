@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Heart, Settings, LogOut, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut } from "next-auth/react";
-import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface UserNavProps {
   session: any;
@@ -103,6 +103,16 @@ export function UserNav({ session }: UserNavProps) {
           </Link>
 
           <div className="h-px bg-border/50 my-1 mx-1" />
+
+          <div className="lg:hidden flex items-center justify-between gap-3 rounded-xl p-2.5">
+            <div className="min-w-0">
+              <p className="text-sm font-bold leading-tight">Theme</p>
+              <p className="text-xs font-medium text-muted-foreground leading-tight">Switch light or dark mode</p>
+            </div>
+            <ThemeToggle />
+          </div>
+
+          <div className="lg:hidden h-px bg-border/50 my-1 mx-1" />
 
           <div className="py-1 flex flex-col gap-1">
             <Link
