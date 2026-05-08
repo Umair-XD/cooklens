@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -67,11 +68,17 @@ export default function MealSlotCard({
 }: MealSlotCardProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const inContainer = containerRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inContainer && !inDropdown) {
         setIsOpen(false);
       }
     };
@@ -86,6 +93,17 @@ export default function MealSlotCard({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  const handleToggle = () => {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   const mealLabel =
     slot.mealType.charAt(0) + slot.mealType.slice(1).toLowerCase();
@@ -103,13 +121,15 @@ export default function MealSlotCard({
   return (
     <Card
       className={cn(
-        "group/card relative border border-transparent bg-card/60 shadow-sm transition-all duration-300 glass overflow-hidden",
+        "group/card relative border border-transparent bg-card/60 shadow-sm transition-all duration-300 glass",
         recipeId && "cursor-pointer hover:shadow-md hover:border-primary/40 hover:bg-card/80"
       )}
       onClick={() => recipeId && router.push(`/recipes/${recipeId}`)}
     >
-      {/* Decorative gradient overlay */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover/card:bg-primary/10 transition-colors" />
+      {/* Decorative gradient overlay - clipped within card bounds */}
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover/card:bg-primary/10 transition-colors" />
+      </div>
 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
         <div className="flex items-center gap-2">
@@ -121,23 +141,29 @@ export default function MealSlotCard({
 
         {/* stopPropagation so swap button doesn't trigger card navigation */}
         <div className="relative" ref={containerRef} onClick={(e) => e.stopPropagation()}>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            ref={buttonRef}
+            variant="ghost"
+            size="icon"
             className="h-7 w-7 rounded-full hover:bg-primary/10 transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={handleToggle}
           >
             <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
           </Button>
 
-          {isOpen && (
-            <div className="absolute right-0 top-full mt-1 w-64 p-2 rounded-xl bg-background shadow-premium border border-border/50 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+          {isOpen && typeof document !== "undefined" && createPortal(
+            <div
+              ref={dropdownRef}
+              style={{ position: "fixed", top: dropdownPos.top, right: dropdownPos.right }}
+              className="w-64 p-2 rounded-xl bg-background shadow-premium border border-border/50 z-[9999] animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 <Zap className="h-3 w-3" />
                 Swap Options
               </div>
               <div className="h-px bg-border/40 my-1 mx-0.5" />
-              
+
               {isLoadingAlternatives ? (
                 <div className="px-2 py-4 flex flex-col gap-2">
                   <Skeleton className="h-8 w-full rounded-lg" />
@@ -147,7 +173,6 @@ export default function MealSlotCard({
                 <button
                   onClick={() => {
                     onLoadAlternatives(slot._id?.toString() ?? "");
-                    // Note: we don't necessarily close here as it might show loading state
                   }}
                   className="w-full flex items-center rounded-lg p-2 hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer text-left font-medium text-sm group/item"
                 >
@@ -166,16 +191,17 @@ export default function MealSlotCard({
                       className="w-full flex flex-col items-start rounded-lg p-2 hover:bg-primary/5 transition-all cursor-pointer border border-transparent hover:border-primary/20 text-left"
                     >
                       <div className="flex w-full items-center justify-between gap-2">
-                         <span className="truncate text-sm font-bold">{alt.name}</span>
-                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
-                           {alt.nutrition?.caloriesPerServing ?? 0} kcal
-                         </span>
+                        <span className="truncate text-sm font-bold">{alt.name}</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                          {alt.nutrition?.caloriesPerServing ?? 0} kcal
+                        </span>
                       </div>
                     </button>
                   ))}
                 </div>
               )}
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       </CardHeader>
