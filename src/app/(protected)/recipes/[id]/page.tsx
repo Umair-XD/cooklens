@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -77,18 +78,20 @@ async function getRecipe(id: string): Promise<RecipeData | null> {
     return null;
   }
 
-  const ingredientsWithDetails: IngredientWithDetails[] = [];
-  for (const ing of recipe.ingredients) {
-    const ingredient = (await Ingredient.findById(
-      ing.ingredientId,
-    ).lean()) as unknown as IIngredient | null;
-    ingredientsWithDetails.push({
-      ingredientId: ing.ingredientId.toString(),
-      quantity: ing.quantity,
-      unit: ing.unit,
-      canonicalName: ingredient?.canonicalName ?? "Unknown",
-    });
-  }
+  const ingredientIds = recipe.ingredients.map((ing) => ing.ingredientId);
+  const fetchedIngredients = (await Ingredient.find(
+    { _id: { $in: ingredientIds } },
+    { _id: 1, canonicalName: 1 },
+  ).lean()) as unknown as Pick<IIngredient, "_id" | "canonicalName">[];
+  const ingredientMap = new Map(
+    fetchedIngredients.map((i) => [i._id.toString(), i.canonicalName]),
+  );
+  const ingredientsWithDetails: IngredientWithDetails[] = recipe.ingredients.map((ing) => ({
+    ingredientId: ing.ingredientId.toString(),
+    quantity: ing.quantity,
+    unit: ing.unit,
+    canonicalName: ingredientMap.get(ing.ingredientId.toString()) ?? "Unknown",
+  }));
 
   return {
     _id: recipe._id.toString(),
@@ -157,10 +160,13 @@ export default async function RecipeDetailPage({
         <div className="mx-auto w-full max-w-7xl px-0 sm:px-6 lg:px-6">
           <div className="relative w-full overflow-hidden aspect-video">
             {recipe.imageUrl ? (
-              <img
+              <Image
                 src={recipe.imageUrl}
                 alt={recipe.name}
-                className="w-full h-full object-cover"
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
               />
             ) : (
               <div className="w-full h-full bg-muted/30 flex items-center justify-center">

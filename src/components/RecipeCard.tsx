@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, ChefHat, Flame, Star } from "lucide-react";
@@ -54,10 +55,12 @@ export function RecipeCard({
           className="block relative aspect-[16/10] bg-muted overflow-hidden sm:aspect-[4/3]"
         >
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 bg-linear-to-br from-muted to-muted/50">
