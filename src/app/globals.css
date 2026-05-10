@@ -81,6 +81,9 @@
 
     html {
         scroll-behavior: smooth;
+        overflow-x: hidden;
+        /* Use dvh so Android WebView excludes the system chrome */
+        height: 100%;
     }
 
     body {
@@ -89,6 +92,12 @@
         font-feature-settings: "rlig" 1, "calt" 1;
         -webkit-font-smoothing: antialiased;
         overscroll-behavior: none;
+        overflow-x: hidden;
+        min-height: 100dvh;
+        /* Prevent tap highlight on Android */
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent text size adjustment on orientation change */
+        -webkit-text-size-adjust: 100%;
     }
 
     /* Hide all scrollbars globally */

@@ -217,7 +217,7 @@ export default function SearchPageContent() {
     filters.maxCookTime < 120;
 
   return (
-    <div className="bg-background/50 min-h-screen">
+    <div className="bg-background/50 min-h-dvh">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:mb-10 sm:gap-6">
           <div className="space-y-2">

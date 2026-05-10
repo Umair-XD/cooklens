@@ -227,7 +227,7 @@ export default function WeeklyPlanView({
           {renderMealStack(selectedDayIndex)}
         </div>
 
-        <div className="hidden overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar md:block">
+        <div className="hidden overflow-x-auto pb-6 custom-scrollbar md:block">
           <div className="flex gap-6 min-w-[max-content]">
             {DAYS.map((dayName, dayIndex) => (
               <div

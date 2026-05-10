@@ -113,7 +113,7 @@ export default function ProfileClient({ user }: { user: ProfileUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-background/50">
+    <div className="min-h-dvh bg-background/50">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
 
         {/* Page header */}

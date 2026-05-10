@@ -154,7 +154,7 @@ export default async function RecipeDetailPage({
   const availableIngredientIds: string[] = [];
 
   return (
-    <div className="min-h-screen bg-background/50 pb-20">
+    <div className="min-h-dvh bg-background/50 pb-20">
       <Suspense fallback={<RecipeDetailSkeleton />}>
         {/* Cinematic Hero */}
         <div className="mx-auto w-full max-w-7xl px-0 sm:px-6 lg:px-6">

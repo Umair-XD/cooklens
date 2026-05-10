@@ -64,7 +64,7 @@ export default function PlannerPageClient({
   }, [userId, router]);
 
   return (
-    <div className="min-h-screen bg-background/50">
+    <div className="min-h-dvh bg-background/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Page header */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-500">

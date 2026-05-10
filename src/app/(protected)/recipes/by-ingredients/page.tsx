@@ -128,7 +128,7 @@ export default function ByIngredientsPage() {
   const hasSearched = results.length > 0 || noResults;
 
   return (
-    <div className="bg-background/50 min-h-screen">
+    <div className="bg-background/50 min-h-dvh">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
 
         {/* Header */}
