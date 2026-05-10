@@ -37,3 +37,12 @@ next-env.d.ts
 /.kiro/
 /.vscode/
 /.claude/
+
+# Capacitor Android — keep source, ignore machine-specific and build output
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+android/app/.cxx/
