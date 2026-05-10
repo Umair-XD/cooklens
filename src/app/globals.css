@@ -102,8 +102,6 @@
         -webkit-tap-highlight-color: transparent;
         /* Prevent text size adjustment on orientation change */
         -webkit-text-size-adjust: 100%;
-        /* Prevent pull-to-refresh on Android Chrome/WebView */
-        touch-action: pan-x pan-y;
     }
 
     /* Hide all scrollbars globally */

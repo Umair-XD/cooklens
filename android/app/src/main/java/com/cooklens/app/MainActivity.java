@@ -11,7 +11,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         // Disable overscroll glow/bounce effect on the WebView at the native level
         WebView webView = getBridge().getWebView();
