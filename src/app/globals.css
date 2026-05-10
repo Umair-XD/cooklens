@@ -82,8 +82,10 @@
     html {
         scroll-behavior: smooth;
         overflow-x: hidden;
-        /* Use dvh so Android WebView excludes the system chrome */
         height: 100%;
+        /* Prevent overscroll bounce on Android WebView */
+        overscroll-behavior: none;
+        overscroll-behavior-y: none;
     }
 
     body {
@@ -91,13 +93,17 @@
         font-family: var(--font-sans);
         font-feature-settings: "rlig" 1, "calt" 1;
         -webkit-font-smoothing: antialiased;
-        overscroll-behavior: none;
         overflow-x: hidden;
         min-height: 100dvh;
+        /* Prevent overscroll bounce/rubber-band on Android WebView */
+        overscroll-behavior: none;
+        overscroll-behavior-y: none;
         /* Prevent tap highlight on Android */
         -webkit-tap-highlight-color: transparent;
         /* Prevent text size adjustment on orientation change */
         -webkit-text-size-adjust: 100%;
+        /* Prevent pull-to-refresh on Android Chrome/WebView */
+        touch-action: pan-x pan-y;
     }
 
     /* Hide all scrollbars globally */
