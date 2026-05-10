@@ -82,10 +82,7 @@
     html {
         scroll-behavior: smooth;
         overflow-x: hidden;
-        height: 100%;
-        /* Prevent overscroll bounce on Android WebView */
         overscroll-behavior: none;
-        overscroll-behavior-y: none;
     }
 
     body {
@@ -97,7 +94,6 @@
         min-height: 100dvh;
         /* Prevent overscroll bounce/rubber-band on Android WebView */
         overscroll-behavior: none;
-        overscroll-behavior-y: none;
         /* Prevent tap highlight on Android */
         -webkit-tap-highlight-color: transparent;
         /* Prevent text size adjustment on orientation change */
