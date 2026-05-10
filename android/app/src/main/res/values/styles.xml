@@ -17,6 +17,11 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <!-- Indigo background matching the app primary color -->
+        <item name="windowSplashScreenBackground">#4F6CF5</item>
+        <!-- CookLens chef hat logo (white, centered in 288dp canvas) -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <!-- Transition to the main app theme once splash is done -->
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

@@ -81,8 +81,6 @@
 
     html {
         scroll-behavior: smooth;
-        overflow-x: hidden;
-        overscroll-behavior: none;
     }
 
     body {
@@ -90,13 +88,7 @@
         font-family: var(--font-sans);
         font-feature-settings: "rlig" 1, "calt" 1;
         -webkit-font-smoothing: antialiased;
-        overflow-x: hidden;
-        min-height: 100dvh;
-        /* Prevent overscroll bounce/rubber-band on Android WebView */
-        overscroll-behavior: none;
-        /* Prevent tap highlight on Android */
         -webkit-tap-highlight-color: transparent;
-        /* Prevent text size adjustment on orientation change */
         -webkit-text-size-adjust: 100%;
     }
 

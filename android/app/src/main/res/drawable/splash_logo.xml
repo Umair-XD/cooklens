@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+
+    <!--
+        Chef hat icon (Lucide ChefHat) scaled 8x from 24x24,
+        centered in 288x288 canvas with 48dp padding on each side.
+        White strokes on transparent background — background color
+        is set via windowSplashScreenBackground in styles.xml.
+    -->
+    <group
+        android:translateX="48"
+        android:translateY="48"
+        android:scaleX="8"
+        android:scaleY="8">
+
+        <!-- Hat body -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M17,21a1,1 0,0 0,1 -1v-5.35c0,-0.457 0.316,-0.844 0.727,-1.041a4,4 0,0 0,-2.134 -7.589 5,5 0,0 0,-9.186 0 4,4 0,0 0,-2.134 7.589c0.411,0.197 0.727,0.584 0.727,1.041L7,20a1,1 0,0 0,1 1Z"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"/>
+
+        <!-- Brim line -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M6,17L18,17"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"/>
+
+    </group>
+</vector>
