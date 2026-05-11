@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { dbConnect } from "@/lib/db/connect";
 import { Favorite } from "@/lib/db/models/Favorite";
 import { Recipe } from "@/lib/db/models/Recipe";
@@ -41,12 +42,14 @@ export async function toggleFavorite(userId: string, recipeId: string) {
 
     if (existing) {
       await Favorite.deleteOne({ _id: existing._id });
+      revalidatePath("/favorites");
       return { isFavorite: false };
     } else {
       await Favorite.create({
         userId: new Types.ObjectId(userId),
         recipeId: new Types.ObjectId(recipeId),
       });
+      revalidatePath("/favorites");
       return { isFavorite: true };
     }
   } catch (error) {
