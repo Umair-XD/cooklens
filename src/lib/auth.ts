@@ -58,8 +58,26 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
+    async jwt({ token, user, account, profile, trigger, session }) {
+      if (user && account?.provider === 'google') {
+        // For Google sign-in, find or create the user in MongoDB so we store the MongoDB _id
+        await dbConnect();
+        const email = user.email!.toLowerCase();
+        let dbUser = await User.findOne({ email });
+        if (!dbUser) {
+          dbUser = await User.create({
+            email,
+            displayName: user.name ?? email,
+            photoUrl: user.image ?? undefined,
+            role: 'USER',
+          });
+        }
+        token.id = dbUser._id.toString();
+        token.role = dbUser.role;
+        token.name = dbUser.displayName ?? user.name;
+        token.email = dbUser.email;
+        token.picture = dbUser.photoUrl ?? user.image;
+      } else if (user) {
         token.role = user.role;
         token.id = user.id;
         token.name = user.name;
