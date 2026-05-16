@@ -546,7 +546,7 @@ function ChatPage() {
         </Button>
       )}
 
-      <div className="relative z-10 border-t border-border/30 bg-background/80 backdrop-blur-xl">
+      <div className="relative z-10 border-t border-border/30 bg-background">
         <ChatInput
           input={localInput}
           onInputChange={setLocalInput}

@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils";
 import {
   Send,
   Square,
-  Plus,
   X,
-  Image as ImageIcon,
-  Paperclip,
+  Camera,
+  ImageIcon,
 } from "lucide-react";
 import {
   useRef,
@@ -32,6 +31,15 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
+async function isNativePlatform(): Promise<boolean> {
+  try {
+    const { Capacitor } = await import("@capacitor/core");
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
 const ChatInput = memo(
   ({
     input,
@@ -43,9 +51,24 @@ const ChatInput = memo(
     placeholder = "Ask anything about cooking...",
   }: ChatInputProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [native, setNative] = useState(false);
+
+    useEffect(() => {
+      isNativePlatform().then(setNative);
+    }, []);
+
+    const addFiles = (files: File[]) => {
+      if (files.length === 0) return;
+      setSelectedFiles((prev) => [...prev, ...files]);
+      setPreviewUrls((prev) => [
+        ...prev,
+        ...files.map((f) => URL.createObjectURL(f)),
+      ]);
+    };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -56,29 +79,59 @@ const ChatInput = memo(
       }
     };
 
-    const handleFileClick = () => {
-      fileInputRef.current?.click();
+    const handleGalleryClick = () => {
+      if (native) {
+        openNativeMedia("photos");
+      } else {
+        galleryInputRef.current?.click();
+      }
+    };
+
+    const handleCameraClick = () => {
+      if (native) {
+        openNativeMedia("camera");
+      } else {
+        cameraInputRef.current?.click();
+      }
+    };
+
+    const openNativeMedia = async (source: "camera" | "photos") => {
+      try {
+        const { Camera, CameraResultType, CameraSource } = await import(
+          "@capacitor/camera"
+        );
+        const image = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source:
+            source === "camera" ? CameraSource.Camera : CameraSource.Photos,
+        });
+        if (!image.dataUrl) return;
+
+        const res = await fetch(image.dataUrl);
+        const blob = await res.blob();
+        const file = new File(
+          [blob],
+          source === "camera" ? "photo.jpg" : "image.jpg",
+          { type: blob.type || "image/jpeg" },
+        );
+        addFiles([file]);
+      } catch (err) {
+        console.error("Media error:", err);
+      }
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length === 0) return;
-
-      // Add new files to existing ones
-      setSelectedFiles((prev) => [...prev, ...files]);
-
-      const urls = files.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prev) => [...prev, ...urls]);
-
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      addFiles(Array.from(e.target.files || []));
+      if (e.target) e.target.value = "";
     };
 
     const removeFile = (index: number) => {
       setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
       setPreviewUrls((prev) => {
-        const newUrls = prev.filter((_, i) => i !== index);
         URL.revokeObjectURL(prev[index]);
-        return newUrls;
+        return prev.filter((_, i) => i !== index);
       });
     };
 
@@ -111,12 +164,7 @@ const ChatInput = memo(
           if (file) files.push(file);
         }
       }
-
-      if (files.length > 0) {
-        setSelectedFiles((prev) => [...prev, ...files]);
-        const urls = files.map((file) => URL.createObjectURL(file));
-        setPreviewUrls((prev) => [...prev, ...urls]);
-      }
+      if (files.length > 0) addFiles(files);
     };
 
     // Auto-resize textarea
@@ -134,7 +182,7 @@ const ChatInput = memo(
           className,
         )}
       >
-        <div className="relative flex flex-col w-full bg-card/60 backdrop-blur-xl border border-border/50 rounded-lg ring-offset-background focus-within:border-primary/40 overflow-hidden">
+        <div className="relative flex flex-col w-full bg-card border border-border/50 rounded-lg ring-offset-background focus-within:border-primary/40 overflow-hidden">
           {/* File Previews */}
           {previewUrls.length > 0 && (
             <div className="flex gap-3 px-4 pt-4 overflow-x-auto no-scrollbar scroll-smooth">
@@ -163,23 +211,46 @@ const ChatInput = memo(
           )}
 
           <div className="flex items-center gap-1.5 p-1.5 focus-within:outline-hidden sm:gap-2 sm:p-2">
+            {/* Hidden inputs for web fallback */}
             <input
               type="file"
-              ref={fileInputRef}
+              ref={galleryInputRef}
               className="hidden"
               accept="image/*"
               onChange={handleFileChange}
               multiple
             />
+            <input
+              type="file"
+              ref={cameraInputRef}
+              className="hidden"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+            />
 
+            {/* Gallery button */}
             <Button
               type="button"
               variant={null as any}
               size="icon"
-              onClick={handleFileClick}
+              onClick={handleGalleryClick}
               className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent sm:h-10 sm:w-10 sm:rounded-xl"
+              title="Attach image"
             >
-              <Paperclip className="h-4 w-4 text-muted-foreground/70 sm:h-5 sm:w-5" />
+              <ImageIcon className="h-4 w-4 text-muted-foreground/70 sm:h-5 sm:w-5" />
+            </Button>
+
+            {/* Camera button */}
+            <Button
+              type="button"
+              variant={null as any}
+              size="icon"
+              onClick={handleCameraClick}
+              className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted/80 flex items-center justify-center transition-colors focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent sm:h-10 sm:w-10 sm:rounded-xl"
+              title="Take photo"
+            >
+              <Camera className="h-4 w-4 text-muted-foreground/70 sm:h-5 sm:w-5" />
             </Button>
 
             <Textarea
