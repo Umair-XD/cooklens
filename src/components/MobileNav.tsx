@@ -21,7 +21,7 @@ export function MobileNav() {
   const activeIndex = navLinks.findIndex((link) => isActivePath(pathname, link.href));
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/40 bg-background/92 px-3 pb-[max(env(safe-area-inset-bottom),0.45rem)] pt-1.5 backdrop-blur-xl lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/40 bg-background px-3 pb-[max(env(safe-area-inset-bottom),0.45rem)] pt-1.5 lg:hidden">
       <div className="relative mx-auto grid max-w-md grid-cols-4 rounded-xl border border-border/50 bg-card/80 p-1 shadow-premium">
         {activeIndex >= 0 && (
           <div
