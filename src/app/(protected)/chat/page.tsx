@@ -419,8 +419,6 @@ function ChatPage() {
 
   return (
     <div className="relative flex h-[calc(100dvh-4rem-6rem)] flex-col overflow-hidden bg-background lg:h-[calc(100dvh-4rem)]">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.08),transparent)]" />
-
       <div className="flex-1 overflow-hidden">
         {messages.length === 0 ? (
           <div className="h-full overflow-y-auto px-4 py-5 text-center sm:flex sm:flex-col sm:items-center sm:justify-center sm:py-8">
