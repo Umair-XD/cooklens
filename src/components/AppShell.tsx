@@ -30,7 +30,7 @@ export async function FullHeader() {
 
   return (
     <>
-    <header className="sticky top-0 z-50 w-full h-16 border-b border-border/40 bg-background flex items-center shrink-0">
+    <header className="sticky top-0 z-50 w-full h-16 border-b border-border/40 bg-background/60 backdrop-blur-xl flex items-center shrink-0">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-10">
           <BrandLogo />

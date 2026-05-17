@@ -418,12 +418,11 @@ function ChatPage() {
       ];
 
   return (
-    <div className="relative flex h-[calc(100dvh-4rem-6rem)] flex-col overflow-hidden bg-background lg:h-[calc(100dvh-4rem)]">
-      <div className="flex-1 overflow-hidden">
+    <div className="relative flex h-[calc(100dvh-4rem-6rem)] flex-col bg-background lg:h-[calc(100dvh-4rem)]">
         {messages.length === 0 ? (
-          <div className="h-full overflow-y-auto px-4 py-5 text-center sm:flex sm:flex-col sm:items-center sm:justify-center sm:py-8">
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-5 text-center sm:flex sm:flex-col sm:items-center sm:justify-center sm:py-8">
             <div className="relative mb-4 mx-auto w-fit sm:mb-5">
-              <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full scale-[1.8] opacity-40" />
+              <div className="absolute inset-0 bg-primary/20 rounded-full scale-[1.8] opacity-30" />
               <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20 sm:h-16 sm:w-16 sm:shadow-xl">
                 <ChefHat className="h-6 w-6 text-primary-foreground sm:h-8 sm:w-8" />
               </div>
@@ -475,7 +474,7 @@ function ChatPage() {
         ) : (
           <div
             ref={scrollRef}
-            className="h-full overflow-y-auto scroll-smooth no-scrollbar"
+            className="flex-1 min-h-0 overflow-y-auto scroll-smooth no-scrollbar"
           >
             <div className="mx-auto max-w-3xl px-4 py-6 space-y-5 pb-6">
               {messages.map((message, i) => (
@@ -531,14 +530,13 @@ function ChatPage() {
             </div>
           </div>
         )}
-      </div>
 
       {showScrollButton && (
         <Button
           variant="secondary"
           size="icon"
           onClick={scrollToBottom}
-          className="absolute bottom-24 right-4 h-9 w-9 rounded-full shadow-lg bg-card/90 backdrop-blur-md border border-border/50 hover:bg-card transition-all z-10 animate-in zoom-in duration-150 sm:bottom-28 sm:right-6"
+          className="absolute bottom-24 right-4 h-9 w-9 rounded-full shadow-lg bg-card border border-border/50 hover:bg-muted transition-all z-10 animate-in zoom-in duration-150 sm:bottom-28 sm:right-6"
         >
           <ArrowDown className="h-4 w-4 text-primary" />
         </Button>
