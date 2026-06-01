@@ -23,7 +23,7 @@ export class AIGateway {
    * Returns a language model optimized for conversational chat.
    */
   public getChatModel(): any {
-    return "openai/gpt-4o";
+    return "minimax/minimax-m3";
   }
 
   /**
